@@ -1,0 +1,221 @@
+[gd_scene load_steps=3 format=3 uid="uid://k7q6n3j9r4p5v"]
+
+[ext_resource type="PackedScene" path="res://scenes/components/CardNode.tscn" id="2_9v2h1"]
+[ext_resource type="Script" path="res://scripts/card_editor_scene.gd" id="1_2f7l9"]
+
+[node name="CardEditorScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2f7l9")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Root" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="PanelContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="HeaderPadding" type="MarginContainer" parent="Padding/Root/Header"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="HeaderBody" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock"]
+layout_mode = 2
+text = "Card Editor"
+theme_override_font_sizes/font_size = 28
+
+[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock"]
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+horizontal_alignment = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Content" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="CardListPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CardListPadding" type="MarginContainer" parent="Padding/Root/Content/CardListPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="CardListBody" type="VBoxContainer" parent="Padding/Root/Content/CardListPanel/CardListPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CardListHeader" type="Label" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
+layout_mode = 2
+text = "Working Cards"
+theme_override_font_sizes/font_size = 18
+
+[node name="CardList" type="ItemList" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FormPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="FormPadding" type="MarginContainer" parent="Padding/Root/Content/FormPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="FormBody" type="VBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FormHeader" type="Label" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+text = "Edit Card"
+theme_override_font_sizes/font_size = 18
+
+[node name="NameField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+placeholder_text = "Name"
+
+[node name="TypeRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TypeField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Type"
+
+[node name="FactionField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Faction"
+
+[node name="StatRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="CostField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 20.0
+step = 1.0
+
+[node name="AttackField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 20.0
+step = 1.0
+
+[node name="HealthField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+layout_mode = 2
+min_value = 0.0
+max_value = 40.0
+step = 1.0
+
+[node name="DescriptionField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 140)
+placeholder_text = "Description"
+
+[node name="FlavorField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 90)
+placeholder_text = "Flavor text"
+
+[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SaveButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
+layout_mode = 2
+text = "Save Draft"
+
+[node name="ResetButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
+layout_mode = 2
+text = "Reset"
+
+[node name="PreviewPanel" type="PanelContainer" parent="Padding/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PreviewPadding" type="MarginContainer" parent="Padding/Root/Content/PreviewPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="PreviewBody" type="VBoxContainer" parent="Padding/Root/Content/PreviewPanel/PreviewPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PreviewHeader" type="Label" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody"]
+layout_mode = 2
+text = "Preview"
+theme_override_font_sizes/font_size = 18
+
+[node name="PreviewCard" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody" instance=ExtResource("2_9v2h1")]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 364)
+
+[node name="PreviewNotes" type="RichTextLabel" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[connection signal="item_selected" from="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody/CardList" to="." method="_on_card_selected"]
+[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/NameField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/TypeField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/FactionField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/CostField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/AttackField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/HealthField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/DescriptionField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/FlavorField" to="." method="_on_field_changed"]
+[connection signal="pressed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/SaveButton" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/ResetButton" to="." method="_on_reset_pressed"]

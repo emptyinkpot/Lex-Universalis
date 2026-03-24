@@ -26,6 +26,18 @@ var mode_entries := [
 		"action": "Open Battle Scene",
 	},
 	{
+		"id": "card_editor",
+		"title": "Card Editor",
+		"summary": "Edit harvested Moon cards, tweak drafts, and save local working copies.",
+		"action": "Open Card Editor",
+	},
+	{
+		"id": "deck_builder",
+		"title": "Deck Builder",
+		"summary": "Assemble a local deck from the current card pool and save it to disk.",
+		"action": "Open Deck Builder",
+	},
+	{
 		"id": "cards",
 		"title": "Card Gallery",
 		"summary": "Browse the card library, inspect card frames, and review the harvested Moon archive cards.",

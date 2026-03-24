@@ -95,6 +95,18 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="CardEditorTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DeckBuilderTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="CardsTab" type="Control" parent="Margin/Root/Modes"]
 visible = false
 layout_mode = 2

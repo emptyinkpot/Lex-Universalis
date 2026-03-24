@@ -3,6 +3,8 @@ extends RefCounted
 
 const GENERATED_DIR := "res://data/generated/"
 const STORY_PROGRESS_SAVE_PATH := "user://story-progress.save.json"
+const CARD_DRAFTS_SAVE_PATH := "user://card-drafts.save.json"
+const DECK_SAVE_PATH := "user://deck-list.save.json"
 
 func load_json_file(file_name: String, fallback: Variant = {}) -> Variant:
 	var path := GENERATED_DIR + file_name
@@ -78,6 +80,41 @@ func load_base_cards() -> Array:
 
 func load_moon_cards() -> Array:
 	return load_json_file("moon-card-drafts.json", []) as Array
+
+func load_working_cards() -> Array:
+	if FileAccess.file_exists(CARD_DRAFTS_SAVE_PATH):
+		var file := FileAccess.open(CARD_DRAFTS_SAVE_PATH, FileAccess.READ)
+		if file != null:
+			var parsed: Variant = JSON.parse_string(file.get_as_text())
+			if parsed is Array:
+				return parsed as Array
+	var working: Array = []
+	working.append_array(load_base_cards())
+	working.append_array(load_moon_cards())
+	return working
+
+func save_working_cards(cards: Array) -> bool:
+	var file := FileAccess.open(CARD_DRAFTS_SAVE_PATH, FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string(JSON.stringify(cards, "\t"))
+	return true
+
+func load_deck_list() -> Array:
+	if FileAccess.file_exists(DECK_SAVE_PATH):
+		var file := FileAccess.open(DECK_SAVE_PATH, FileAccess.READ)
+		if file != null:
+			var parsed: Variant = JSON.parse_string(file.get_as_text())
+			if parsed is Array:
+				return parsed as Array
+	return []
+
+func save_deck_list(deck_cards: Array) -> bool:
+	var file := FileAccess.open(DECK_SAVE_PATH, FileAccess.WRITE)
+	if file == null:
+		return false
+	file.store_string(JSON.stringify(deck_cards, "\t"))
+	return true
 
 func load_battle_seed() -> Dictionary:
 	return load_json_file("battle-seed.json", {}) as Dictionary

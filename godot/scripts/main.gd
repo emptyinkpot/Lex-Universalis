@@ -2,6 +2,8 @@ extends Control
 
 const STORY_SCENE := preload("res://scenes/story/StoryModeScene.tscn")
 const BATTLE_SCENE := preload("res://scenes/battle/BattleScene.tscn")
+const CARD_EDITOR_SCENE := preload("res://scenes/cards/CardEditorScene.tscn")
+const DECK_BUILDER_SCENE := preload("res://scenes/deck/DeckBuilderScene.tscn")
 const CARD_SCENE := preload("res://scenes/cards/CardGalleryScene.tscn")
 const RESULT_SCENE := preload("res://scenes/results/BattleResultScene.tscn")
 const HOME_SCENE := preload("res://scenes/home/HomeScene.tscn")
@@ -13,6 +15,8 @@ var data_loader: RefCounted
 var home_view: Control
 var story_view: Control
 var battle_view: Control
+var card_editor_view: Control
+var deck_builder_view: Control
 var card_view: Control
 var result_view: Control
 var ui_theme: Theme
@@ -26,6 +30,8 @@ func _ready() -> void:
 	home_view = _mount_scene("HomeTab", HOME_SCENE)
 	story_view = _mount_scene("StoryTab", STORY_SCENE)
 	battle_view = _mount_scene("BattleTab", BATTLE_SCENE)
+	card_editor_view = _mount_scene("CardEditorTab", CARD_EDITOR_SCENE)
+	deck_builder_view = _mount_scene("DeckBuilderTab", DECK_BUILDER_SCENE)
 	card_view = _mount_scene("CardsTab", CARD_SCENE)
 	result_view = _mount_scene("ResultsTab", RESULT_SCENE)
 	if home_view.has_signal("open_page"):
@@ -85,10 +91,14 @@ func _on_home_open_page(page_id: String) -> void:
 			tab_container.current_tab = 1
 		"battle":
 			tab_container.current_tab = 2
-		"cards":
+		"card_editor":
 			tab_container.current_tab = 3
-		"results":
+		"deck_builder":
 			tab_container.current_tab = 4
+		"cards":
+			tab_container.current_tab = 5
+		"results":
+			tab_container.current_tab = 6
 		_:
 			tab_container.current_tab = 0
 

@@ -1,0 +1,171 @@
+[gd_scene load_steps=3 format=3 uid="uid://v4n3c2m8d1b0r"]
+
+[ext_resource type="PackedScene" path="res://scenes/components/CardNode.tscn" id="2_0m3x7"]
+[ext_resource type="Script" path="res://scripts/deck_builder_scene.gd" id="1_v0q92"]
+
+[node name="DeckBuilderScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_v0q92")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Root" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="PanelContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="HeaderPadding" type="MarginContainer" parent="Padding/Root/Header"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="HeaderBody" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock"]
+layout_mode = 2
+text = "Deck Builder"
+theme_override_font_sizes/font_size = 28
+
+[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock"]
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+horizontal_alignment = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Content" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="PoolPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PoolPadding" type="MarginContainer" parent="Padding/Root/Content/PoolPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="PoolBody" type="VBoxContainer" parent="Padding/Root/Content/PoolPanel/PoolPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PoolHeader" type="Label" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
+layout_mode = 2
+text = "Available Cards"
+theme_override_font_sizes/font_size = 18
+
+[node name="PoolList" type="ItemList" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeckPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeckPadding" type="MarginContainer" parent="Padding/Root/Content/DeckPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="DeckBody" type="VBoxContainer" parent="Padding/Root/Content/DeckPanel/DeckPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DeckHeader" type="Label" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
+layout_mode = 2
+text = "Current Deck"
+theme_override_font_sizes/font_size = 18
+
+[node name="DeckList" type="ItemList" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EditPanel" type="PanelContainer" parent="Padding/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="EditPadding" type="MarginContainer" parent="Padding/Root/Content/EditPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="EditBody" type="VBoxContainer" parent="Padding/Root/Content/EditPanel/EditPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DetailTitle" type="Label" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody"]
+layout_mode = 2
+text = "Deck Detail"
+theme_override_font_sizes/font_size = 18
+
+[node name="CardPreview" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody" instance=ExtResource("2_0m3x7")]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 364)
+
+[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="AddButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+layout_mode = 2
+text = "Add to Deck"
+
+[node name="RemoveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+layout_mode = 2
+text = "Remove from Deck"
+
+[node name="SaveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+layout_mode = 2
+text = "Save Deck"
+
+[node name="ResetButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+layout_mode = 2
+text = "Reset"
+
+[connection signal="item_selected" from="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody/PoolList" to="." method="_on_pool_selected"]
+[connection signal="item_selected" from="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody/DeckList" to="." method="_on_deck_selected"]
+[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/AddButton" to="." method="_on_add_pressed"]
+[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/RemoveButton" to="." method="_on_remove_pressed"]
+[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/SaveButton" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/ResetButton" to="." method="_on_reset_pressed"]
