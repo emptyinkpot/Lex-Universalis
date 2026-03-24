@@ -8,5 +8,6 @@ UI behavior, card visuals, and theme notes live here.
 - `battle-interaction-architecture.md`
 - `battle-performance-notes.md`
 - `tarot-card-template.md`
+- `moon-card-drafts.md`
 - `theme-config-system.md`
 - `theme-system-summary.md`

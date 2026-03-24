@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { FactionIcon } from '@/components/FactionIcon';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
+import { MOON_CARD_DRAFTS, type MoonCardDraftSeed } from '@/data/moon-card-drafts';
 import { BuildingType, CardType, Faction, TacticType, UnitType } from '@/types/game';
 import { createStyles } from './styles';
 
@@ -52,8 +53,10 @@ type EditorCard = {
 const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL ?? 'http://127.0.0.1:9091';
 const STORAGE_KEY = 'lex-universalis.card-editor.cards.v1';
 const TEMPLATE_STORAGE_KEY = 'lex-universalis.card-editor.templates.v1';
+const MOON_DRAFT_STORAGE_KEY = 'lex-universalis.card-editor.moon-drafts.v1';
 const tempId = () => `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 const isNumericId = (value: string) => /^\d+$/.test(value);
+const isMoonDraftId = (value: string) => value.startsWith('moon-');
 const withAlpha = (hex: string, alpha: number) => {
   const normalized = hex.replace('#', '');
   if (normalized.length !== 6) return `rgba(0, 0, 0, ${alpha})`;
@@ -276,6 +279,41 @@ function mergeTemplateIntoCard(baseCard: EditorCard, template?: CardTemplate | n
     notes: baseCard.notes || defaults.notes || '',
   };
 }
+
+function hydrateMoonDraft(seed: MoonCardDraftSeed): EditorCard {
+  return {
+    id: seed.id,
+    name: seed.name,
+    cost: seed.cost,
+    faction: seed.faction,
+    type: seed.type,
+    rarity: seed.rarity,
+    description: seed.description,
+    flavorText: seed.flavorText,
+    imageUrl: '',
+    attack: seed.attack,
+    health: seed.health,
+    movement: seed.movement,
+    durability: seed.durability,
+    effect: seed.effect,
+    duration: seed.duration,
+    unitType: seed.unitType,
+    tacticType: seed.tacticType,
+    buildingType: seed.buildingType,
+    abilities: seed.abilities.map((item) => ({ ...item })),
+    notes: `${seed.notes}\n来源：${seed.sourceCategory} / ${seed.sourceFile}`,
+    localOnly: true,
+    needsSync: false,
+    updatedAt: Date.now(),
+  };
+}
+
+function mergeMoonDraftsIntoCards(cards: EditorCard[]) {
+  const nextMap = new Map(cards.map((item) => [item.id, item]));
+  const moonCards = MOON_CARD_DRAFTS.map((seed) => nextMap.get(seed.id) ?? hydrateMoonDraft(seed));
+  const rest = cards.filter((item) => !isMoonDraftId(item.id));
+  return [...moonCards, ...rest];
+}
 export default function CardEditorScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -310,6 +348,7 @@ export default function CardEditorScreen() {
   const stats = useMemo(() => ({
     total: cards.length,
     pending: cards.filter((item) => item.needsSync).length,
+    moon: cards.filter((item) => isMoonDraftId(item.id)).length,
     unit: cards.filter((item) => item.type === CardType.UNIT).length,
     tactic: cards.filter((item) => item.type === CardType.TACTIC).length,
     building: cards.filter((item) => item.type === CardType.BUILDING).length,
@@ -330,7 +369,11 @@ export default function CardEditorScreen() {
   const loadCards = async () => {
     setLoading(true);
     try {
-      const [response, cached] = await Promise.all([fetch(`${API_BASE_URL}/api/v1/cards`), AsyncStorage.getItem(STORAGE_KEY)]);
+      const [response, cached, moonFlag] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/v1/cards`),
+        AsyncStorage.getItem(STORAGE_KEY),
+        AsyncStorage.getItem(MOON_DRAFT_STORAGE_KEY),
+      ]);
       const cachedCards = cached ? (JSON.parse(cached) as EditorCard[]) : [];
       const cachedMap = new Map(cachedCards.map((item: EditorCard) => [item.id, item]));
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -339,17 +382,39 @@ export default function CardEditorScreen() {
       const merged = remoteCards.map((item: any) => normalizeApiCard(item, cachedMap.get(String(item.id))));
       const remoteIds = new Set(merged.map((item: any) => item.id));
       const extras = cachedCards.filter((item: EditorCard) => !remoteIds.has(item.id));
-      const next = [...merged, ...extras];
+      let next = [...merged, ...extras];
+      const hasMoonDrafts = next.some((item) => isMoonDraftId(item.id));
+      if (hasMoonDrafts) {
+        if (moonFlag !== 'true') {
+          await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
+        }
+      } else if (moonFlag !== 'true') {
+        next = mergeMoonDraftsIntoCards(next);
+        await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
+      }
       setCards(next);
-      setSelectedId(next[0]?.id ?? null);
+      const preferred = next.find((item) => isMoonDraftId(item.id)) ?? next[0] ?? null;
+      setSelectedId(preferred?.id ?? null);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch (error) {
       console.error('加载卡牌失败:', error);
       const cached = await AsyncStorage.getItem(STORAGE_KEY);
       if (cached) {
         const cachedCards = JSON.parse(cached) as EditorCard[];
-        setCards(cachedCards);
-        setSelectedId(cachedCards[0]?.id ?? null);
+        const cachedMoonFlag = await AsyncStorage.getItem(MOON_DRAFT_STORAGE_KEY);
+        let next = cachedCards;
+        const hasMoonDrafts = next.some((item) => isMoonDraftId(item.id));
+        if (hasMoonDrafts) {
+          if (cachedMoonFlag !== 'true') {
+            await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
+          }
+        } else if (cachedMoonFlag !== 'true') {
+          next = mergeMoonDraftsIntoCards(next);
+          await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
+        }
+        setCards(next);
+        const preferred = next.find((item) => isMoonDraftId(item.id)) ?? next[0] ?? null;
+        setSelectedId(preferred?.id ?? null);
       } else {
         Alert.alert('加载失败', '服务器和本地缓存都没有卡牌数据。');
       }
@@ -636,6 +701,15 @@ export default function CardEditorScreen() {
     setTemplates((current) => current.filter((item) => item.id !== templateId));
   };
 
+  const restoreMoonDrafts = async () => {
+    const next = mergeMoonDraftsIntoCards(cards);
+    setCards(next);
+    const preferred = next.find((item) => isMoonDraftId(item.id)) ?? next[0] ?? null;
+    setSelectedId(preferred?.id ?? null);
+    await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
+    Alert.alert('月球毛坯已注入', `已将 ${MOON_CARD_DRAFTS.length} 张月球卡并入编辑器。`);
+  };
+
   const createCardFromTemplate = (template: CardTemplate) => {
     setEditorMode('create');
     setDraft(mergeTemplateIntoCard(emptyCard(template.defaults.type ?? CardType.UNIT), template));
@@ -656,7 +730,12 @@ export default function CardEditorScreen() {
     return (
       <Pressable key={card.id} onPress={() => setSelectedId(card.id)} style={[styles.cardTile, active && styles.cardTileActive, { borderColor: active ? theme.primary : theme.borderLight }]}>
         <View style={styles.cardHead}>
-          <ThemedText variant="bodyMedium" color={theme.textPrimary} numberOfLines={1}>{card.name || '未命名卡牌'}</ThemedText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <ThemedText variant="bodyMedium" color={theme.textPrimary} numberOfLines={1} style={{ flex: 1 }}>
+              {card.name || '未命名卡牌'}
+            </ThemedText>
+            {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
+          </View>
           <ThemedText variant="tiny" color={theme.textMuted}>{card.type} · 费用 {card.cost}</ThemedText>
         </View>
         <View style={styles.cardBody}>
@@ -702,6 +781,7 @@ export default function CardEditorScreen() {
               <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
             </View>
             <View style={styles.cardTopMeta}>
+              {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
               <EditorBadge color={factionColor} label={card.faction} />
               <EditorBadge color={rarityColor} label={card.rarity} />
             </View>
@@ -815,9 +895,10 @@ export default function CardEditorScreen() {
         <ThemedView level="root" style={styles.headerCard}>
           <View style={styles.headerRow}>
             <Pressable onPress={() => router.back()} style={styles.iconButton}><FontAwesome6 name="arrow-left" size={14} color={theme.textPrimary} /></Pressable>
-            <View style={styles.titleBlock}><ThemedText variant="h2" color={theme.textPrimary}>卡牌编辑器</ThemedText><ThemedText variant="small" color={theme.textMuted}>完整编辑、复制、删除、导入导出和服务器同步。</ThemedText></View>
+            <View style={styles.titleBlock}><ThemedText variant="h2" color={theme.textPrimary}>卡牌编辑器</ThemedText><ThemedText variant="small" color={theme.textMuted}>完整编辑、复制、删除、导入导出和服务器同步。月球毛坯会自动注入，也可手动恢复。</ThemedText></View>
             <View style={styles.headerActions}>
               <Pressable onPress={loadCards} style={styles.iconButton}><FontAwesome6 name="rotate" size={14} color={theme.textPrimary} /></Pressable>
+              <Pressable onPress={restoreMoonDrafts} style={styles.iconButton}><FontAwesome6 name="moon" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => setExportVisible(true)} style={styles.iconButton}><FontAwesome6 name="download" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => setImportVisible(true)} style={styles.iconButton}><FontAwesome6 name="upload" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => setTemplateVisible(true)} style={styles.iconButton}><FontAwesome6 name="bookmark" size={14} color={theme.textPrimary} /></Pressable>
@@ -830,6 +911,7 @@ export default function CardEditorScreen() {
             <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.pending}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>待同步</ThemedText></ThemedView>
             <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.unit}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>单位</ThemedText></ThemedView>
             <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.tactic + stats.building}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>战术/建筑</ThemedText></ThemedView>
+            <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.moon}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>月球毛坯</ThemedText></ThemedView>
           </View>
         </ThemedView>
 
