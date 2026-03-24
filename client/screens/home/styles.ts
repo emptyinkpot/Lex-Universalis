@@ -93,6 +93,9 @@ export const createStyles = (_theme: Theme) =>
       paddingTop: Spacing.xl,
       gap: Spacing.lg,
     },
+    menuItemWrap: {
+      borderRadius: BorderRadius.xl,
+    },
     menuItem: {
       overflow: 'hidden',
       backgroundColor: '#16110c',

@@ -5,6 +5,7 @@ import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
+import { AnimatedTiltSurface } from '@/components/AnimatedTiltSurface';
 import { createStyles } from './styles';
 
 interface Scenario {
@@ -176,7 +177,7 @@ export default function StoryModeScreen() {
 
           <View style={styles.beatsGrid}>
             {storyBeats.map((beat) => (
-              <View key={beat.title} style={styles.beatCard}>
+              <AnimatedTiltSurface key={beat.title} style={styles.beatCardWrap} contentStyle={styles.beatCard} glowColor="rgba(215,178,109,0.22)">
                 <View style={styles.beatIcon}>
                   <FontAwesome6 name={beat.icon as any} size={14} color="#d7b26d" />
                 </View>
@@ -184,7 +185,7 @@ export default function StoryModeScreen() {
                 <ThemedText variant="small" color="#a58f73" style={styles.beatCopy}>
                   {beat.copy}
                 </ThemedText>
-              </View>
+              </AnimatedTiltSurface>
             ))}
           </View>
 

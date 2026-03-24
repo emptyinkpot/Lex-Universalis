@@ -95,6 +95,7 @@ export const createStyles = (_theme: Theme) =>
     toolbarFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, flexWrap: 'wrap' },
     cardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
     cardTile: { width: '48.2%', minWidth: 240, gap: Spacing.sm },
+    cardTileSurface: { borderRadius: BorderRadius['3xl'] },
     cardTileFace: {
       aspectRatio: 5 / 7,
       borderRadius: BorderRadius['3xl'],

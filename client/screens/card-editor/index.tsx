@@ -6,6 +6,7 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { FactionIcon } from '@/components/FactionIcon';
+import { AnimatedTiltSurface } from '@/components/AnimatedTiltSurface';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
 import { MOON_CARD_DRAFTS, type MoonCardDraftSeed } from '@/data/moon-card-drafts';
@@ -718,8 +719,13 @@ export default function CardEditorScreen() {
     }[card.faction] ?? theme.primary;
     const typeIcon = card.type === CardType.UNIT ? 'chess-knight' : card.type === CardType.TACTIC ? 'scroll' : 'tower-observation';
     return (
-      <Pressable key={card.id} onPress={() => setSelectedId(card.id)} style={[styles.cardTile, active && styles.cardTileActive]}>
-        <View style={[styles.cardTileFace, { borderColor: active ? theme.primary : theme.borderLight }]}>
+      <View key={card.id} style={[styles.cardTile, active && styles.cardTileActive]}>
+        <AnimatedTiltSurface
+          onPress={() => setSelectedId(card.id)}
+          style={styles.cardTileSurface}
+          contentStyle={[styles.cardTileFace, { borderColor: active ? theme.primary : theme.borderLight }]}
+          glowColor={withAlpha(factionColor, 0.36)}
+        >
           <View style={[styles.cardTileBackdrop, { backgroundColor: withAlpha(factionColor, 0.12) }]} />
           <View style={styles.cardTileFaceContent}>
             <View style={styles.cardTileTopBar}>
@@ -777,13 +783,13 @@ export default function CardEditorScreen() {
               </View>
             ) : null}
           </View>
-        </View>
+        </AnimatedTiltSurface>
         <View style={styles.tileActions}>
           <Pressable onPress={() => openEdit(card)} style={styles.tileAction}><FontAwesome6 name="pen-to-square" size={12} color={theme.textPrimary} /><Text style={{ color: theme.textPrimary, fontSize: 12 }}>编辑</Text></Pressable>
           <Pressable onPress={() => duplicateCard(card)} style={styles.tileAction}><FontAwesome6 name="clone" size={12} color={theme.textPrimary} /><Text style={{ color: theme.textPrimary, fontSize: 12 }}>复制</Text></Pressable>
           <Pressable onPress={() => deleteCard(card)} style={styles.tileAction}><FontAwesome6 name="trash" size={12} color={theme.error} /><Text style={{ color: theme.error, fontSize: 12 }}>删除</Text></Pressable>
         </View>
-      </Pressable>
+      </View>
     );
   };
 

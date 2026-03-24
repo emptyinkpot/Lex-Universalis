@@ -5,6 +5,7 @@ import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
+import { AnimatedTiltSurface } from '@/components/AnimatedTiltSurface';
 import { createStyles } from './styles';
 
 type MenuItem = {
@@ -59,11 +60,12 @@ export default function HomeScreen() {
 
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
-            <TouchableOpacity
+            <AnimatedTiltSurface
               key={index}
-              style={styles.menuItem}
               onPress={() => router.push(item.route)}
-              activeOpacity={0.86}
+              style={styles.menuItemWrap}
+              contentStyle={styles.menuItem}
+              glowColor="rgba(215,178,109,0.26)"
             >
               <View style={styles.menuEtching} />
               <View style={[styles.menuIconContainer, { borderColor: item.iconColor }]}>
@@ -78,7 +80,7 @@ export default function HomeScreen() {
                 </ThemedText>
               </View>
               <FontAwesome6 name="chevron-right" size={18} color="#8f7a57" />
-            </TouchableOpacity>
+            </AnimatedTiltSurface>
           ))}
         </View>
 

@@ -5,6 +5,9 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  withRepeat,
+  withSequence,
+  Easing,
 } from 'react-native-reanimated';
 import { ThemedText } from './ThemedText';
 
@@ -38,6 +41,7 @@ export function BattleTargetSlot({
 }: BattleTargetSlotProps) {
   const opacity = useSharedValue(1);
   const scale = useSharedValue(1);
+  const pulse = useSharedValue(0);
 
   useEffect(() => {
     if (slot.status === 'dying') {
@@ -56,9 +60,27 @@ export function BattleTargetSlot({
     scale.value = withSpring(selected ? 1.02 : 1, { damping: 15, stiffness: 220 });
   }, [selected, slot.status, opacity, scale]);
 
+  useEffect(() => {
+    if (targeting && slot.status === 'alive') {
+      pulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 680, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0, { duration: 680, easing: Easing.inOut(Easing.quad) }),
+        ),
+        -1,
+        false,
+      );
+      return;
+    }
+
+    pulse.value = withTiming(0, { duration: 160 });
+  }, [targeting, slot.status, pulse]);
+
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.value + pulse.value * 0.035 }],
+    shadowOpacity: 0.18 + pulse.value * 0.22,
+    shadowRadius: 8 + pulse.value * 10,
   }));
 
   const hpPercent = slot.maxHealth > 0 ? Math.max(0, slot.health / slot.maxHealth) : 0;
@@ -78,7 +100,10 @@ export function BattleTargetSlot({
           targeting && styles.targeting,
           slot.status === 'dying' && styles.dying,
           slot.status === 'dead' && styles.dead,
-          { borderColor: selected ? accent : 'rgba(0,47,167,0.14)' },
+          {
+            borderColor: selected || targeting ? accent : 'rgba(120,92,56,0.22)',
+            backgroundColor: targeting ? 'rgba(33, 21, 14, 0.88)' : 'rgba(12, 9, 8, 0.76)',
+          },
         ]}
       >
         <View style={styles.slotHeader}>

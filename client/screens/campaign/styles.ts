@@ -114,9 +114,12 @@ export const createStyles = (_theme: Theme) =>
       gap: Spacing.md,
       flexWrap: 'wrap',
     },
-    beatCard: {
+    beatCardWrap: {
       flex: 1,
       minWidth: 180,
+      borderRadius: BorderRadius.xl,
+    },
+    beatCard: {
       padding: Spacing.md,
       borderRadius: BorderRadius.xl,
       backgroundColor: '#100c09',
