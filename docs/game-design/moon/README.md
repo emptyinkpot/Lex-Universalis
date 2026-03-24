@@ -2,6 +2,8 @@
 
 This folder is the canonical design space for the card game project.
 
+The original `.docx` sources have been harvested into `server/src/data/moon-cards.generated.ts`, and the remaining prose notes were converted to markdown.
+
 ## Canonical Structure
 
 - `cards/characters/` - merged character cards, one canonical copy per card

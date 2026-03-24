@@ -4,6 +4,7 @@ import cors from "cors";
 import gameRouter from "./routes/game";
 import searchRouter from "./routes/search";
 import githubSearchRouter from "./routes/githubSearch";
+import { seedMoonCards } from "./data/seedMoonCards";
 
 const app = express();
 const port = process.env.PORT || 9091;
@@ -24,7 +25,17 @@ app.get('/api/v1/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+async function bootstrap() {
+  try {
+    const result = await seedMoonCards();
+    console.log(`Moon cards seeded: inserted=${result.inserted}, skipped=${result.skipped}`);
+  } catch (error) {
+    console.error('Moon card seeding failed:', error);
+  }
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}/`);
-});
+  app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}/`);
+  });
+}
+
+void bootstrap();

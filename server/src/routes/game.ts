@@ -1,6 +1,7 @@
-import express from 'express';
+﻿import express from 'express';
 import { INITIAL_CARDS } from '../data/cards';
 import { CAMPAIGN_CHAPTERS, CAMPAIGN_SCENARIOS, getChapterById, getLevelById, getScenarioById, getChaptersByScenario } from '../data/campaign';
+import { MOON_CARDS } from '../data/moon-cards.generated';
 import type { Ability, Card, Position } from '../types/game';
 import { Faction, CardType, GamePhase, ActionType } from '../types/game';
 import { cards } from '../storage/database/shared/schema';
@@ -68,6 +69,69 @@ interface PlayerAction {
 
 const router = express.Router();
 
+type ApiCard = {
+  id: string;
+  name: string;
+  cost: number;
+  faction: string;
+  type: string;
+  rarity: string;
+  description: string;
+  flavorText: string | null;
+  attack: number | null;
+  health: number | null;
+  movement: number | null;
+  durability: number | null;
+  ability: string | null;
+};
+
+function toApiCard(card: any, fallbackId?: string): ApiCard {
+  return {
+    id: String(card.id ?? fallbackId ?? card.name),
+    name: String(card.name ?? ''),
+    cost: Number(card.cost ?? 0),
+    faction: String(card.faction ?? 'BYZANTIUM'),
+    type: String(card.type ?? 'TACTIC'),
+    rarity: String(card.rarity ?? 'COMMON'),
+    description: String(card.description ?? ''),
+    flavorText: card.flavorText ?? null,
+    attack: card.attack ?? null,
+    health: card.health ?? null,
+    movement: card.movement ?? null,
+    durability: card.durability ?? null,
+    ability: card.ability ?? null,
+  };
+}
+
+function cardKey(card: { name: string; type: string; faction: string }) {
+  return `${card.name}|${card.type}|${card.faction}`.toLowerCase();
+}
+
+function moonFallbackCards(): ApiCard[] {
+  return MOON_CARDS.map((card) => toApiCard(card, `moon-${Buffer.from(card.name, 'utf8').toString('hex').slice(0, 16)}`));
+}
+
+let cachedCards: ApiCard[] | null = null;
+
+async function loadCards(): Promise<ApiCard[]> {
+  if (cachedCards) {
+    return cachedCards;
+  }
+
+  try {
+    const dbCards = await db.select().from(cards);
+    const normalizedDbCards = dbCards.map((card: any) => toApiCard(card));
+    const known = new Set(normalizedDbCards.map(cardKey));
+    const moonCards = moonFallbackCards().filter((card) => !known.has(cardKey(card)));
+    cachedCards = [...normalizedDbCards, ...moonCards];
+    return cachedCards;
+  } catch (error) {
+    console.warn('Falling back to bundled moon cards:', error);
+    cachedCards = moonFallbackCards();
+    return cachedCards;
+  }
+}
+
 // 存储游戏状态（实际应用中应该使用数据库）
 const gameRooms = new Map<string, GameState>();
 
@@ -82,27 +146,7 @@ router.get('/health', (req, res) => {
  */
 router.get('/cards', async (req, res) => {
   try {
-    // 从数据库获取所有卡牌
-    const allCards = await db.select().from(cards);
-
-    // 转换为前端需要的格式
-    const formattedCards = allCards.map((card: any) => ({
-      id: String(card.id),
-      name: card.name,
-      cost: card.cost,
-      faction: card.faction,
-      type: card.type,
-      rarity: card.rarity,
-      description: card.description,
-      flavorText: card.flavorText,
-      // 单位属性
-      attack: card.attack,
-      health: card.health,
-      movement: card.movement,
-      // 建筑属性
-      durability: card.durability,
-      ability: card.ability,
-    }));
+    const formattedCards = await loadCards();
 
     res.status(200).json({
       success: true,
@@ -110,71 +154,42 @@ router.get('/cards', async (req, res) => {
       count: formattedCards.length,
     });
   } catch (error) {
-    console.error('获取卡牌失败:', error);
+    console.error('鑾峰彇鍗＄墝澶辫触:', error);
     res.status(500).json({
       success: false,
-      error: '获取卡牌失败',
+      error: '鑾峰彇鍗＄墝澶辫触',
     });
   }
 });
 
-/**
- * GET /api/v1/cards/:id
- * 根据ID获取单张卡牌
- */
 router.get('/cards/:id', async (req, res) => {
   try {
     const cardId = parseInt(req.params.id);
+    const allCards = await loadCards();
+    const formattedCard = Number.isNaN(cardId)
+      ? allCards.find((card) => card.id === req.params.id)
+      : allCards.find((card) => card.id === String(cardId));
 
-    if (isNaN(cardId)) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的卡牌ID',
-      });
-    }
-
-    const [card] = await db.select().from(cards).where(eq(cards.id, cardId));
-
-    if (!card) {
+    if (!formattedCard) {
       return res.status(404).json({
         success: false,
         error: '卡牌不存在',
       });
     }
 
-    const formattedCard = {
-      id: String(card.id),
-      name: card.name,
-      cost: card.cost,
-      faction: card.faction,
-      type: card.type,
-      rarity: card.rarity,
-      description: card.description,
-      flavorText: card.flavorText,
-      attack: card.attack,
-      health: card.health,
-      movement: card.movement,
-      durability: card.durability,
-      ability: card.ability,
-    };
-
     res.status(200).json({
       success: true,
       data: formattedCard,
     });
   } catch (error) {
-    console.error('获取卡牌失败:', error);
+    console.error('鑾峰彇鍗＄墝澶辫触:', error);
     res.status(500).json({
       success: false,
-      error: '获取卡牌失败',
+      error: '鑾峰彇鍗＄墝澶辫触',
     });
   }
 });
 
-/**
- * PUT /api/v1/cards/:id
- * 更新卡牌数据
- */
 router.put('/cards/:id', async (req, res) => {
   try {
     const cardId = parseInt(req.params.id);
@@ -451,27 +466,11 @@ router.get('/cards/faction/:faction', async (req, res) => {
     if (!Object.values(Faction).includes(faction as Faction)) {
       return res.status(400).json({
         success: false,
-        error: '无效的阵营',
+        error: '鏃犳晥鐨勯樀钀?',
       });
     }
 
-    const factionCards = await db.select().from(cards).where(eq(cards.faction, faction));
-
-    const formattedCards = factionCards.map((card: any) => ({
-      id: String(card.id),
-      name: card.name,
-      cost: card.cost,
-      faction: card.faction,
-      type: card.type,
-      rarity: card.rarity,
-      description: card.description,
-      flavorText: card.flavorText,
-      attack: card.attack,
-      health: card.health,
-      movement: card.movement,
-      durability: card.durability,
-      ability: card.ability,
-    }));
+    const formattedCards = (await loadCards()).filter((card) => card.faction === faction);
 
     res.status(200).json({
       success: true,
@@ -479,18 +478,14 @@ router.get('/cards/faction/:faction', async (req, res) => {
       count: formattedCards.length,
     });
   } catch (error) {
-    console.error('获取卡牌失败:', error);
+    console.error('鑾峰彇鍗＄墝澶辫触:', error);
     res.status(500).json({
       success: false,
-      error: '获取卡牌失败',
+      error: '鑾峰彇鍗＄墝澶辫触',
     });
   }
 });
 
-/**
- * GET /api/v1/cards/type/:type
- * 根据类型获取卡牌
- */
 router.get('/cards/type/:type', async (req, res) => {
   try {
     const type = req.params.type.toUpperCase() as any;
@@ -498,27 +493,11 @@ router.get('/cards/type/:type', async (req, res) => {
     if (!Object.values(CardType).includes(type as CardType)) {
       return res.status(400).json({
         success: false,
-        error: '无效的卡牌类型',
+        error: '鏃犳晥鐨勫崱鐗岀被鍨?',
       });
     }
 
-    const typeCards = await db.select().from(cards).where(eq(cards.type, type));
-
-    const formattedCards = typeCards.map((card: any) => ({
-      id: String(card.id),
-      name: card.name,
-      cost: card.cost,
-      faction: card.faction,
-      type: card.type,
-      rarity: card.rarity,
-      description: card.description,
-      flavorText: card.flavorText,
-      attack: card.attack,
-      health: card.health,
-      movement: card.movement,
-      durability: card.durability,
-      ability: card.ability,
-    }));
+    const formattedCards = (await loadCards()).filter((card) => card.type === type);
 
     res.status(200).json({
       success: true,
@@ -526,18 +505,14 @@ router.get('/cards/type/:type', async (req, res) => {
       count: formattedCards.length,
     });
   } catch (error) {
-    console.error('获取卡牌失败:', error);
+    console.error('鑾峰彇鍗＄墝澶辫触:', error);
     res.status(500).json({
       success: false,
-      error: '获取卡牌失败',
+      error: '鑾峰彇鍗＄墝澶辫触',
     });
   }
 });
 
-/**
- * POST /api/v1/battle/create
- * 创建新战斗
- */
 router.post('/battle/create', async (req, res) => {
   try {
     const { player1Name, player1Faction, player2Name, player2Faction } = req.body;
