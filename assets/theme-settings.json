@@ -1,0 +1,23 @@
+{
+  "background": {
+    "backgroundImage": "app-background.png"
+  },
+  "logo": {
+    "imagePath": "game-logo.png"
+  },
+  "button": {
+    "backgroundImage": "button.png",
+    "color": "#ffffff",
+    "fontSize": 24,
+    "fontPath": "font.ttf"
+  },
+  "buttonHover": {
+    "color": "#999999"
+  },
+  "appTaskbarIcon": {
+    "appIconPath": "icon.ico"
+  },
+  "appIcon": {
+    "appIconPath": "icon.png"
+  }
+}
