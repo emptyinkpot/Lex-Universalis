@@ -1,130 +1,280 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Alert,
-  RefreshControl,
-  Text,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
-import { useSafeRouter } from '@/hooks/useSafeRouter';
-import { useTheme } from '@/hooks/useTheme';
+﻿import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, Share, Text, TextInput, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { FactionIcon } from '@/components/FactionIcon';
+import { useSafeRouter } from '@/hooks/useSafeRouter';
+import { useTheme } from '@/hooks/useTheme';
+import { BuildingType, CardType, Faction, TacticType, UnitType } from '@/types/game';
 import { createStyles } from './styles';
-import { FontAwesome6 } from '@expo/vector-icons';
-import { Spacing } from '@/constants/theme';
 
-// 卡牌类型定义
-interface CardData {
+/* eslint-disable reactnative/wrap-horizontal-scrollview-inside-view */
+
+type CardRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+type AbilityDraft = { type: string; value: string; description: string };
+
+type EditorCard = {
   id: string;
   name: string;
   cost: number;
-  faction: 'ENGLAND' | 'FRANCE' | 'HRE' | 'VIKING' | 'BYZANTIUM' | 'NEUTRAL';
-  type: 'UNIT' | 'TACTIC' | 'BUILDING';
-  rarity: 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
+  faction: Faction;
+  type: CardType;
+  rarity: CardRarity;
   description: string;
-  flavorText: string | null;
+  flavorText: string;
+  imageUrl: string;
   attack: number | null;
   health: number | null;
   movement: number | null;
   durability: number | null;
-  ability: string | null;
-}
+  effect: string;
+  duration: number | null;
+  unitType: UnitType;
+  tacticType: TacticType;
+  buildingType: BuildingType;
+  abilities: AbilityDraft[];
+  notes: string;
+  localOnly: boolean;
+  needsSync: boolean;
+  updatedAt: number;
+};
 
-// 阵营和类型枚举
-const FACTIONS = [
-  { value: 'ENGLAND', label: '英格兰', icon: 'crown' },
-  { value: 'FRANCE', label: '法兰西', icon: 'flag' },
-  { value: 'HRE', label: '神圣罗马', icon: 'landmark' },
-  { value: 'VIKING', label: '维京', icon: 'axe-battle' },
-  { value: 'BYZANTIUM', label: '拜占庭', icon: 'church' },
-  { value: 'NEUTRAL', label: '中立', icon: 'shield-halved' },
-];
+const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL ?? 'http://127.0.0.1:9091';
+const STORAGE_KEY = 'lex-universalis.card-editor.cards.v1';
+const tempId = () => `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const isNumericId = (value: string) => /^\d+$/.test(value);
 
-const CARD_TYPES = [
-  { value: 'UNIT', label: '单位', icon: 'chess-knight' },
-  { value: 'TACTIC', label: '战术', icon: 'scroll' },
-  { value: 'BUILDING', label: '建筑', icon: 'tower-observation' },
-];
+const FACTION_OPTIONS = [
+  { value: Faction.ENGLAND, label: '英格兰', icon: 'crown' },
+  { value: Faction.FRANCE, label: '法兰西', icon: 'flag' },
+  { value: Faction.HOLY_ROMAN_EMPIRE, label: '神罗', icon: 'landmark' },
+  { value: Faction.VIKING, label: '维京', icon: 'helmet-battle' },
+  { value: Faction.BYZANTIUM, label: '拜占庭', icon: 'church' },
+] as const;
 
-const RARITIES = [
+const TYPE_OPTIONS = [
+  { value: CardType.UNIT, label: '单位', icon: 'chess-knight' },
+  { value: CardType.TACTIC, label: '战术', icon: 'scroll' },
+  { value: CardType.BUILDING, label: '建筑', icon: 'tower-observation' },
+] as const;
+
+const RARITY_OPTIONS: Array<{ value: CardRarity; label: string; color: string }> = [
   { value: 'COMMON', label: '普通', color: '#9CA3AF' },
   { value: 'RARE', label: '稀有', color: '#3B82F6' },
   { value: 'EPIC', label: '史诗', color: '#8B5CF6' },
   { value: 'LEGENDARY', label: '传说', color: '#F59E0B' },
 ];
 
-// 单位类型
 const UNIT_TYPES = [
-  { value: 'INFANTRY', label: '步兵', icon: 'person-rifle' },
-  { value: 'CAVALRY', label: '骑兵', icon: 'horse' },
-  { value: 'ARCHER', label: '弓箭手', icon: 'crosshairs' },
-  { value: 'SIEGE', label: '攻城', icon: 'tower' },
-];
+  { value: UnitType.INFANTRY, label: '步兵' },
+  { value: UnitType.CAVALRY, label: '骑兵' },
+  { value: UnitType.ARCHER, label: '弓手' },
+  { value: UnitType.SIEGE, label: '攻城' },
+] as const;
 
-// 建筑类型
-const BUILDING_TYPES = [
-  { value: 'ECONOMIC', label: '经济', icon: 'coins' },
-  { value: 'MILITARY', label: '军事', icon: 'shield' },
-  { value: 'DEFENSE', label: '防御', icon: 'fortress' },
-];
-
-// 战术类型
 const TACTIC_TYPES = [
-  { value: 'INSTANT', label: '即时', icon: 'bolt' },
-  { value: 'ONGOING', label: '持续', icon: 'hourglass-half' },
-  { value: 'EQUIPMENT', label: '装备', icon: 'sword' },
-];
+  { value: TacticType.INSTANT, label: '即时' },
+  { value: TacticType.ONGOING, label: '持续' },
+  { value: TacticType.EQUIPMENT, label: '装备' },
+] as const;
 
+const BUILDING_TYPES = [
+  { value: BuildingType.ECONOMIC, label: '经济' },
+  { value: BuildingType.MILITARY, label: '军事' },
+  { value: BuildingType.DEFENSE, label: '防御' },
+] as const;
+
+function emptyCard(type: CardType = CardType.UNIT): EditorCard {
+  return {
+    id: tempId(),
+    name: '',
+    cost: 0,
+    faction: Faction.ENGLAND,
+    type,
+    rarity: 'COMMON',
+    description: '',
+    flavorText: '',
+    imageUrl: '',
+    attack: type === CardType.UNIT ? 0 : null,
+    health: type === CardType.UNIT ? 0 : null,
+    movement: type === CardType.UNIT ? 0 : null,
+    durability: type === CardType.BUILDING ? 0 : null,
+    effect: '',
+    duration: type === CardType.TACTIC ? 0 : null,
+    unitType: UnitType.INFANTRY,
+    tacticType: TacticType.INSTANT,
+    buildingType: BuildingType.MILITARY,
+    abilities: [],
+    notes: '',
+    localOnly: true,
+    needsSync: true,
+    updatedAt: Date.now(),
+  };
+}
+
+function safeNumber(value: string, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseAbilities(text: string | null | undefined): AbilityDraft[] {
+  if (!text) return [];
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item) => ({ type: String(item?.type ?? 'CUSTOM'), value: String(item?.value ?? ''), description: String(item?.description ?? '') }))
+        .filter((item) => item.description.trim());
+    }
+  } catch {
+    // ignore
+  }
+  return trimmed.split(/\r?\n|;+/).map((part) => part.trim()).filter(Boolean).map((description) => ({ type: 'CUSTOM', value: '', description }));
+}
+
+function serializeAbilities(card: EditorCard) {
+  if (card.type === CardType.UNIT) return card.abilities.map((item) => item.description || item.type).filter(Boolean).join('\n');
+  return [card.effect, card.duration !== null ? `持续 ${card.duration} 回合` : ''].filter(Boolean).join(' | ');
+}
+
+function normalizeApiCard(raw: any, fallback?: EditorCard): EditorCard {
+  const base = fallback ?? emptyCard(raw?.type === CardType.BUILDING ? CardType.BUILDING : CardType.UNIT);
+  const type = raw?.type === CardType.UNIT || raw?.type === CardType.TACTIC || raw?.type === CardType.BUILDING ? raw.type : base.type;
+  return {
+    ...base,
+    id: String(raw?.id ?? base.id),
+    name: String(raw?.name ?? base.name),
+    cost: safeNumber(String(raw?.cost ?? base.cost), base.cost),
+    faction: String(raw?.faction ?? base.faction) as Faction,
+    type,
+    rarity: String(raw?.rarity ?? base.rarity) as CardRarity,
+    description: String(raw?.description ?? base.description),
+    flavorText: String(raw?.flavorText ?? base.flavorText),
+    imageUrl: String(raw?.imageUrl ?? base.imageUrl),
+    attack: raw?.attack !== undefined ? Number(raw.attack) : base.attack,
+    health: raw?.health !== undefined ? Number(raw.health) : base.health,
+    movement: raw?.movement !== undefined ? Number(raw.movement) : base.movement,
+    durability: raw?.durability !== undefined ? Number(raw.durability) : base.durability,
+    effect: type === CardType.UNIT ? base.effect : String(raw?.ability ?? base.effect),
+    duration: raw?.duration !== undefined ? Number(raw.duration) : base.duration,
+    unitType: String(raw?.unitType ?? base.unitType) as UnitType,
+    tacticType: String(raw?.tacticType ?? base.tacticType) as TacticType,
+    buildingType: String(raw?.buildingType ?? base.buildingType) as BuildingType,
+    abilities: type === CardType.UNIT ? (base.abilities.length > 0 ? base.abilities : parseAbilities(raw?.ability)) : [],
+    notes: String(raw?.notes ?? base.notes),
+    localOnly: base.localOnly,
+    needsSync: base.needsSync,
+    updatedAt: base.updatedAt,
+  };
+}
+
+function stripRuntime(card: EditorCard) {
+  const { localOnly, needsSync, ...rest } = card;
+  return rest;
+}
+
+function buildPayload(card: EditorCard) {
+  return {
+    name: card.name.trim(),
+    cost: card.cost,
+    faction: card.faction,
+    type: card.type,
+    rarity: card.rarity,
+    description: card.description.trim(),
+    flavorText: card.flavorText.trim() || null,
+    attack: card.type === CardType.UNIT ? card.attack : null,
+    health: card.type === CardType.UNIT ? card.health : null,
+    movement: card.type === CardType.UNIT ? card.movement : null,
+    durability: card.type === CardType.BUILDING ? card.durability : null,
+    ability: serializeAbilities(card) || null,
+  };
+}
+
+function replaceCard(cards: EditorCard[], nextCard: EditorCard) {
+  const index = cards.findIndex((item) => item.id === nextCard.id);
+  if (index === -1) return [...cards, nextCard];
+  const next = [...cards];
+  next[index] = nextCard;
+  return next;
+}
+
+function removeCard(cards: EditorCard[], id: string) {
+  return cards.filter((item) => item.id !== id);
+}
 export default function CardEditorScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
 
-  // 状态管理
-  const [cards, setCards] = useState<CardData[]>([]);
+  const [cards, setCards] = useState<EditorCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedFaction, setSelectedFaction] = useState<string>('ALL');
-  const [selectedType, setSelectedType] = useState<string>('ALL');
-  const [selectedRarity, setSelectedRarity] = useState<string>('ALL');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [factionFilter, setFactionFilter] = useState<'ALL' | Faction>('ALL');
+  const [typeFilter, setTypeFilter] = useState<'ALL' | CardType>('ALL');
+  const [rarityFilter, setRarityFilter] = useState<'ALL' | CardRarity>('ALL');
+  const [editorVisible, setEditorVisible] = useState(false);
+  const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
+  const [draft, setDraft] = useState<EditorCard>(emptyCard());
+  const [importVisible, setImportVisible] = useState(false);
+  const [exportVisible, setExportVisible] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [syncingAll, setSyncingAll] = useState(false);
 
-  // 编辑 Modal 状态
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingCard, setEditingCard] = useState<CardData | null>(null);
+  const selectedCard = useMemo(() => cards.find((item) => item.id === selectedId) ?? cards[0] ?? null, [cards, selectedId]);
+  const exportJson = useMemo(() => JSON.stringify(cards.map(stripRuntime), null, 2), [cards]);
 
-  // 表单状态
-  const [formData, setFormData] = useState<Partial<CardData>>({});
-  const [selectedUnitType, setSelectedUnitType] = useState<string>('INFANTRY');
-  const [selectedBuildingType, setSelectedBuildingType] = useState<string>('MILITARY');
-  const [selectedTacticType, setSelectedTacticType] = useState<string>('INSTANT');
-  const [effects, setEffects] = useState<string[]>([]);
+  const stats = useMemo(() => ({
+    total: cards.length,
+    pending: cards.filter((item) => item.needsSync).length,
+    unit: cards.filter((item) => item.type === CardType.UNIT).length,
+    tactic: cards.filter((item) => item.type === CardType.TACTIC).length,
+    building: cards.filter((item) => item.type === CardType.BUILDING).length,
+  }), [cards]);
 
-  // 加载卡牌数据
+  const filteredCards = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return cards.filter((item) => {
+      if (factionFilter !== 'ALL' && item.faction !== factionFilter) return false;
+      if (typeFilter !== 'ALL' && item.type !== typeFilter) return false;
+      if (rarityFilter !== 'ALL' && item.rarity !== rarityFilter) return false;
+      if (!query) return true;
+      const haystack = [item.name, item.description, item.flavorText, item.effect, item.notes, item.abilities.map((ability) => ability.description).join(' ')].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [cards, factionFilter, rarityFilter, search, typeFilter]);
+
   const loadCards = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      /**
-       * 服务端文件：server/src/routes/game.ts
-       * 接口：GET /api/v1/cards
-       */
-      const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/cards`);
+      const [response, cached] = await Promise.all([fetch(`${API_BASE_URL}/api/v1/cards`), AsyncStorage.getItem(STORAGE_KEY)]);
+      const cachedCards = cached ? (JSON.parse(cached) as EditorCard[]) : [];
+      const cachedMap = new Map(cachedCards.map((item: EditorCard) => [item.id, item]));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const result = await response.json();
-
-      if (result.success) {
-        setCards(result.data);
-      } else {
-        Alert.alert('错误', '加载卡牌数据失败');
-      }
+      const remoteCards = Array.isArray(result?.data) ? result.data : [];
+      const merged = remoteCards.map((item: any) => normalizeApiCard(item, cachedMap.get(String(item.id))));
+      const remoteIds = new Set(merged.map((item: any) => item.id));
+      const extras = cachedCards.filter((item: EditorCard) => !remoteIds.has(item.id));
+      const next = [...merged, ...extras];
+      setCards(next);
+      setSelectedId(next[0]?.id ?? null);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch (error) {
       console.error('加载卡牌失败:', error);
-      Alert.alert('错误', '网络请求失败');
+      const cached = await AsyncStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const cachedCards = JSON.parse(cached) as EditorCard[];
+        setCards(cachedCards);
+        setSelectedId(cachedCards[0]?.id ?? null);
+      } else {
+        Alert.alert('加载失败', '服务器和本地缓存都没有卡牌数据。');
+      }
     } finally {
       setLoading(false);
     }
@@ -134,755 +284,329 @@ export default function CardEditorScreen() {
     loadCards();
   }, []);
 
-  // 过滤卡牌
-  const filteredCards = useMemo(() => {
-    return cards.filter((card) => {
-      if (selectedFaction !== 'ALL' && card.faction !== selectedFaction) return false;
-      if (selectedType !== 'ALL' && card.type !== selectedType) return false;
-      if (selectedRarity !== 'ALL' && card.rarity !== selectedRarity) return false;
-      return true;
-    });
-  }, [cards, selectedFaction, selectedType, selectedRarity]);
+  useEffect(() => {
+    if (!loading) {
+      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cards)).catch((error) => {
+        console.error('保存本地缓存失败:', error);
+      });
+    }
+  }, [cards, loading]);
 
-  // 创建新卡牌
-  const handleCreateCard = () => {
-    setEditingCard(null);
-    setFormData({
-      id: '',
-      name: '',
-      cost: 0,
-      faction: 'ENGLAND',
-      type: 'UNIT',
-      rarity: 'COMMON',
-      description: '',
-      flavorText: '',
-      attack: 0,
-      health: 0,
-      movement: 0,
-      durability: 0,
-      ability: '',
-    });
-    setSelectedUnitType('INFANTRY');
-    setSelectedBuildingType('MILITARY');
-    setSelectedTacticType('INSTANT');
-    setEffects([]);
-    setModalVisible(true);
+  const openCreate = (type: CardType = CardType.UNIT) => {
+    setEditorMode('create');
+    setDraft(emptyCard(type));
+    setEditorVisible(true);
   };
 
-  // 打开编辑 Modal
-  const handleEditCard = (card: CardData) => {
-    setEditingCard(card);
-    setFormData({ ...card });
-    setSelectedUnitType('INFANTRY');
-    setSelectedBuildingType('MILITARY');
-    setSelectedTacticType('INSTANT');
-    setEffects([]);
-    setModalVisible(true);
+  const openEdit = (card: EditorCard) => {
+    setEditorMode('edit');
+    setDraft({ ...card, abilities: card.abilities.map((item) => ({ ...item })) });
+    setEditorVisible(true);
   };
 
-  // 删除卡牌
-  const handleDeleteCard = (card: CardData) => {
-    Alert.alert(
-      '确认删除',
-      `确定要删除卡牌 "${card.name}" 吗？`,
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '删除',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              /**
-               * 服务端文件：server/src/routes/game.ts
-               * 接口：DELETE /api/v1/cards/:id
-               */
-              const response = await fetch(
-                `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/cards/${card.id}`,
-                {
-                  method: 'DELETE',
-                }
-              );
-
-              const result = await response.json();
-
-              if (result.success) {
-                Alert.alert('成功', '卡牌已删除');
-                loadCards();
-              } else {
-                Alert.alert('错误', result.error || '删除失败');
-              }
-            } catch (error) {
-              console.error('删除卡牌失败:', error);
-              Alert.alert('错误', '网络请求失败');
-            }
-          },
-        },
-      ]
-    );
+  const updateDraft = <K extends keyof EditorCard>(key: K, value: EditorCard[K]) => {
+    setDraft((current) => ({ ...current, [key]: value, updatedAt: Date.now() }));
   };
 
-  // 保存卡牌
-  const handleSaveCard = async () => {
-    if (!formData.name || formData.name.trim() === '') {
-      Alert.alert('错误', '卡牌名称不能为空');
+  const addAbility = () => {
+    setDraft((current) => ({ ...current, abilities: [...current.abilities, { type: 'CUSTOM', value: '', description: '' }], updatedAt: Date.now() }));
+  };
+
+  const updateAbility = (index: number, field: keyof AbilityDraft, value: string) => {
+    setDraft((current) => ({
+      ...current,
+      abilities: current.abilities.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item)),
+      updatedAt: Date.now(),
+    }));
+  };
+
+  const removeAbility = (index: number) => {
+    setDraft((current) => ({ ...current, abilities: current.abilities.filter((_, itemIndex) => itemIndex !== index), updatedAt: Date.now() }));
+  };
+
+  const saveCard = async () => {
+    const cleaned: EditorCard = {
+      ...draft,
+      name: draft.name.trim(),
+      description: draft.description.trim(),
+      flavorText: draft.flavorText.trim(),
+      imageUrl: draft.imageUrl.trim(),
+      notes: draft.notes.trim(),
+      updatedAt: Date.now(),
+      needsSync: true,
+      localOnly: draft.localOnly || editorMode === 'create' || !isNumericId(draft.id),
+    };
+
+    if (!cleaned.name) {
+      Alert.alert('无法保存', '卡牌名称不能为空。');
       return;
     }
 
-    if (formData.cost === undefined || formData.cost < 0) {
-      Alert.alert('错误', '法力消耗必须大于等于0');
-      return;
-    }
+    const optimistic = editorMode === 'edit' ? cards.map((item) => (item.id === draft.id ? cleaned : item)) : [...cards, cleaned];
+    setCards(optimistic);
+    setSelectedId(cleaned.id);
+    setEditorVisible(false);
 
     try {
-      const saveData = {
-        ...formData,
-        ability: effects.join('; '),
-      };
-
-      if (editingCard) {
-        // 更新现有卡牌
-        /**
-         * 服务端文件：server/src/routes/game.ts
-         * 接口：PUT /api/v1/cards/:id
-         * Body 参数：CardData
-         */
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/cards/${editingCard.id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(saveData),
-          }
-        );
-
-        const result = await response.json();
-
-        if (result.success) {
-          Alert.alert('成功', '卡牌已更新');
-          setModalVisible(false);
-          loadCards();
-        } else {
-          Alert.alert('错误', result.error || '保存失败');
-        }
-      } else {
-        // 创建新卡牌
-        /**
-         * 服务端文件：server/src/routes/game.ts
-         * 接口：POST /api/v1/cards
-         * Body 参数：CardData
-         */
-        const response = await fetch(
-          `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/cards`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(saveData),
-          }
-        );
-
-        const result = await response.json();
-
-        if (result.success) {
-          Alert.alert('成功', '卡牌已创建');
-          setModalVisible(false);
-          loadCards();
-        } else {
-          Alert.alert('错误', result.error || '创建失败');
-        }
-      }
+      const url = editorMode === 'edit' && isNumericId(draft.id) ? `${API_BASE_URL}/api/v1/cards/${draft.id}` : `${API_BASE_URL}/api/v1/cards`;
+      const method = editorMode === 'edit' && isNumericId(draft.id) ? 'PUT' : 'POST';
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload(cleaned)),
+      });
+      const result = await response.json();
+      if (!response.ok || !result?.success) throw new Error(result?.error || `HTTP ${response.status}`);
+      const synced = normalizeApiCard(result.data, cleaned);
+      synced.id = String(result.data?.id ?? cleaned.id);
+      synced.localOnly = false;
+      synced.needsSync = false;
+      synced.updatedAt = Date.now();
+      const next = editorMode === 'edit' ? replaceCard(cards, synced) : replaceCard(optimistic.filter((item) => item.id !== cleaned.id), synced);
+      setCards(next);
+      setSelectedId(synced.id);
     } catch (error) {
-      console.error('保存卡牌失败:', error);
-      Alert.alert('错误', '网络请求失败');
+      console.error('保存失败:', error);
+      Alert.alert('已保存到本地', '服务器同步失败，稍后可点击同步待处理按钮。');
+      setCards((current) => current.map((item) => (item.id === cleaned.id ? { ...item, localOnly: true, needsSync: true } : item)));
     }
   };
 
-  // 添加效果
-  const handleAddEffect = () => {
-    setEffects([...effects, '新效果']);
+  const deleteCard = (card: EditorCard) => {
+    Alert.alert('删除卡牌', `确认删除「${card.name}」吗？`, [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '删除',
+        style: 'destructive',
+        onPress: async () => {
+          setCards((current) => removeCard(current, card.id));
+          setSelectedId((current) => (current === card.id ? null : current));
+          if (!isNumericId(card.id)) return;
+          try {
+            const response = await fetch(`${API_BASE_URL}/api/v1/cards/${card.id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (!response.ok || !result?.success) throw new Error(result?.error || `HTTP ${response.status}`);
+          } catch (error) {
+            console.error('删除服务器卡牌失败:', error);
+            Alert.alert('本地删除完成', '服务器端删除失败，稍后可以重新同步。');
+          }
+        },
+      },
+    ]);
+  };
+  const duplicateCard = (card: EditorCard) => {
+    const copy: EditorCard = { ...card, id: tempId(), name: `${card.name} 副本`, localOnly: true, needsSync: true, updatedAt: Date.now() };
+    const next = [...cards, copy];
+    setCards(next);
+    setSelectedId(copy.id);
+    setEditorMode('edit');
+    setDraft(copy);
+    setEditorVisible(true);
   };
 
-  // 更新效果
-  const handleUpdateEffect = (index: number, value: string) => {
-    const newEffects = [...effects];
-    newEffects[index] = value;
-    setEffects(newEffects);
+  const syncPending = async () => {
+    setSyncingAll(true);
+    try {
+      const next = [...cards];
+      for (let i = 0; i < next.length; i += 1) {
+        const card = next[i];
+        if (!card.needsSync && isNumericId(card.id)) continue;
+        const response = await fetch(isNumericId(card.id) ? `${API_BASE_URL}/api/v1/cards/${card.id}` : `${API_BASE_URL}/api/v1/cards`, {
+          method: isNumericId(card.id) ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(buildPayload(card)),
+        });
+        const result = await response.json();
+        if (!response.ok || !result?.success) throw new Error(result?.error || `HTTP ${response.status}`);
+        const synced = normalizeApiCard(result.data, card);
+        synced.id = String(result.data?.id ?? card.id);
+        synced.localOnly = false;
+        synced.needsSync = false;
+        synced.updatedAt = Date.now();
+        next[i] = synced;
+      }
+      setCards(next);
+      Alert.alert('同步完成', '所有待处理卡牌都已同步到服务器。');
+    } catch (error) {
+      console.error('同步失败:', error);
+      Alert.alert('同步失败', '至少有一张卡牌没有成功写入服务器。');
+    } finally {
+      setSyncingAll(false);
+    }
   };
 
-  // 删除效果
-  const handleRemoveEffect = (index: number) => {
-    setEffects(effects.filter((_, i) => i !== index));
+  const performImport = async (syncNow: boolean) => {
+    try {
+      const parsed = JSON.parse(importText.trim());
+      const incoming = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.cards) ? parsed.cards : null;
+      if (!incoming) throw new Error('JSON 必须是数组，或者包含 cards 字段。');
+      const next = incoming.map((item: any) => {
+        const card = normalizeApiCard(item, emptyCard(item?.type));
+        return { ...card, localOnly: !syncNow, needsSync: !syncNow, updatedAt: Date.now() };
+      });
+      setCards(next);
+      setSelectedId(next[0]?.id ?? null);
+      setImportVisible(false);
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      if (syncNow) setTimeout(() => { syncPending(); }, 0);
+    } catch (error) {
+      console.error('导入失败:', error);
+      Alert.alert('导入失败', '请确认 JSON 格式正确。');
+    }
   };
 
-  // 渲染筛选标签
-  const renderFilterTabs = () => {
+  const renderChip = (label: string, active: boolean, onPress: () => void, color?: string) => (
+    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive, { backgroundColor: active ? color ?? theme.primary : theme.backgroundTertiary, borderColor: active ? color ?? theme.primary : theme.borderLight }]}>
+      <ThemedText variant="small" color={active ? '#FFFFFF' : theme.textPrimary}>{label}</ThemedText>
+    </Pressable>
+  );
+
+  const renderCardTile = (card: EditorCard) => {
+    const active = selectedCard?.id === card.id;
+    const rarityColor = RARITY_OPTIONS.find((item) => item.value === card.rarity)?.color ?? theme.primary;
     return (
-      <View style={styles.filterContainer}>
-        {/* 阵营筛选 */}
-        <View style={styles.filterSection}>
-          <ThemedText variant="small" color={theme.textMuted} style={styles.filterLabel}>
-            阵营
-          </ThemedText>
-          <View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              <TouchableOpacity
-                style={[styles.filterChip, selectedFaction === 'ALL' && styles.filterChipActive]}
-                onPress={() => setSelectedFaction('ALL')}
-              >
-                <ThemedText
-                  variant="small"
-                  color={selectedFaction === 'ALL' ? '#FFFFFF' : theme.textPrimary}
-                >
-                  全部
-                </ThemedText>
-              </TouchableOpacity>
-              {FACTIONS.map((faction) => (
-                <TouchableOpacity
-                  key={faction.value}
-                  style={[
-                    styles.filterChip,
-                    selectedFaction === faction.value && styles.filterChipActive,
-                  ]}
-                  onPress={() => setSelectedFaction(faction.value)}
-                >
-                  <FontAwesome6
-                    name={faction.icon as any}
-                    size={12}
-                    color={selectedFaction === faction.value ? '#FFFFFF' : theme.textMuted}
-                    style={styles.filterChipIcon}
-                  />
-                  <ThemedText
-                    variant="small"
-                    color={selectedFaction === faction.value ? '#FFFFFF' : theme.textPrimary}
-                  >
-                    {faction.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+      <Pressable key={card.id} onPress={() => setSelectedId(card.id)} style={[styles.cardTile, active && styles.cardTileActive, { borderColor: active ? theme.primary : theme.borderLight }]}>
+        <View style={styles.cardHead}>
+          <ThemedText variant="bodyMedium" color={theme.textPrimary} numberOfLines={1}>{card.name || '未命名卡牌'}</ThemedText>
+          <ThemedText variant="tiny" color={theme.textMuted}>{card.type} · 费用 {card.cost}</ThemedText>
         </View>
-
-        {/* 类型筛选 */}
-        <View style={styles.filterSection}>
-          <ThemedText variant="small" color={theme.textMuted} style={styles.filterLabel}>
-            类型
-          </ThemedText>
-          <View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              <TouchableOpacity
-                style={[styles.filterChip, selectedType === 'ALL' && styles.filterChipActive]}
-                onPress={() => setSelectedType('ALL')}
-              >
-                <ThemedText
-                  variant="small"
-                  color={selectedType === 'ALL' ? '#FFFFFF' : theme.textPrimary}
-                >
-                  全部
-                </ThemedText>
-              </TouchableOpacity>
-              {CARD_TYPES.map((type) => (
-                <TouchableOpacity
-                  key={type.value}
-                  style={[styles.filterChip, selectedType === type.value && styles.filterChipActive]}
-                  onPress={() => setSelectedType(type.value)}
-                >
-                  <FontAwesome6
-                    name={type.icon as any}
-                    size={12}
-                    color={selectedType === type.value ? '#FFFFFF' : theme.textMuted}
-                    style={styles.filterChipIcon}
-                  />
-                  <ThemedText
-                    variant="small"
-                    color={selectedType === type.value ? '#FFFFFF' : theme.textPrimary}
-                  >
-                    {type.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+        <View style={styles.cardBody}>
+          <View style={[styles.costBadge, { borderColor: rarityColor }]}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.cost}</ThemedText>
           </View>
+          <ThemedText variant="small" color={theme.textSecondary} numberOfLines={2}>{card.description || '暂无描述'}</ThemedText>
         </View>
-
-        {/* 稀有度筛选 */}
-        <View style={styles.filterSection}>
-          <ThemedText variant="small" color={theme.textMuted} style={styles.filterLabel}>
-            稀有度
-          </ThemedText>
-          <View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              <TouchableOpacity
-                style={[styles.filterChip, selectedRarity === 'ALL' && styles.filterChipActive]}
-                onPress={() => setSelectedRarity('ALL')}
-              >
-                <ThemedText
-                  variant="small"
-                  color={selectedRarity === 'ALL' ? '#FFFFFF' : theme.textPrimary}
-                >
-                  全部
-                </ThemedText>
-              </TouchableOpacity>
-              {RARITIES.map((rarity) => (
-                <TouchableOpacity
-                  key={rarity.value}
-                  style={[
-                    styles.filterChip,
-                    selectedRarity === rarity.value && styles.filterChipActive,
-                    { borderColor: selectedRarity === rarity.value ? rarity.color : theme.borderLight },
-                  ]}
-                  onPress={() => setSelectedRarity(rarity.value)}
-                >
-                  <ThemedText
-                    variant="small"
-                    color={selectedRarity === rarity.value ? '#FFFFFF' : theme.textPrimary}
-                  >
-                    {rarity.label}
-                  </ThemedText>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+        <View style={styles.tileActions}>
+          <Pressable onPress={() => openEdit(card)} style={styles.tileAction}><FontAwesome6 name="pen-to-square" size={12} color={theme.textPrimary} /><Text style={{ color: theme.textPrimary, fontSize: 12 }}>编辑</Text></Pressable>
+          <Pressable onPress={() => duplicateCard(card)} style={styles.tileAction}><FontAwesome6 name="clone" size={12} color={theme.textPrimary} /><Text style={{ color: theme.textPrimary, fontSize: 12 }}>复制</Text></Pressable>
+          <Pressable onPress={() => deleteCard(card)} style={styles.tileAction}><FontAwesome6 name="trash" size={12} color={theme.error} /><Text style={{ color: theme.error, fontSize: 12 }}>删除</Text></Pressable>
         </View>
-      </View>
+      </Pressable>
     );
   };
 
-  // 渲染卡牌列表
-  const renderCardsList = () => {
-    if (loading) {
-      return (
-        <View style={styles.centerContainer}>
-          <ThemedText variant="body" color={theme.textMuted}>加载中...</ThemedText>
-        </View>
-      );
-    }
-
-    if (filteredCards.length === 0) {
-      return (
-        <View style={styles.centerContainer}>
-          <FontAwesome6 name="clone" size={64} color={theme.textMuted} />
-          <ThemedText variant="body" color={theme.textMuted} style={styles.emptyText}>
-            没有找到符合条件的卡牌
-          </ThemedText>
-        </View>
-      );
+  const renderPreview = (card: EditorCard | null) => {
+    if (!card) {
+      return <ThemedView level="tertiary" style={styles.previewEmpty}><FontAwesome6 name="rectangle-list" size={40} color={theme.textMuted} /><ThemedText variant="bodyMedium" color={theme.textPrimary}>选择一张卡牌查看详情</ThemedText><ThemedText variant="small" color={theme.textMuted}>你可以新建、复制、删除、导入和导出卡牌数据。</ThemedText></ThemedView>;
     }
 
     return (
-      <View style={styles.cardsGrid}>
-        {filteredCards.map((card, index) => {
-          // 获取稀有度配置
-          const rarityConfig = RARITIES.find(r => r.value === card.rarity);
-          const factionConfig = FACTIONS.find(f => f.value === card.faction);
-
-          // 根据稀有度选择边框颜色（塔罗牌风格）
-          const getBorderColor = () => {
-            switch (card.rarity) {
-              case 'LEGENDARY': return '#C17A5B'; // 黏土橙（传说）
-              case 'EPIC': return '#8B7355';      // 暖棕色（史诗）
-              case 'RARE': return '#D4A574';      // 土黄色（稀有）
-              default: return '#C17A5B';         // 默认黏土橙
-            }
-          };
-
-          // 根据阵营选择背景色（塔罗牌风格）
-          const getFactionColor = () => {
-            switch (card.faction) {
-              case 'ENGLAND': return '#4A6FA5';   // 钴蓝色
-              case 'FRANCE': return '#E84A4A';    // 亮红色
-              case 'HRE': return '#8B7355';       // 暖棕色
-              case 'VIKING': return '#059669';    // 维京绿
-              case 'BYZANTIUM': return '#7C3AED';  // 拜占庭紫
-              default: return '#6B7280';          // 中立灰
-            }
-          };
-
-          // 获取卡牌类型图标
-          const getTypeIcon = () => {
-            switch (card.type) {
-              case 'UNIT': return 'user-shield';
-              case 'TACTIC': return 'crosshairs';
-              case 'BUILDING': return 'landmark';
-              default: return 'clone';
-            }
-          };
-
-          return (
-            <TouchableOpacity
-              key={`${card.id}-${index}`}
-              onPress={() => handleEditCard(card)}
-              activeOpacity={0.7}
-              onLongPress={() => handleDeleteCard(card)}
-            >
-              <View style={[styles.cardWrapper, { borderColor: getBorderColor() }]}>
-                {/* 阵营背景层 */}
-                <View style={[styles.cardBackground, { backgroundColor: getFactionColor() }]} />
-
-                {/* 卡牌内边框装饰 */}
-                <View style={styles.cardInnerBorder} />
-
-                {/* 顶部费用区域 */}
-                <View style={styles.cardCostSection}>
-                  {/* 费用徽章 */}
-                  <View style={[
-                    styles.costBadge,
-                    card.rarity === 'LEGENDARY' && styles.costBadgeLegendary,
-                    card.rarity === 'EPIC' && styles.costBadgeEpic,
-                    card.rarity === 'RARE' && styles.costBadgeRare,
-                  ]}>
-                    <Text style={styles.costText}>{card.cost}</Text>
-                  </View>
-
-                  {/* 稀有度标记 */}
-                  <View style={[styles.rarityBadge, { backgroundColor: rarityConfig?.color || '#9CA3AF' }]} />
-                </View>
-
-                {/* 卡牌图片/图标区域 */}
-                <View style={styles.cardImageArea}>
-                  {card.type === 'UNIT' ? (
-                    // 单位卡显示士兵图标
-                    <FontAwesome6
-                      name={getTypeIcon() as any}
-                      size={64}
-                      color="rgba(139, 115, 85, 0.4)"
-                    />
-                  ) : (
-                    // 战术/建筑卡显示对应图标
-                    <FontAwesome6
-                      name={getTypeIcon() as any}
-                      size={72}
-                      color="rgba(139, 115, 85, 0.5)"
-                    />
-                  )}
-                </View>
-
-                {/* 卡牌信息区域 */}
-                <View style={styles.cardInfoSection}>
-                  {/* 卡牌名称 */}
-                  <Text style={styles.cardName} numberOfLines={2}>
-                    {card.name}
-                  </Text>
-
-                  {/* 阵营标签 */}
-                  <View style={styles.factionBadge}>
-                    <FontAwesome6
-                      name={factionConfig?.icon as any}
-                      size={14}
-                      color={theme.textPrimary}
-                    />
-                    <Text style={styles.factionBadgeText}>
-                      {factionConfig?.label}
-                    </Text>
-                  </View>
-
-                  {/* 类型标签 */}
-                  <View style={styles.typeBadge}>
-                    <FontAwesome6
-                      name={getTypeIcon() as any}
-                      size={14}
-                      color={theme.textSecondary}
-                    />
-                    <Text style={styles.typeBadgeText}>
-                      {CARD_TYPES.find(t => t.value === card.type)?.label}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* 底部属性区域 */}
-                <View style={styles.cardStatsSection}>
-                  {/* 单位卡：攻击力和生命值 */}
-                  {card.type === 'UNIT' && (
-                    <>
-                      {card.attack !== null && (
-                        <View style={styles.attackBadge}>
-                          <Text style={styles.attackText}>{card.attack}</Text>
-                        </View>
-                      )}
-                      {card.health !== null && (
-                        <View style={styles.healthBadge}>
-                          <Text style={styles.healthText}>{card.health}</Text>
-                        </View>
-                      )}
-                    </>
-                  )}
-
-                  {/* 建筑卡：耐久度 */}
-                  {card.type === 'BUILDING' && card.durability !== null && (
-                    <View style={[styles.healthBadge, { borderColor: '#F59E0B' }]}>
-                      <Text style={styles.healthText}>{card.durability}</Text>
-                    </View>
-                  )}
-
-                  {/* 战术卡：无属性 */}
-                  {card.type === 'TACTIC' && <View />}
-                </View>
-
-                {/* 底部稀有度边框 */}
-                <View style={[styles.rarityBorder, { backgroundColor: getBorderColor() }]} />
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    );
-  };
-
-  // 渲染选择器
-  const renderSelector = (
-    label: string,
-    options: { value: string; label: string; icon?: string }[],
-    selected: string,
-    onSelect: (value: string) => void
-  ) => {
-    return (
-      <View style={styles.inputGroup}>
-        <ThemedText variant="small" color={theme.textSecondary} style={styles.inputLabel}>
-          {label}
-        </ThemedText>
-        <View style={styles.selectorContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {options.map((option) => (
-              <TouchableOpacity
-                key={option.value}
-                style={[
-                  styles.selectorChip,
-                  selected === option.value && styles.selectorChipActive,
-                  {
-                    backgroundColor: selected === option.value ? theme.primary : theme.backgroundTertiary,
-                    borderColor: selected === option.value ? theme.primary : theme.borderLight,
-                  },
-                ]}
-                onPress={() => onSelect(option.value)}
-              >
-                {option.icon && (
-                  <FontAwesome6
-                    name={option.icon as any}
-                    size={12}
-                    color={selected === option.value ? '#FFFFFF' : theme.textMuted}
-                    style={styles.selectorChipIcon}
-                  />
-                )}
-                <ThemedText
-                  variant="small"
-                  color={selected === option.value ? '#FFFFFF' : theme.textPrimary}
-                >
-                  {option.label}
-                </ThemedText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+      <ThemedView level="default" style={styles.previewCard}>
+        <View style={styles.previewHeader}>
+          <View style={{ flex: 1 }}>
+            <ThemedText variant="h4" color={theme.textPrimary}>{card.name || '未命名卡牌'}</ThemedText>
+            <ThemedText variant="small" color={theme.textMuted}>{card.type} · {card.rarity} · {card.faction}</ThemedText>
+          </View>
+          <ThemedText variant="tiny" color={card.needsSync ? theme.error : theme.success}>{card.needsSync ? '待同步' : '已同步'}</ThemedText>
         </View>
-      </View>
+        <View style={styles.previewArtWrap}>{card.imageUrl ? <Image source={{ uri: card.imageUrl }} style={styles.previewImage} resizeMode="cover" /> : <View style={styles.previewPlaceholder}><FactionIcon faction={card.faction} size={54} /><ThemedText variant="small" color={theme.textMuted} style={{ marginTop: 8 }}>未设置图片</ThemedText></View>}</View>
+        <View style={styles.previewStats}>
+          <View style={styles.previewStat}><ThemedText variant="stat" color={theme.textPrimary}>{card.cost}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText></View>
+          <View style={styles.previewStat}><ThemedText variant="bodyMedium" color={theme.textPrimary}>{card.type}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>类型</ThemedText></View>
+          <View style={styles.previewStat}><ThemedText variant="bodyMedium" color={theme.textPrimary}>{card.faction}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>阵营</ThemedText></View>
+        </View>
+        <ThemedText variant="body" color={theme.textPrimary}>{card.description || '暂无描述'}</ThemedText>
+        {card.flavorText ? <ThemedText variant="small" color={theme.textMuted} style={{ fontStyle: 'italic' }}>{card.flavorText}</ThemedText> : null}
+        {card.type === CardType.UNIT && <View style={styles.previewBattleStats}><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="crosshairs" size={14} color={theme.error} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText></ThemedView><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="heart" size={14} color={theme.success} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText></ThemedView><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="person-walking" size={14} color={theme.primary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText></ThemedView></View>}
+        {card.type === CardType.BUILDING && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>耐久 {card.durability ?? 0}</ThemedText><ThemedText variant="small" color={theme.textMuted}>{card.effect || '暂无建筑效果'}</ThemedText></ThemedView>}
+        {card.type === CardType.TACTIC && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.effect || '暂无战术效果'}</ThemedText>{card.duration !== null ? <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText> : null}</ThemedView>}
+        {card.type === CardType.UNIT && card.abilities.length > 0 && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>{card.abilities.map((ability, index) => <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>• {ability.description || ability.type}</Text>)}</ThemedView>}
+        {card.notes ? <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText><ThemedText variant="small" color={theme.textMuted}>{card.notes}</ThemedText></ThemedView> : null}
+        <View style={styles.previewActions}><Pressable onPress={() => openEdit(card)} style={[styles.previewAction, { backgroundColor: theme.primary }]}><FontAwesome6 name="pen-to-square" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">编辑</ThemedText></Pressable><Pressable onPress={() => duplicateCard(card)} style={[styles.previewAction, { backgroundColor: theme.backgroundTertiary }]}><FontAwesome6 name="clone" size={14} color={theme.textPrimary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>复制</ThemedText></Pressable></View>
+      </ThemedView>
     );
   };
-
-  // 渲染表单输入框
-  const renderInput = (
-    label: string,
-    key: keyof CardData,
-    keyboardType: 'default' | 'numeric' = 'default',
-    multiline: boolean = false
-  ) => {
-    const value = formData[key]?.toString() || '';
-
-    return (
-      <View style={styles.inputGroup}>
-        <ThemedText variant="small" color={theme.textSecondary} style={styles.inputLabel}>
-          {label}
-        </ThemedText>
-        <TextInput
-          style={[
-            styles.input,
-            { backgroundColor: theme.backgroundTertiary, color: theme.textPrimary },
-            multiline && styles.inputMultiline,
-          ]}
-          value={value}
-          onChangeText={(text) => {
-            const numValue = keyboardType === 'numeric' ? Number(text) : text;
-            setFormData({ ...formData, [key]: numValue });
-          }}
-          keyboardType={keyboardType}
-          multiline={multiline}
-          numberOfLines={multiline ? 4 : 1}
-        />
-      </View>
-    );
-  };
-
   return (
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="dark">
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={loadCards} />}
-      >
-        <ThemedView level="root" style={styles.header}>
-          <View style={styles.headerTop}>
-            <View>
-              <ThemedText variant="h2" color={theme.textPrimary}>卡牌编辑器</ThemedText>
-              <ThemedText variant="small" color={theme.textMuted}>
-                图形化设计游戏卡牌
-              </ThemedText>
+      <ScrollView contentContainerStyle={styles.page} refreshControl={<RefreshControl refreshing={loading} onRefresh={loadCards} />}>
+        <ThemedView level="root" style={styles.headerCard}>
+          <View style={styles.headerRow}>
+            <Pressable onPress={() => router.back()} style={styles.iconButton}><FontAwesome6 name="arrow-left" size={14} color={theme.textPrimary} /></Pressable>
+            <View style={styles.titleBlock}><ThemedText variant="h2" color={theme.textPrimary}>卡牌编辑器</ThemedText><ThemedText variant="small" color={theme.textMuted}>完整编辑、复制、删除、导入导出和服务器同步。</ThemedText></View>
+            <View style={styles.headerActions}>
+              <Pressable onPress={loadCards} style={styles.iconButton}><FontAwesome6 name="rotate" size={14} color={theme.textPrimary} /></Pressable>
+              <Pressable onPress={() => setExportVisible(true)} style={styles.iconButton}><FontAwesome6 name="download" size={14} color={theme.textPrimary} /></Pressable>
+              <Pressable onPress={() => setImportVisible(true)} style={styles.iconButton}><FontAwesome6 name="upload" size={14} color={theme.textPrimary} /></Pressable>
+              <Pressable onPress={() => openCreate(CardType.UNIT)} style={[styles.primaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="plus" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">新建卡牌</ThemedText></Pressable>
             </View>
-            <TouchableOpacity
-              style={[styles.createButton, { backgroundColor: theme.primary }]}
-              onPress={handleCreateCard}
-            >
-              <FontAwesome6 name="plus" size={16} color="#FFFFFF" />
-              <ThemedText variant="small" color="#FFFFFF" style={styles.createButtonText}>
-                新建卡牌
-              </ThemedText>
-            </TouchableOpacity>
+          </View>
+
+          <View style={styles.statsRow}>
+            <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.total}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>总卡牌</ThemedText></ThemedView>
+            <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.pending}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>待同步</ThemedText></ThemedView>
+            <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.unit}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>单位</ThemedText></ThemedView>
+            <ThemedView level="tertiary" style={styles.statCard}><ThemedText variant="stat" color={theme.textPrimary}>{stats.tactic + stats.building}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>战术/建筑</ThemedText></ThemedView>
           </View>
         </ThemedView>
 
-        {/* 筛选器 */}
-        {renderFilterTabs()}
+        <View style={styles.bodyGrid}>
+          <View style={styles.leftPane}>
+            <ThemedView level="default" style={styles.toolbarCard}>
+              <TextInput value={search} onChangeText={setSearch} placeholder="搜索卡牌名称、描述、能力或备注" placeholderTextColor={theme.textMuted} style={[styles.searchInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} />
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>{renderChip('全部阵营', factionFilter === 'ALL', () => setFactionFilter('ALL'))}{FACTION_OPTIONS.map((item) => renderChip(item.label, factionFilter === item.value, () => setFactionFilter(item.value)))}</ScrollView>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>{renderChip('全部类型', typeFilter === 'ALL', () => setTypeFilter('ALL'))}{TYPE_OPTIONS.map((item) => renderChip(item.label, typeFilter === item.value, () => setTypeFilter(item.value)))}</ScrollView>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>{renderChip('全部稀有度', rarityFilter === 'ALL', () => setRarityFilter('ALL'))}{RARITY_OPTIONS.map((item) => renderChip(item.label, rarityFilter === item.value, () => setRarityFilter(item.value), item.color))}</ScrollView>
+              <View style={styles.toolbarFooter}><ThemedText variant="small" color={theme.textMuted}>当前显示 {filteredCards.length} 张</ThemedText><Pressable onPress={syncPending} disabled={syncingAll || stats.pending === 0} style={[styles.primaryButton, { backgroundColor: stats.pending === 0 ? theme.borderLight : theme.primary, opacity: syncingAll ? 0.75 : 1 }]}><FontAwesome6 name="cloud-arrow-up" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">{syncingAll ? '同步中...' : `同步待处理(${stats.pending})`}</ThemedText></Pressable></View>
+            </ThemedView>
 
-        {/* 卡牌列表 */}
-        {renderCardsList()}
+            <View style={styles.cardsGrid}>{filteredCards.length > 0 ? filteredCards.map(renderCardTile) : <ThemedView level="tertiary" style={styles.emptyState}><FontAwesome6 name="magnifying-glass" size={40} color={theme.textMuted} /><ThemedText variant="bodyMedium" color={theme.textPrimary}>没有匹配的卡牌</ThemedText><ThemedText variant="small" color={theme.textMuted}>试着调整筛选条件，或者直接新建一张卡牌。</ThemedText></ThemedView>}</View>
+          </View>
 
-        {/* 提示信息 */}
-        <ThemedView level="tertiary" style={styles.hintBox}>
-          <FontAwesome6 name="circle-info" size={16} color={theme.textMuted} />
-          <ThemedText variant="small" color={theme.textMuted} style={styles.hintText}>
-            点击卡牌编辑，长按删除
-          </ThemedText>
-        </ThemedView>
+          <View style={styles.rightPane}>{renderPreview(selectedCard)}<ThemedView level="default" style={styles.quickHint}><FontAwesome6 name="circle-info" size={16} color={theme.textMuted} /><ThemedText variant="small" color={theme.textMuted} style={{ flex: 1 }}>点击卡牌查看详情，使用右上角按钮可以导入、导出或者刷新数据。</ThemedText></ThemedView></View>
+        </View>
       </ScrollView>
 
-      {/* 编辑/创建 Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <KeyboardAvoidingView style={{ flex: 1 }} behavior={'padding' as const}>
-            <View style={styles.modalContainer}>
-              <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
-              {/* Header */}
-              <View style={styles.modalHeader}>
-                <ThemedText variant="h3" color={theme.textPrimary}>
-                  {editingCard ? '编辑卡牌' : '创建卡牌'}
-                </ThemedText>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <FontAwesome6 name="xmark" size={24} color={theme.textPrimary} />
-                </TouchableOpacity>
-              </View>
+      <Modal visible={editorVisible} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setEditorVisible(false)}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <ScrollView contentContainerStyle={styles.modalContent}>
+                <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>{editorMode === 'create' ? '新建卡牌' : '编辑卡牌'}</ThemedText><ThemedText variant="small" color={theme.textMuted}>把基础信息、类型属性和附加说明一起编辑完整。</ThemedText></View><Pressable onPress={() => setEditorVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
 
-              {/* Body */}
-              <ScrollView style={styles.modalBody}>
-                {/* 基础信息 */}
-                <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                  基础信息
-                </ThemedText>
-                {renderInput('卡牌名称', 'name')}
-                {renderInput('法力消耗', 'cost', 'numeric')}
-                {renderInput('描述', 'description', 'default', true)}
-                {renderInput('背景文本', 'flavorText', 'default', true)}
+                <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>基础信息</ThemedText><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>名称</ThemedText><TextInput value={draft.name} onChangeText={(value) => updateDraft('name', value)} style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} placeholder="输入卡牌名称" placeholderTextColor={theme.textMuted} /></View><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>费用</ThemedText><TextInput value={String(draft.cost)} onChangeText={(value) => updateDraft('cost', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View>
+                  <ThemedText variant="small" color={theme.textMuted}>阵营</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{FACTION_OPTIONS.map((item) => <Pressable key={item.value} onPress={() => updateDraft('faction', item.value)} style={[styles.selectorChip, draft.faction === item.value && styles.selectorChipActive, { backgroundColor: draft.faction === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.faction === item.value ? theme.primary : theme.borderLight }]}><FontAwesome6 name={item.icon as any} size={12} color={draft.faction === item.value ? '#FFFFFF' : theme.textMuted} /><ThemedText variant="small" color={draft.faction === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView>
+                  <ThemedText variant="small" color={theme.textMuted}>类型</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{TYPE_OPTIONS.map((item) => <Pressable key={item.value} onPress={() => updateDraft('type', item.value)} style={[styles.selectorChip, draft.type === item.value && styles.selectorChipActive, { backgroundColor: draft.type === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.type === item.value ? theme.primary : theme.borderLight }]}><FontAwesome6 name={item.icon as any} size={12} color={draft.type === item.value ? '#FFFFFF' : theme.textMuted} /><ThemedText variant="small" color={draft.type === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView>
+                  <ThemedText variant="small" color={theme.textMuted}>稀有度</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{RARITY_OPTIONS.map((item) => <Pressable key={item.value} onPress={() => updateDraft('rarity', item.value)} style={[styles.selectorChip, draft.rarity === item.value && styles.selectorChipActive, { backgroundColor: draft.rarity === item.value ? item.color : theme.backgroundTertiary, borderColor: draft.rarity === item.value ? item.color : theme.borderLight }]}><ThemedText variant="small" color={draft.rarity === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView>
+                  <ThemedText variant="small" color={theme.textMuted}>描述</ThemedText><TextInput value={draft.description} onChangeText={(value) => updateDraft('description', value)} multiline placeholder="写下卡牌效果描述" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} />
+                  <ThemedText variant="small" color={theme.textMuted}>背景文本</ThemedText><TextInput value={draft.flavorText} onChangeText={(value) => updateDraft('flavorText', value)} multiline placeholder="写下风味文本" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} />
+                  <ThemedText variant="small" color={theme.textMuted}>图片地址</ThemedText><TextInput value={draft.imageUrl} onChangeText={(value) => updateDraft('imageUrl', value)} placeholder="https://..." placeholderTextColor={theme.textMuted} style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>
 
-                {/* 阵营和类型 */}
-                <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                  阵营与分类
-                </ThemedText>
-                {renderSelector('阵营', FACTIONS, formData.faction || 'ENGLAND', (value) =>
-                  setFormData({ ...formData, faction: value as any })
-                )}
-                {renderSelector('类型', CARD_TYPES, formData.type || 'UNIT', (value) =>
-                  setFormData({ ...formData, type: value as any })
-                )}
-                {renderSelector('稀有度', RARITIES, formData.rarity || 'COMMON', (value) =>
-                  setFormData({ ...formData, rarity: value as any })
-                )}
+                {draft.type === CardType.UNIT && <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>单位属性</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{UNIT_TYPES.map((item) => <Pressable key={item.value} onPress={() => updateDraft('unitType', item.value)} style={[styles.selectorChip, draft.unitType === item.value && styles.selectorChipActive, { backgroundColor: draft.unitType === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.unitType === item.value ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={draft.unitType === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>攻击</ThemedText><TextInput value={String(draft.attack ?? 0)} onChangeText={(value) => updateDraft('attack', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>生命</ThemedText><TextInput value={String(draft.health ?? 0)} onChangeText={(value) => updateDraft('health', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>移动</ThemedText><TextInput value={String(draft.movement ?? 0)} onChangeText={(value) => updateDraft('movement', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View><ThemedText variant="small" color={theme.textMuted}>能力</ThemedText>{draft.abilities.map((ability, index) => <View key={`${ability.type}-${index}`} style={styles.abilityRow}><TextInput value={ability.description} onChangeText={(value) => updateAbility(index, 'description', value)} placeholder="能力描述" placeholderTextColor={theme.textMuted} style={[styles.abilityInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /><Pressable onPress={() => removeAbility(index)} style={styles.abilityDelete}><FontAwesome6 name="trash" size={14} color={theme.error} /></Pressable></View>)}<Pressable onPress={addAbility} style={[styles.addRowButton, { borderColor: theme.borderLight, backgroundColor: theme.backgroundTertiary }]}><FontAwesome6 name="plus" size={14} color={theme.textMuted} /><ThemedText variant="small" color={theme.textMuted}>添加能力</ThemedText></Pressable></View>}
 
-                {/* 子类型选择 */}
-                {formData.type === 'UNIT' && (
-                  <>
-                    <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                      单位属性
-                    </ThemedText>
-                    {renderSelector('单位类型', UNIT_TYPES, selectedUnitType, setSelectedUnitType)}
-                    {renderInput('攻击力', 'attack', 'numeric')}
-                    {renderInput('生命值', 'health', 'numeric')}
-                    {renderInput('移动力', 'movement', 'numeric')}
-                  </>
-                )}
+                {draft.type === CardType.TACTIC && <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>战术属性</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{TACTIC_TYPES.map((item) => <Pressable key={item.value} onPress={() => updateDraft('tacticType', item.value)} style={[styles.selectorChip, draft.tacticType === item.value && styles.selectorChipActive, { backgroundColor: draft.tacticType === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.tacticType === item.value ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={draft.tacticType === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView><TextInput value={draft.effect} onChangeText={(value) => updateDraft('effect', value)} multiline placeholder="输入战术效果" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>持续回合</ThemedText><TextInput value={String(draft.duration ?? 0)} onChangeText={(value) => updateDraft('duration', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View></View>}
 
-                {formData.type === 'BUILDING' && (
-                  <>
-                    <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                      建筑属性
-                    </ThemedText>
-                    {renderSelector('建筑类型', BUILDING_TYPES, selectedBuildingType, setSelectedBuildingType)}
-                    {renderInput('耐久度', 'durability', 'numeric')}
-                  </>
-                )}
+                {draft.type === CardType.BUILDING && <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>建筑属性</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{BUILDING_TYPES.map((item) => <Pressable key={item.value} onPress={() => updateDraft('buildingType', item.value)} style={[styles.selectorChip, draft.buildingType === item.value && styles.selectorChipActive, { backgroundColor: draft.buildingType === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.buildingType === item.value ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={draft.buildingType === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>耐久</ThemedText><TextInput value={String(draft.durability ?? 0)} onChangeText={(value) => updateDraft('durability', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View><TextInput value={draft.effect} onChangeText={(value) => updateDraft('effect', value)} multiline placeholder="输入建筑效果" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>}
 
-                {formData.type === 'TACTIC' && (
-                  <>
-                    <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                      战术属性
-                    </ThemedText>
-                    {renderSelector('战术类型', TACTIC_TYPES, selectedTacticType, setSelectedTacticType)}
-                  </>
-                )}
-
-                {/* 效果编辑器 */}
-                {(formData.type === 'UNIT' || formData.type === 'BUILDING' || formData.type === 'TACTIC') && (
-                  <>
-                    <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-                      能力效果
-                    </ThemedText>
-                    <View style={styles.effectsList}>
-                      {effects.map((effect, index) => (
-                        <View key={index} style={styles.effectItem}>
-                          <TextInput
-                            style={[styles.input, styles.effectInput, { backgroundColor: theme.backgroundTertiary, color: theme.textPrimary }]}
-                            value={effect}
-                            onChangeText={(text) => handleUpdateEffect(index, text)}
-                            placeholder="输入效果描述"
-                          />
-                          <TouchableOpacity
-                            style={styles.effectRemoveButton}
-                            onPress={() => handleRemoveEffect(index)}
-                          >
-                            <FontAwesome6 name="trash" size={16} color={theme.error} />
-                          </TouchableOpacity>
-                        </View>
-                      ))}
-                      <TouchableOpacity
-                        style={[styles.effectAddButton, { backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]}
-                        onPress={handleAddEffect}
-                      >
-                        <FontAwesome6 name="plus" size={14} color={theme.textMuted} />
-                        <ThemedText variant="small" color={theme.textMuted}>
-                          添加效果
-                        </ThemedText>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
+                <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>备注</ThemedText><TextInput value={draft.notes} onChangeText={(value) => updateDraft('notes', value)} multiline placeholder="编辑器备注，不会影响对局" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>
               </ScrollView>
-
-              {/* Footer */}
-              <View style={styles.modalFooter}>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.cancelButton]}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <ThemedText variant="bodyMedium" color={theme.textMuted}>
-                    取消
-                  </ThemedText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.modalButton, styles.saveButton, { backgroundColor: theme.primary }]}
-                  onPress={handleSaveCard}
-                >
-                  <ThemedText variant="bodyMedium" color="#FFFFFF">
-                    {editingCard ? '保存' : '创建'}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
+              <View style={styles.modalFooter}><Pressable onPress={() => setEditorVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={saveCard} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="floppy-disk" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText></Pressable></View>
+            </Pressable>
+          </Pressable>
         </KeyboardAvoidingView>
-      </TouchableWithoutFeedback>
+      </Modal>
+
+      <Modal visible={importVisible} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setImportVisible(false)}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>导入 JSON</ThemedText><ThemedText variant="small" color={theme.textMuted}>支持数组，或者包含 cards 字段的对象。</ThemedText></View><Pressable onPress={() => setImportVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
+              <ScrollView contentContainerStyle={styles.modalContent}><TextInput value={importText} onChangeText={setImportText} multiline placeholder="把 JSON 粘贴到这里" placeholderTextColor={theme.textMuted} style={[styles.longInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></ScrollView>
+              <View style={styles.modalFooter}><Pressable onPress={() => setImportVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={() => performImport(false)} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><ThemedText variant="smallMedium" color="#FFFFFF">仅导入本地</ThemedText></Pressable><Pressable onPress={() => performImport(true)} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.success }]}><ThemedText variant="smallMedium" color="#FFFFFF">导入并同步</ThemedText></Pressable></View>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={exportVisible} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setExportVisible(false)}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>导出 JSON</ThemedText><ThemedText variant="small" color={theme.textMuted}>复制后可以直接保存，或者发给其他人导入。</ThemedText></View><Pressable onPress={() => setExportVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
+              <ScrollView contentContainerStyle={styles.modalContent}><TextInput value={exportJson} editable={false} multiline style={[styles.longInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></ScrollView>
+              <View style={styles.modalFooter}><Pressable onPress={async () => { if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { await navigator.clipboard.writeText(exportJson); } else { await Share.share({ message: exportJson }); } Alert.alert('已复制', '卡牌 JSON 已经复制到剪贴板。'); }} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="copy" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">复制</ThemedText></Pressable><Pressable onPress={() => setExportVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>关闭</ThemedText></Pressable></View>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </Screen>
   );
