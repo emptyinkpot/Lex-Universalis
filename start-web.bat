@@ -22,4 +22,4 @@ if not exist "client\node_modules" (
 )
 
 echo Starting Expo web preview...
-corepack pnpm --dir client start
+corepack pnpm --dir client exec expo start --web --clear --port 8082
