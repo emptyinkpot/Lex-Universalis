@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
@@ -11,7 +11,12 @@ import { KardsCard } from '@/components/KardsCard';
 import { UIIcon } from '@/components/UIIcon';
 import { INITIAL_CARDS, AnyCard } from '@/types/game';
 import { useScreenShake } from '@/utils/cardEffects';
-import { BattleFeedbackLayer, type BattleFeedbackEvent } from '@/components/BattleFeedbackLayer';
+import {
+  BattleFeedbackLayer,
+  type BattleFeedbackEvent,
+} from '@/components/BattleFeedbackLayer';
+import { BattleDamageOverlay, type DamageEvent } from '@/components/BattleDamageOverlay';
+import { BattleSwipeZone } from '@/components/BattleSwipeZone';
 import { createStyles } from './styles';
 
 type BattleLogEntry = {
@@ -20,6 +25,8 @@ type BattleLogEntry = {
   detail: string;
   accent: string;
 };
+
+type BattleFocus = 'enemy-line' | 'player-line';
 
 const battleRules = [
   { label: '阶段', value: '声明 → 施行 → 结束' },
@@ -34,10 +41,13 @@ export default function BattleScreen() {
   const router = useSafeRouter();
   const { shake, animatedStyle: shakeStyle } = useScreenShake();
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const damageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [battleFocus, setBattleFocus] = useState<BattleFocus>('enemy-line');
   const [feedbackEvent, setFeedbackEvent] = useState<BattleFeedbackEvent | null>(null);
+  const [damageEvent, setDamageEvent] = useState<DamageEvent | null>(null);
   const [battleLog, setBattleLog] = useState<BattleLogEntry[]>([
     {
       id: 'rule-1',
@@ -47,21 +57,27 @@ export default function BattleScreen() {
     },
   ]);
 
-  const hand = useMemo(() => INITIAL_CARDS.slice(0, 5), []);
-  const playerGold = 6;
-  const playerInfluence = 3;
-  const enemyGold = 5;
-  const enemyInfluence = 2;
-  const playerHealth = 30;
-  const enemyHealth = 28;
+  const [playerHealth, setPlayerHealth] = useState(30);
+  const [enemyHealth, setEnemyHealth] = useState(28);
+  const [playerGold] = useState(6);
+  const [playerInfluence] = useState(3);
+  const [enemyGold] = useState(5);
+  const [enemyInfluence] = useState(2);
   const currentTurn = 3;
   const isPlayerTurn = true;
+  const hand = useMemo(() => INITIAL_CARDS.slice(0, 5), []);
 
-  useEffect(() => () => {
-    if (feedbackTimerRef.current) {
-      clearTimeout(feedbackTimerRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (feedbackTimerRef.current) {
+        clearTimeout(feedbackTimerRef.current);
+      }
+      if (damageTimerRef.current) {
+        clearTimeout(damageTimerRef.current);
+      }
+    },
+    []
+  );
 
   const triggerScreenShake = () => {
     shake(8, 300);
@@ -83,35 +99,130 @@ export default function BattleScreen() {
     }, nextEvent.duration + 160);
   };
 
-  const appendLog = (entry: BattleLogEntry) => {
-    setBattleLog((current) => [entry, ...current].slice(0, 3));
+  const emitDamage = (event: Omit<DamageEvent, 'id'>) => {
+    if (damageTimerRef.current) {
+      clearTimeout(damageTimerRef.current);
+    }
+
+    const nextEvent: DamageEvent = {
+      ...event,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    };
+
+    setDamageEvent(nextEvent);
+    damageTimerRef.current = setTimeout(() => {
+      setDamageEvent(null);
+    }, 900);
   };
 
-  const handleCardPress = (card: AnyCard) => {
+  const appendLog = (entry: BattleLogEntry) => {
+    setBattleLog((current) => [entry, ...current].slice(0, 4));
+  };
+
+  const resolveCardHit = (card: AnyCard, origin: 'tap' | 'swipe') => {
     const accent = card.faction === 'FRANCE'
       ? '#002FA7'
       : card.faction === 'ENGLAND'
         ? '#C8102E'
         : '#C9A96E';
+    const damage = origin === 'swipe' ? 3 : 2;
 
     setSelectedCard(card);
+    setBattleFocus('enemy-line');
+    setEnemyHealth((current) => Math.max(0, current - damage));
     triggerScreenShake();
+
     emitFeedback({
       kind: 'attack',
-      title: `${card.name} 触发基础反馈`,
+      title: `${card.name} 触发命中反馈`,
       detail: '命中闪光、冲击波和屏幕抖动会在这里统一播放。',
       accent,
       side: 'player',
       duration: 780,
     });
+    emitDamage({
+      amount: damage,
+      kind: 'damage',
+      x: 220,
+      y: 210,
+      accent,
+    });
     appendLog({
       id: `${card.id}-${Date.now()}`,
-      title: '基础攻击',
-      detail: `${card.name} 已进入施行阶段。`,
+      title: origin === 'swipe' ? '滑动出牌' : '基础攻击',
+      detail: `${card.name} 对敌方造成 ${damage} 点伤害。`,
       accent,
     });
 
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const handleBattleSwipe = (direction: 'up' | 'down' | 'left' | 'right') => {
+    if (direction === 'left' || direction === 'right') {
+      const nextFocus: BattleFocus =
+        battleFocus === 'enemy-line' ? 'player-line' : 'enemy-line';
+      setBattleFocus(nextFocus);
+      emitFeedback({
+        kind: 'turn',
+        title: '切换视角',
+        detail: nextFocus === 'enemy-line' ? '当前聚焦敌方前排。' : '当前聚焦己方前排。',
+        accent: '#C9A96E',
+        side: nextFocus === 'enemy-line' ? 'enemy' : 'player',
+        duration: 500,
+      });
+      appendLog({
+        id: `focus-${Date.now()}`,
+        title: '滑动切换',
+        detail: nextFocus === 'enemy-line' ? '战场视角切回敌方阵线。' : '战场视角切回己方阵线。',
+        accent: '#C9A96E',
+      });
+      void Haptics.selectionAsync();
+      return;
+    }
+
+    if (direction === 'up' && selectedCard) {
+      resolveCardHit(selectedCard, 'swipe');
+      return;
+    }
+
+    if (direction === 'down') {
+      setSelectedCard(null);
+      emitFeedback({
+        kind: 'counter',
+        title: '取消选择',
+        detail: '向下滑动用于撤销当前卡牌锁定。',
+        accent: '#6B7280',
+        side: 'player',
+        duration: 420,
+      });
+      appendLog({
+        id: `cancel-${Date.now()}`,
+        title: '取消锁定',
+        detail: '已退出当前卡牌的锁定状态。',
+        accent: '#6B7280',
+      });
+      void Haptics.selectionAsync();
+    }
+  };
+
+  const handleCardPress = (card: AnyCard) => {
+    setSelectedCard(card);
+    setBattleFocus('enemy-line');
+    emitFeedback({
+      kind: 'attack',
+      title: `${card.name} 已锁定`,
+      detail: '上滑可试作出牌雏形，下滑可取消，左右滑可切换视角。',
+      accent: '#C9A96E',
+      side: 'player',
+      duration: 640,
+    });
+    appendLog({
+      id: `${card.id}-${Date.now()}`,
+      title: '卡牌锁定',
+      detail: `${card.name} 已进入待出牌状态。`,
+      accent: '#C9A96E',
+    });
+    void Haptics.selectionAsync();
   };
 
   const handleEndTurn = () => {
@@ -130,7 +241,6 @@ export default function BattleScreen() {
       detail: '你结束了当前回合，等待对手行动。',
       accent: '#C9A96E',
     });
-
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
@@ -159,6 +269,7 @@ export default function BattleScreen() {
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
       <View style={styles.container}>
         <BattleFeedbackLayer event={feedbackEvent} />
+        <BattleDamageOverlay event={damageEvent} />
 
         <View style={styles.enemyInfoBar}>
           <View style={styles.enemyNameSection}>
@@ -204,27 +315,46 @@ export default function BattleScreen() {
           ))}
         </View>
 
-        <Animated.View style={[shakeStyle, styles.battlefield]}>
-          <View style={styles.battlefieldZone}>
-            <View style={styles.zoneRow}>
-              {[1, 2, 3].map((_, index) => (
-                <View key={index} style={styles.zoneSlot} />
-              ))}
+        <BattleSwipeZone onSwipe={handleBattleSwipe}>
+          <Animated.View style={[shakeStyle, styles.battlefield]}>
+            <View style={styles.battlefieldTopRow}>
+              <ThemedText variant="caption" color={theme.textMuted} style={styles.battlefieldLabel}>
+                {battleFocus === 'enemy-line' ? '当前聚焦：敌方前排' : '当前聚焦：己方前排'}
+              </ThemedText>
+              <View style={styles.swipeHintRow}>
+                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+                  左右切换视角
+                </ThemedText>
+                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+                  上滑出牌
+                </ThemedText>
+                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+                  下滑取消
+                </ThemedText>
+              </View>
             </View>
-          </View>
 
-          <View style={styles.divider} />
-
-          <View style={styles.battlefieldZone}>
-            <View style={styles.zoneRow}>
-              {[1, 2, 3].map((_, index) => (
-                <TouchableOpacity key={index} style={styles.zoneSlotEmpty} activeOpacity={0.5}>
-                  <FontAwesome6 name="plus" size={14} color={theme.textMuted} />
-                </TouchableOpacity>
-              ))}
+            <View style={styles.battlefieldZone}>
+              <View style={styles.zoneRow}>
+                {[1, 2, 3].map((_, index) => (
+                  <View key={index} style={styles.zoneSlot} />
+                ))}
+              </View>
             </View>
-          </View>
-        </Animated.View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.battlefieldZone}>
+              <View style={styles.zoneRow}>
+                {[1, 2, 3].map((_, index) => (
+                  <TouchableOpacity key={index} style={styles.zoneSlotEmpty} activeOpacity={0.5}>
+                    <FontAwesome6 name="plus" size={14} color={theme.textMuted} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </Animated.View>
+        </BattleSwipeZone>
 
         <View style={styles.logPanel}>
           {battleLog.map((entry) => (

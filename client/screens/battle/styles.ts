@@ -81,6 +81,26 @@ export const createStyles = (theme: Theme) =>
       padding: Spacing.md,
       justifyContent: 'center',
       minHeight: 180,
+      gap: Spacing.sm,
+    },
+    battlefieldTopRow: {
+      gap: Spacing.xs,
+    },
+    battlefieldLabel: {
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
+    swipeHintRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.xs,
+    },
+    swipeHint: {
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 4,
+      borderRadius: BorderRadius.full,
+      backgroundColor: theme.backgroundTertiary,
+      overflow: 'hidden',
     },
     battlefieldZone: {
       justifyContent: 'center',
