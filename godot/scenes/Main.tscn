@@ -79,6 +79,11 @@ theme_override_font_sizes/font_size = 16
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="HomeTab" type="Control" parent="Margin/Root/Modes"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="StoryTab" type="Control" parent="Margin/Root/Modes"]
 layout_mode = 2
 size_flags_horizontal = 3

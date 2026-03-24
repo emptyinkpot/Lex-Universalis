@@ -4,11 +4,13 @@ const STORY_SCENE := preload("res://scenes/story/StoryModeScene.tscn")
 const BATTLE_SCENE := preload("res://scenes/battle/BattleScene.tscn")
 const CARD_SCENE := preload("res://scenes/cards/CardGalleryScene.tscn")
 const RESULT_SCENE := preload("res://scenes/results/BattleResultScene.tscn")
+const HOME_SCENE := preload("res://scenes/home/HomeScene.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 @onready var top_stats: Label = get_node("Margin/Root/TopBar/TopBarPadding/TopBarRow/TopStats")
 @onready var tab_container: TabContainer = get_node("Margin/Root/Modes")
 var data_loader: RefCounted
+var home_view: Control
 var story_view: Control
 var battle_view: Control
 var card_view: Control
@@ -21,10 +23,13 @@ func _ready() -> void:
 	theme = ui_theme
 	top_stats.add_theme_color_override("font_color", Color("f1e2bf"))
 	_render_stats()
+	home_view = _mount_scene("HomeTab", HOME_SCENE)
 	story_view = _mount_scene("StoryTab", STORY_SCENE)
 	battle_view = _mount_scene("BattleTab", BATTLE_SCENE)
 	card_view = _mount_scene("CardsTab", CARD_SCENE)
 	result_view = _mount_scene("ResultsTab", RESULT_SCENE)
+	if home_view.has_signal("open_page"):
+		home_view.open_page.connect(_on_home_open_page)
 	if story_view.has_signal("launch_level"):
 		story_view.launch_level.connect(_on_story_launch_level)
 	if battle_view.has_signal("battle_finished"):
@@ -70,9 +75,22 @@ func _on_battle_finished(result_data: Dictionary) -> void:
 		result_view.setup_result(result_data)
 
 func _on_return_to_story() -> void:
-	tab_container.current_tab = 0
+	tab_container.current_tab = 1
 	if story_view.has_method("refresh_progress"):
 		story_view.refresh_progress()
+
+func _on_home_open_page(page_id: String) -> void:
+	match page_id:
+		"story":
+			tab_container.current_tab = 1
+		"battle":
+			tab_container.current_tab = 2
+		"cards":
+			tab_container.current_tab = 3
+		"results":
+			tab_container.current_tab = 4
+		_:
+			tab_container.current_tab = 0
 
 func _build_desktop_theme() -> Theme:
 	var theme := Theme.new()
