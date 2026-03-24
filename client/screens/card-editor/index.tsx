@@ -369,10 +369,9 @@ export default function CardEditorScreen() {
   const loadCards = async () => {
     setLoading(true);
     try {
-      const [response, cached, moonFlag] = await Promise.all([
+      const [response, cached] = await Promise.all([
         fetch(`${API_BASE_URL}/api/v1/cards`),
         AsyncStorage.getItem(STORAGE_KEY),
-        AsyncStorage.getItem(MOON_DRAFT_STORAGE_KEY),
       ]);
       const cachedCards = cached ? (JSON.parse(cached) as EditorCard[]) : [];
       const cachedMap = new Map(cachedCards.map((item: EditorCard) => [item.id, item]));
@@ -382,16 +381,8 @@ export default function CardEditorScreen() {
       const merged = remoteCards.map((item: any) => normalizeApiCard(item, cachedMap.get(String(item.id))));
       const remoteIds = new Set(merged.map((item: any) => item.id));
       const extras = cachedCards.filter((item: EditorCard) => !remoteIds.has(item.id));
-      let next = [...merged, ...extras];
-      const hasMoonDrafts = next.some((item) => isMoonDraftId(item.id));
-      if (hasMoonDrafts) {
-        if (moonFlag !== 'true') {
-          await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
-        }
-      } else if (moonFlag !== 'true') {
-        next = mergeMoonDraftsIntoCards(next);
-        await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
-      }
+      const next = mergeMoonDraftsIntoCards([...merged, ...extras]);
+      await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
       setCards(next);
       const preferred = next.find((item) => isMoonDraftId(item.id)) ?? next[0] ?? null;
       setSelectedId(preferred?.id ?? null);
@@ -401,17 +392,8 @@ export default function CardEditorScreen() {
       const cached = await AsyncStorage.getItem(STORAGE_KEY);
       if (cached) {
         const cachedCards = JSON.parse(cached) as EditorCard[];
-        const cachedMoonFlag = await AsyncStorage.getItem(MOON_DRAFT_STORAGE_KEY);
-        let next = cachedCards;
-        const hasMoonDrafts = next.some((item) => isMoonDraftId(item.id));
-        if (hasMoonDrafts) {
-          if (cachedMoonFlag !== 'true') {
-            await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
-          }
-        } else if (cachedMoonFlag !== 'true') {
-          next = mergeMoonDraftsIntoCards(next);
-          await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
-        }
+        const next = mergeMoonDraftsIntoCards(cachedCards);
+        await AsyncStorage.setItem(MOON_DRAFT_STORAGE_KEY, 'true');
         setCards(next);
         const preferred = next.find((item) => isMoonDraftId(item.id)) ?? next[0] ?? null;
         setSelectedId(preferred?.id ?? null);
