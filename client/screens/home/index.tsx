@@ -7,15 +7,23 @@ import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { createStyles } from './styles';
 
+type MenuItem = {
+  title: string;
+  subtitle: string;
+  icon: string;
+  iconColor: string;
+  route: string;
+};
+
 export default function HomeScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
-      title: '战役模式',
-      subtitle: '单人 Roguelike 冒险',
+      title: '故事模式',
+      subtitle: '单剧本剧情与战斗',
       icon: 'scroll',
       iconColor: '#C9A96E',
       route: '/campaign',
@@ -66,10 +74,7 @@ export default function HomeScreen() {
 
   return (
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.heroSection}>
           <ThemedText variant="caption" color="#C9A96E" style={styles.heroSubtitle}>
             Lex Universalis
@@ -89,11 +94,7 @@ export default function HomeScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <FontAwesome6
-                  name={item.icon as any}
-                  size={32}
-                  color={item.iconColor}
-                />
+                <FontAwesome6 name={item.icon as any} size={32} color={item.iconColor} />
               </View>
               <View style={styles.menuTextContainer}>
                 <ThemedText variant="h3" color={theme.textPrimary}>
@@ -103,18 +104,14 @@ export default function HomeScreen() {
                   {item.subtitle}
                 </ThemedText>
               </View>
-              <FontAwesome6
-                name="chevron-right"
-                size={20}
-                color={theme.textMuted}
-              />
+              <FontAwesome6 name="chevron-right" size={20} color={theme.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
 
         <View style={styles.footer}>
           <ThemedText variant="caption" color={theme.textMuted} style={styles.footerText}>
-            v1.0.0 | Lex Universalis | 规则与设定已入 UI
+            v1.0.0 | Lex Universalis | 规则与设定已接入 UI
           </ThemedText>
         </View>
       </ScrollView>

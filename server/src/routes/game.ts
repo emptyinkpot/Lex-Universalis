@@ -1,6 +1,6 @@
 ﻿import express from 'express';
 import { INITIAL_CARDS } from '../data/cards';
-import { CAMPAIGN_CHAPTERS, CAMPAIGN_SCENARIOS, getChapterById, getLevelById, getScenarioById, getChaptersByScenario } from '../data/campaign';
+import { CAMPAIGN_CHAPTERS, CAMPAIGN_LEVELS, CAMPAIGN_SCENARIOS, getChapterById, getLevelById, getScenarioById, getChaptersByScenario } from '../data/campaign';
 import { MOON_CARDS } from '../data/moon-cards.generated';
 import type { Ability, Card, Position } from '../types/game';
 import { Faction, CardType, GamePhase, ActionType } from '../types/game';
@@ -68,6 +68,21 @@ interface PlayerAction {
 }
 
 const router = express.Router();
+
+function createDefaultCampaignProgress(userId: string) {
+  const firstChapter = CAMPAIGN_CHAPTERS[0];
+  const firstLevel = CAMPAIGN_LEVELS[0];
+
+  return {
+    userId,
+    currentChapter: firstChapter?.id ?? '',
+    currentLevel: firstLevel?.id ?? '',
+    completedLevels: [],
+    totalStars: 0,
+    unlockedChapters: firstChapter ? [firstChapter.id] : [],
+    lastPlayedAt: Date.now(),
+  };
+}
 
 type ApiCard = {
   id: string;
@@ -789,7 +804,7 @@ router.post('/battle/:gameId/action', (req, res) => {
   }
 });
 
-// ===== 战役模式相关接口 =====
+// ===== 故事模式相关接口 =====
 
 // 存储玩家战役进度（实际应用中应该使用数据库）
 const campaignProgresses = new Map<string, any>();
@@ -874,7 +889,7 @@ router.get('/campaign/levels/:levelId', (req, res) => {
 
 /**
  * GET /api/v1/campaign/progress/:userId
- * 获取玩家战役进度
+ * 获取玩家故事进度
  */
 router.get('/campaign/progress/:userId', (req, res) => {
   try {
@@ -883,15 +898,7 @@ router.get('/campaign/progress/:userId', (req, res) => {
 
     // 如果没有进度记录，创建初始进度
     if (!progress) {
-      progress = {
-        userId,
-        currentChapter: 'chapter_1',
-        currentLevel: 'level_1_1',
-        completedLevels: [],
-        totalStars: 0,
-        unlockedChapters: ['chapter_1'],
-        lastPlayedAt: Date.now(),
-      };
+      progress = createDefaultCampaignProgress(userId);
       campaignProgresses.set(userId, progress);
     }
 
@@ -900,17 +907,17 @@ router.get('/campaign/progress/:userId', (req, res) => {
       data: progress,
     });
   } catch (error) {
-    console.error('获取战役进度失败:', error);
+    console.error('获取故事进度失败:', error);
     res.status(500).json({
       success: false,
-      error: '获取战役进度失败',
+      error: '获取故事进度失败',
     });
   }
 });
 
 /**
  * POST /api/v1/campaign/progress/:userId
- * 更新玩家战役进度
+ * 更新玩家故事进度
  */
 router.post('/campaign/progress/:userId', (req, res) => {
   try {
@@ -928,15 +935,7 @@ router.post('/campaign/progress/:userId', (req, res) => {
 
     // 如果没有进度记录，创建初始进度
     if (!progress) {
-      progress = {
-        userId,
-        currentChapter: 'chapter_1',
-        currentLevel: 'level_1_1',
-        completedLevels: [],
-        totalStars: 0,
-        unlockedChapters: ['chapter_1'],
-        lastPlayedAt: Date.now(),
-      };
+      progress = createDefaultCampaignProgress(userId);
       campaignProgresses.set(userId, progress);
     }
 
@@ -1013,10 +1012,10 @@ router.post('/campaign/progress/:userId', (req, res) => {
       data: progress,
     });
   } catch (error) {
-    console.error('更新战役进度失败:', error);
+    console.error('更新故事进度失败:', error);
     res.status(500).json({
       success: false,
-      error: '更新战役进度失败',
+      error: '更新故事进度失败',
     });
   }
 });

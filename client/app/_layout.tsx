@@ -25,9 +25,9 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="index" options={{ title: '' }} />
-            <Stack.Screen name="campaign" options={{ title: '战役模式' }} />
+            <Stack.Screen name="campaign" options={{ title: '故事模式' }} />
             <Stack.Screen name="scenario-detail" options={{ title: '剧本详情' }} />
-            <Stack.Screen name="campaign-detail" options={{ title: '关卡详情' }} />
+            <Stack.Screen name="campaign-detail" options={{ title: '章节详情' }} />
             <Stack.Screen name="deck-builder" options={{ title: '卡组编辑' }} />
             <Stack.Screen name="battle" options={{ title: '战斗' }} />
             <Stack.Screen name="theme-settings" options={{ title: '主题设置' }} />
