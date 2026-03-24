@@ -1,26 +1,30 @@
 # Lex Universalis
 
-Monorepo for the `Lex Universalis` game project.
+`Lex Universalis` is now a Godot desktop game project.
 
-## Structure
+The old Expo/Web client and Node backend have been retired from the mainline repository. The active runtime is:
 
-- `client/` - Expo app and UI
-- `server/` - Express API and game data
-- `docs/` - design notes, reference material, and archived game docs
-- `config/` - runtime and theme configuration
-- `scripts/` - helper scripts
+- [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot)
 
-## Common commands
+## Active Structure
 
-```bash
-pnpm i
-pnpm dev
-pnpm build
-pnpm start
-```
+- `godot/` - Godot 4 desktop game project
+- `docs/` - design notes, rules, worldbuilding, and migration records
+- `config/` - retained project configuration and reference data
+- `scripts/` - small helper scripts that are not part of the retired Web runtime
+
+## Run
+
+Double-click:
+
+- [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
+
+Validate the Godot project headlessly:
+
+- [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)
 
 ## Documentation
 
-- Game design archive: [`docs/game-design/moon/README.md`](docs/game-design/moon/README.md)
-- Reference notes: [`docs/reference/README.md`](docs/reference/README.md)
-- Rule and setting UI: `client/screens/lore-library`
+- Active Godot workspace notes: [`E:\Lex Universalis\godot\README.md`](/E:/Lex%20Universalis/godot/README.md)
+- Game design archive: [`E:\Lex Universalis\docs\game-design\moon\README.md`](/E:/Lex%20Universalis/docs/game-design/moon/README.md)
+- Reference notes: [`E:\Lex Universalis\docs\reference\README.md`](/E:/Lex%20Universalis/docs/reference/README.md)

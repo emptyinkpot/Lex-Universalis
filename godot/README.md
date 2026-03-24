@@ -1,27 +1,35 @@
 # Lex Universalis Godot Project
 
-This directory is the desktop-game migration target.
+This directory is now the active desktop game project.
 
 ## Current Scope
 
 - Fixed desktop viewport baseline
 - Data-driven bootstrap from JSON exports
-- Main shell scene for story/card/battle migration
-
-## Data Source
-
-Generated JSON lives in:
-
-- [`E:\Lex Universalis\godot\data\generated`](/E:/Lex%20Universalis/godot/data/generated)
-
-Refresh it with:
-
-```powershell
-corepack pnpm --dir client exec tsx ..\scripts\export-godot-data.ts
-```
+- Main shell scene for story/card/battle flow
+- Story mode, battle, result screen, and persistent story progress
+- Player-side unit deployment, orders, and enemy turn resolution
 
 ## Open In Godot
 
-Open [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot) in Godot 4.x.
+Open [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot) in Godot 4.6.x.
 
-The first target is a true desktop single-viewport layout, not a scroll-page UI.
+Or use:
+
+- [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
+
+To validate the project without opening the editor:
+
+- [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)
+
+## Data
+
+Generated runtime data lives in:
+
+- [`E:\Lex Universalis\godot\data\generated`](/E:/Lex%20Universalis/godot/data/generated)
+
+Story progress is written at runtime to:
+
+- `user://story-progress.save.json`
+
+The project target remains a true desktop single-viewport layout, not a scroll-page UI.
