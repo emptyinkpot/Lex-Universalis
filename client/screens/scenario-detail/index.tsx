@@ -1,15 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, View } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useSafeRouter, useSafeSearchParams } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { FactionIcon } from '@/components/FactionIcon';
 import { createStyles } from './styles';
 
-// 剧本接口
 interface Scenario {
   id: string;
   name: string;
@@ -19,7 +16,6 @@ interface Scenario {
   historicalBackground: string;
 }
 
-// 章节接口
 interface Chapter {
   id: string;
   name: string;
@@ -29,7 +25,6 @@ interface Chapter {
   order: number;
 }
 
-// 关卡接口
 interface Level {
   id: string;
   chapterId: string;
@@ -38,32 +33,17 @@ interface Level {
   difficulty: string;
   storyText: string;
   enemyFaction: string;
-  rewards: any[];
+  rewards: Array<{ description: string }>;
   victoryCondition: string;
   defeatCondition: string;
   order: number;
 }
 
-// 战役进度接口
-interface CampaignProgress {
-  completedLevels: any[];
-}
-
-// 难度配置
-const DIFFICULTY_CONFIG = {
-  NORMAL: {
-    color: '#10B981', // 绿色
-    label: '普通',
-  },
-  HARD: {
-    color: '#F59E0B', // 橙色
-    label: '困难',
-  },
-  EXPERT: {
-    color: '#EF4444', // 红色
-    label: '专家',
-  },
-};
+const storySteps = [
+  { title: '战火起始', copy: '这不是完整战役树，而是一个可以直接试玩的展示剧情。', icon: 'fire-flame-curved' },
+  { title: '章节陈述', copy: '你会先看到章节开场，再进入一场最小可玩的样板战斗。', icon: 'book-open' },
+  { title: '进入战斗', copy: '这一跳转直接复用你项目现有战斗页，用来展示剧情与战斗串联。', icon: 'swords' },
+] as const;
 
 export default function ScenarioDetailScreen() {
   const { theme } = useTheme();
@@ -73,92 +53,44 @@ export default function ScenarioDetailScreen() {
 
   const [loading, setLoading] = useState(true);
   const [scenario, setScenario] = useState<Scenario | null>(null);
-  const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [progress, setProgress] = useState<CampaignProgress | null>(null);
+  const [chapter, setChapter] = useState<Chapter | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const [showStoryModal, setShowStoryModal] = useState(false);
 
   useEffect(() => {
-    if (scenarioId) {
-      loadData();
-    }
+    if (!scenarioId) return;
+    void loadData();
   }, [scenarioId]);
 
   const loadData = async () => {
     try {
       setLoading(true);
+      const [scenarioRes, chaptersRes] = await Promise.all([
+        fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/campaign/scenarios/${scenarioId}`),
+        fetch(`${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/campaign/scenarios/${scenarioId}/chapters`),
+      ]);
 
-      // 获取剧本详情
-      const scenarioRes = await fetch(
-        `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/campaign/scenarios/${scenarioId}`
-      );
       const scenarioData = await scenarioRes.json();
+      const chaptersData = await chaptersRes.json();
 
       if (scenarioData.success) {
         setScenario(scenarioData.data);
       }
-
-      // 获取剧本下的章节
-      const chaptersRes = await fetch(
-        `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/campaign/scenarios/${scenarioId}/chapters`
-      );
-      const chaptersData = await chaptersRes.json();
-
       if (chaptersData.success) {
-        setChapters(chaptersData.data);
-      }
-
-      // 获取玩家进度
-      const userId = 'user_default';
-      const progressRes = await fetch(
-        `${process.env.EXPO_PUBLIC_BACKEND_BASE_URL}/api/v1/campaign/progress/${userId}`
-      );
-      const progressData = await progressRes.json();
-
-      if (progressData.success) {
-        setProgress(progressData.data);
+        const firstChapter = Array.isArray(chaptersData.data) ? chaptersData.data[0] ?? null : null;
+        setChapter(firstChapter);
+        setSelectedLevel(firstChapter?.levels?.[0] ?? null);
       }
     } catch (error) {
-      console.error('加载剧本数据失败:', error);
+      console.error('加载剧本详情失败:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const isLevelCompleted = (levelId: string) => {
-    return progress?.completedLevels?.some((cl: any) => cl.levelId === levelId) || false;
-  };
-
-  const getLevelStars = (levelId: string) => {
-    const completedLevel = progress?.completedLevels?.find((cl: any) => cl.levelId === levelId);
-    return completedLevel?.stars || 0;
-  };
-
-  const isLevelUnlocked = (level: Level, chapterLevels: Level[]) => {
-    // 第一关总是解锁
-    if (level.order === 1) return true;
-
-    // 检查前一关是否完成
-    const prevLevel = chapterLevels.find((l) => l.order === level.order - 1);
-    if (prevLevel) {
-      return isLevelCompleted(prevLevel.id);
-    }
-
-    return false;
-  };
-
-  const handleLevelPress = (level: Level, chapterLevels: Level[]) => {
-    if (!isLevelUnlocked(level, chapterLevels)) return;
-
-    setSelectedLevel(level);
-    setShowStoryModal(true);
-  };
-
   const handleStartBattle = () => {
     if (!selectedLevel) return;
-
     setShowStoryModal(false);
-    // 跳转到对战页面，传递关卡信息
     router.push('/battle', {
       levelId: selectedLevel.id,
       enemyFaction: selectedLevel.enemyFaction,
@@ -168,23 +100,23 @@ export default function ScenarioDetailScreen() {
 
   if (loading) {
     return (
-      <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
+      <Screen backgroundColor="#0a0706" statusBarStyle="light">
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.primary} />
-          <ThemedText variant="body" color={theme.textSecondary} style={styles.loadingText}>
-            加载中...
+          <ActivityIndicator size="large" color="#d7b26d" />
+          <ThemedText variant="body" color="#b8a284" style={styles.loadingText}>
+            正在整理剧本与章节...
           </ThemedText>
         </View>
       </Screen>
     );
   }
 
-  if (!scenario) {
+  if (!scenario || !chapter || !selectedLevel) {
     return (
-      <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
+      <Screen backgroundColor="#0a0706" statusBarStyle="light">
         <View style={styles.loadingContainer}>
-          <ThemedText variant="body" color={theme.textSecondary}>
-            剧本不存在
+          <ThemedText variant="body" color="#b8a284">
+            剧本数据不可用。
           </ThemedText>
         </View>
       </Screen>
@@ -192,269 +124,148 @@ export default function ScenarioDetailScreen() {
   }
 
   return (
-    <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* 标题区域 */}
+    <Screen backgroundColor="#0a0706" statusBarStyle="light">
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.headerSection}>
+          <View style={styles.headerOverlay} />
           <View style={styles.headerContainer}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-            >
-              <FontAwesome6 name="arrow-left" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            <Pressable onPress={() => router.back()} style={styles.backButton}>
+              <FontAwesome6 name="arrow-left" size={18} color="#f3e5c5" />
+            </Pressable>
             <View style={styles.headerTitleContainer}>
-              <ThemedText variant="caption" color="#C9A96E" style={styles.headerSubtitle}>
-                {scenario.year} - {scenario.era}
+              <ThemedText variant="caption" color="#d7b26d" style={styles.headerSubtitle}>
+                {scenario.year} / {scenario.era}
               </ThemedText>
-              <ThemedText variant="h2" color="#FFFFFF" style={styles.headerTitle}>
+              <ThemedText variant="h2" color="#f3e5c5" style={styles.headerTitle}>
                 {scenario.name}
               </ThemedText>
             </View>
           </View>
+          <ThemedText variant="small" color="#b39c7e" style={styles.headerCopy}>
+            {scenario.description}
+          </ThemedText>
         </View>
 
-        {/* 剧本介绍 */}
         <View style={styles.introSection}>
-          <ThemedView level="default" style={styles.introCard}>
+          <View style={styles.introCard}>
             <View style={styles.introHeader}>
-              <FontAwesome6 name="scroll" size={20} color="#C9A96E" />
-              <ThemedText variant="h3" color={theme.textPrimary}>
-                历史背景
+              <FontAwesome6 name="landmark" size={18} color="#d7b26d" />
+              <ThemedText variant="h3" color="#f3e5c5">
+                背景导读
               </ThemedText>
             </View>
-            <ThemedText variant="body" color={theme.textSecondary} style={styles.introText}>
+            <ThemedText variant="body" color="#cdbb9d" style={styles.introText}>
               {scenario.historicalBackground}
             </ThemedText>
-          </ThemedView>
+          </View>
         </View>
 
-        {/* 章节和关卡列表 */}
-        <View style={styles.chaptersSection}>
-          <ThemedText variant="h3" color={theme.textPrimary} style={styles.sectionTitle}>
-            章节列表
-          </ThemedText>
-          {chapters.map((chapter) => (
-            <View key={chapter.id} style={styles.chapterSection}>
-              <View style={styles.chapterHeader}>
-                <ThemedText variant="h4" color={theme.textPrimary}>
-                  {chapter.name}
-                </ThemedText>
-                <ThemedText variant="caption" color={theme.textMuted}>
-                  {chapter.levels.length} 关
-                </ThemedText>
+        <View style={styles.stepsSection}>
+          {storySteps.map((step) => (
+            <View key={step.title} style={styles.stepCard}>
+              <View style={styles.stepIcon}>
+                <FontAwesome6 name={step.icon as any} size={14} color="#d7b26d" />
               </View>
-
-              {/* 关卡列表 */}
-              <View style={styles.levelsList}>
-                {chapter.levels.map((level, index) => {
-                  const completed = isLevelCompleted(level.id);
-                  const unlocked = isLevelUnlocked(level, chapter.levels);
-                  const stars = getLevelStars(level.id);
-                  const difficultyConfig = DIFFICULTY_CONFIG[level.difficulty as keyof typeof DIFFICULTY_CONFIG];
-
-                  return (
-                    <TouchableOpacity
-                      key={level.id}
-                      style={[
-                        styles.levelCard,
-                        !unlocked && styles.levelCardLocked,
-                        completed && styles.levelCardCompleted,
-                      ]}
-                      onPress={() => handleLevelPress(level, chapter.levels)}
-                      activeOpacity={unlocked ? 0.7 : 1}
-                      disabled={!unlocked}
-                    >
-                      {/* 关卡序号 */}
-                      <View style={[
-                        styles.levelNumber,
-                        !unlocked && styles.levelNumberLocked,
-                        completed && styles.levelNumberCompleted,
-                      ]}>
-                        <ThemedText 
-                          variant="h3" 
-                          color={completed ? '#FFFFFF' : (unlocked ? theme.textPrimary : theme.textMuted)}
-                        >
-                          {index + 1}
-                        </ThemedText>
-                      </View>
-
-                      {/* 关卡内容 */}
-                      <View style={styles.levelContent}>
-                        <View style={styles.levelHeader}>
-                          <ThemedText 
-                            variant="h4" 
-                            color={unlocked ? theme.textPrimary : theme.textMuted}
-                            style={styles.levelName}
-                          >
-                            {level.name}
-                          </ThemedText>
-                          {!unlocked && (
-                            <FontAwesome6 
-                              name="lock" 
-                              size={14} 
-                              color={theme.textMuted} 
-                            />
-                          )}
-                        </View>
-
-                        <ThemedText 
-                          variant="caption" 
-                          color={theme.textSecondary} 
-                          style={styles.levelDescription}
-                          numberOfLines={2}
-                        >
-                          {level.description}
-                        </ThemedText>
-
-                        {/* 难度和星星 */}
-                        {unlocked && (
-                          <View style={styles.levelMeta}>
-                            <View style={styles.difficultyBadge}>
-                              <FontAwesome6 
-                                name="star" 
-                                size={12} 
-                                color={difficultyConfig?.color || theme.textMuted} 
-                              />
-                              <ThemedText 
-                                variant="caption" 
-                                color={difficultyConfig?.color || theme.textMuted}
-                                style={styles.difficultyText}
-                              >
-                                {difficultyConfig?.label || '普通'}
-                              </ThemedText>
-                            </View>
-
-                            {/* 敌人阵营 */}
-                            <View style={styles.factionBadge}>
-                              <FactionIcon faction={level.enemyFaction as any} size={20} />
-                            </View>
-
-                            {/* 星星 */}
-                            <View style={styles.starsContainer}>
-                              {[1, 2, 3].map((starIndex) => (
-                                <FontAwesome6
-                                  key={starIndex}
-                                  name="star"
-                                  size={14}
-                                  color={starIndex <= stars ? '#FFD700' : theme.border}
-                                />
-                              ))}
-                            </View>
-                          </View>
-                        )}
-                      </View>
-
-                      {/* 锁定遮罩 */}
-                      {!unlocked && <View style={styles.lockOverlay} />}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              <ThemedText variant="smallMedium" color="#f3e5c5">{step.title}</ThemedText>
+              <ThemedText variant="small" color="#ab9576" style={styles.stepCopy}>
+                {step.copy}
+              </ThemedText>
             </View>
           ))}
         </View>
-      </ScrollView>
 
-      {/* 剧情弹窗 */}
-      <Modal
-        visible={showStoryModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowStoryModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* 弹窗标题 */}
-            <View style={styles.modalHeader}>
-              <ThemedText variant="h3" color={theme.textPrimary}>
-                {selectedLevel?.name}
+        <View style={styles.chapterPanel}>
+          <View style={styles.chapterPanelHeader}>
+            <View>
+              <ThemedText variant="caption" color="#d7b26d" style={styles.chapterPanelLabel}>
+                chapter 01
               </ThemedText>
-              <TouchableOpacity onPress={() => setShowStoryModal(false)}>
-                <FontAwesome6 name="xmark" size={24} color={theme.textMuted} />
-              </TouchableOpacity>
+              <ThemedText variant="h3" color="#f3e5c5">
+                {chapter.name}
+              </ThemedText>
+            </View>
+            <View style={styles.chapterBadge}>
+              <ThemedText variant="tiny" color="#22150d">样板剧本</ThemedText>
+            </View>
+          </View>
+
+          <ThemedText variant="small" color="#b29c7e" style={styles.chapterPanelCopy}>
+            {chapter.storyIntro}
+          </ThemedText>
+
+          <View style={styles.levelCard}>
+            <View style={styles.levelHeader}>
+              <View>
+                <ThemedText variant="bodyMedium" color="#f3e5c5">{selectedLevel.name}</ThemedText>
+                <ThemedText variant="tiny" color="#967f61">{selectedLevel.difficulty}</ThemedText>
+              </View>
+              <View style={styles.enemyBadge}>
+                <FontAwesome6 name="flag" size={12} color="#d7b26d" />
+                <ThemedText variant="tiny" color="#d7b26d">{selectedLevel.enemyFaction}</ThemedText>
+              </View>
+            </View>
+            <ThemedText variant="small" color="#b8a283" style={styles.levelText}>
+              {selectedLevel.storyText}
+            </ThemedText>
+
+            <View style={styles.levelFactRow}>
+              <View style={styles.levelFact}>
+                <ThemedText variant="tiny" color="#8d775a">胜利条件</ThemedText>
+                <ThemedText variant="small" color="#eadcc0">{selectedLevel.victoryCondition}</ThemedText>
+              </View>
+              <View style={styles.levelFact}>
+                <ThemedText variant="tiny" color="#8d775a">失败条件</ThemedText>
+                <ThemedText variant="small" color="#eadcc0">{selectedLevel.defeatCondition}</ThemedText>
+              </View>
             </View>
 
-            {/* 剧情文本 */}
+            <View style={styles.levelActions}>
+              <Pressable style={styles.secondaryButton} onPress={() => setShowStoryModal(true)}>
+                <FontAwesome6 name="scroll" size={14} color="#f3e5c5" />
+                <ThemedText variant="smallMedium" color="#f3e5c5">查看战前文本</ThemedText>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={handleStartBattle}>
+                <FontAwesome6 name="swords" size={14} color="#22150d" />
+                <ThemedText variant="smallMedium" color="#22150d">开始展示战斗</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+
+      <Modal visible={showStoryModal} transparent animationType="fade" onRequestClose={() => setShowStoryModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <ThemedText variant="h3" color="#f3e5c5">
+                {selectedLevel.name}
+              </ThemedText>
+              <Pressable onPress={() => setShowStoryModal(false)} style={styles.modalClose}>
+                <FontAwesome6 name="xmark" size={18} color="#f3e5c5" />
+              </Pressable>
+            </View>
             <ScrollView style={styles.modalBody}>
-              <ThemedView level="tertiary" style={styles.storyCard}>
-                <View style={styles.storyIconContainer}>
-                  <FontAwesome6 name="book-open" size={24} color="#C9A96E" />
-                </View>
-                <ThemedText variant="body" color={theme.textPrimary} style={styles.storyText}>
-                  {selectedLevel?.storyText}
-                </ThemedText>
-              </ThemedView>
+              <ThemedText variant="body" color="#d4c2a2" style={styles.modalStoryText}>
+                {selectedLevel.storyText}
+              </ThemedText>
 
-              {/* 战斗条件 */}
-              <View style={styles.conditionsContainer}>
-                <ThemedView level="tertiary" style={styles.conditionCard}>
-                  <FontAwesome6 name="trophy" size={18} color="#10B981" />
-                  <View style={styles.conditionTextContainer}>
-                    <ThemedText variant="caption" color={theme.textSecondary}>
-                      胜利条件
-                    </ThemedText>
-                    <ThemedText variant="small" color={theme.textPrimary}>
-                      {selectedLevel?.victoryCondition}
-                    </ThemedText>
-                  </View>
-                </ThemedView>
-
-                <ThemedView level="tertiary" style={styles.conditionCard}>
-                  <FontAwesome6 name="skull" size={18} color="#EF4444" />
-                  <View style={styles.conditionTextContainer}>
-                    <ThemedText variant="caption" color={theme.textSecondary}>
-                      失败条件
-                    </ThemedText>
-                    <ThemedText variant="small" color={theme.textPrimary}>
-                      {selectedLevel?.defeatCondition}
-                    </ThemedText>
-                  </View>
-                </ThemedView>
-              </View>
-
-              {/* 奖励 */}
-              <View style={styles.rewardsContainer}>
-                <ThemedText variant="h4" color={theme.textPrimary} style={styles.rewardsTitle}>
-                  战利品
-                </ThemedText>
-                {selectedLevel?.rewards.map((reward, index) => (
-                  <View key={index} style={styles.rewardItem}>
-                    <FontAwesome6 
-                      name={reward.type === 'gold' ? 'coins' : 'gift'} 
-                      size={16} 
-                      color="#C9A96E" 
-                    />
-                    <ThemedText variant="small" color={theme.textSecondary}>
-                      {reward.description}
-                    </ThemedText>
-                  </View>
+              <View style={styles.modalFactCard}>
+                <ThemedText variant="smallMedium" color="#f3e5c5">奖励展示</ThemedText>
+                {selectedLevel.rewards.map((reward, index) => (
+                  <ThemedText key={`${reward.description}-${index}`} variant="small" color="#af9879" style={styles.rewardText}>
+                    • {reward.description}
+                  </ThemedText>
                 ))}
               </View>
             </ScrollView>
-
-            {/* 底部按钮 */}
             <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowStoryModal(false)}
-              >
-                <ThemedText variant="smallMedium" color={theme.textMuted}>
-                  返回
-                </ThemedText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.startButton]}
-                onPress={handleStartBattle}
-              >
-                <FontAwesome6 name="mask" size={16} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <ThemedText variant="smallMedium" color="#FFFFFF">
-                  开始战斗
-                </ThemedText>
-              </TouchableOpacity>
+              <Pressable style={styles.secondaryButton} onPress={() => setShowStoryModal(false)}>
+                <ThemedText variant="smallMedium" color="#f3e5c5">返回</ThemedText>
+              </Pressable>
+              <Pressable style={styles.primaryButton} onPress={handleStartBattle}>
+                <FontAwesome6 name="play" size={13} color="#22150d" />
+                <ThemedText variant="smallMedium" color="#22150d">进入战斗</ThemedText>
+              </Pressable>
             </View>
           </View>
         </View>

@@ -1,26 +1,42 @@
 import { StyleSheet } from 'react-native';
 import { Spacing, BorderRadius, Theme } from '@/constants/theme';
 
-export const createStyles = (theme: Theme) => {
-  return StyleSheet.create({
+export const createStyles = (_theme: Theme) =>
+  StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
       paddingBottom: Spacing['5xl'],
+      backgroundColor: '#0a0706',
+      gap: Spacing.lg,
     },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       gap: Spacing.md,
+      backgroundColor: '#0a0706',
     },
     loadingText: {
       marginTop: Spacing.md,
     },
     headerSection: {
-      backgroundColor: '#002FA7', // 克莱因蓝
-      paddingTop: Spacing['2xl'],
+      overflow: 'hidden',
+      backgroundColor: '#140f0b',
+      paddingTop: Spacing['3xl'],
       paddingBottom: Spacing.xl,
       paddingHorizontal: Spacing.lg,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(176, 137, 81, 0.24)',
+      gap: Spacing.md,
+    },
+    headerOverlay: {
+      position: 'absolute',
+      top: -90,
+      alignSelf: 'center',
+      width: 260,
+      height: 260,
+      borderRadius: 999,
+      backgroundColor: 'rgba(145, 76, 37, 0.16)',
     },
     headerContainer: {
       flexDirection: 'row',
@@ -28,10 +44,12 @@ export const createStyles = (theme: Theme) => {
       gap: Spacing.lg,
     },
     backButton: {
-      width: 40,
-      height: 40,
+      width: 42,
+      height: 42,
       borderRadius: BorderRadius.lg,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: '#221811',
+      borderWidth: 1,
+      borderColor: 'rgba(177, 136, 80, 0.2)',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -40,139 +58,182 @@ export const createStyles = (theme: Theme) => {
     },
     headerSubtitle: {
       textTransform: 'uppercase',
-      letterSpacing: 1,
-      marginBottom: 4,
+      letterSpacing: 2,
+      marginBottom: 6,
     },
     headerTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
+      fontSize: 30,
+      fontWeight: '300',
+      letterSpacing: 1,
+    },
+    headerCopy: {
+      lineHeight: 21,
+      maxWidth: 540,
     },
     introSection: {
-      padding: Spacing.lg,
+      paddingHorizontal: Spacing.lg,
     },
     introCard: {
       padding: Spacing.lg,
-      borderRadius: BorderRadius.lg,
+      borderRadius: BorderRadius['2xl'],
       borderWidth: 1,
-      borderColor: theme.borderLight,
+      borderColor: 'rgba(167, 129, 76, 0.2)',
+      backgroundColor: '#16100c',
+      gap: Spacing.md,
     },
     introHeader: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: Spacing.sm,
-      marginBottom: Spacing.md,
     },
     introText: {
       lineHeight: 22,
     },
-    chaptersSection: {
-      padding: Spacing.lg,
-      paddingTop: 0,
-    },
-    sectionTitle: {
-      marginBottom: Spacing.lg,
-    },
-    chapterSection: {
-      marginBottom: Spacing.xl,
-    },
-    chapterHeader: {
+    stepsSection: {
+      paddingHorizontal: Spacing.lg,
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: Spacing.lg,
-      paddingBottom: Spacing.sm,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.border,
-    },
-    levelsList: {
+      flexWrap: 'wrap',
       gap: Spacing.md,
     },
-    levelCard: {
-      backgroundColor: theme.backgroundDefault,
-      borderRadius: BorderRadius.lg,
-      padding: Spacing.lg,
-      flexDirection: 'row',
-      gap: Spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.border,
-      position: 'relative',
-    },
-    levelCardLocked: {
-      backgroundColor: theme.backgroundTertiary,
-      opacity: 0.6,
-    },
-    levelCardCompleted: {
-      backgroundColor: 'rgba(16, 185, 129, 0.05)',
-      borderColor: 'rgba(16, 185, 129, 0.2)',
-    },
-    levelNumber: {
-      width: 44,
-      height: 44,
-      borderRadius: BorderRadius.lg,
-      backgroundColor: theme.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    levelNumberLocked: {
-      backgroundColor: theme.border,
-    },
-    levelNumberCompleted: {
-      backgroundColor: '#10B981',
-    },
-    levelContent: {
+    stepCard: {
       flex: 1,
+      minWidth: 180,
+      padding: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: '#100c09',
+      borderWidth: 1,
+      borderColor: 'rgba(160, 124, 74, 0.16)',
+      gap: Spacing.sm,
+    },
+    stepIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      alignItems: 'center',
       justifyContent: 'center',
+      backgroundColor: '#1c130d',
+      borderWidth: 1,
+      borderColor: 'rgba(172, 133, 77, 0.18)',
+    },
+    stepCopy: {
+      lineHeight: 19,
+    },
+    chapterPanel: {
+      marginHorizontal: Spacing.lg,
+      padding: Spacing.xl,
+      borderRadius: BorderRadius['2xl'],
+      backgroundColor: '#17110d',
+      borderWidth: 1,
+      borderColor: 'rgba(175, 137, 81, 0.24)',
+      gap: Spacing.md,
+    },
+    chapterPanelHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: Spacing.md,
+    },
+    chapterPanelLabel: {
+      textTransform: 'uppercase',
+      letterSpacing: 3,
+      marginBottom: 4,
+    },
+    chapterBadge: {
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 6,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#d7b26d',
+    },
+    chapterPanelCopy: {
+      lineHeight: 21,
+    },
+    levelCard: {
+      padding: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: '#0f0b08',
+      borderWidth: 1,
+      borderColor: 'rgba(163, 126, 76, 0.16)',
+      gap: Spacing.md,
     },
     levelHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: Spacing.xs,
+      alignItems: 'flex-start',
+      gap: Spacing.md,
     },
-    levelName: {
-      flex: 1,
-    },
-    levelDescription: {
-      lineHeight: 18,
-      marginBottom: Spacing.sm,
-    },
-    levelMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.lg,
-    },
-    difficultyBadge: {
+    enemyBadge: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 4,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 5,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#1b130d',
+      borderWidth: 1,
+      borderColor: 'rgba(175, 136, 80, 0.16)',
     },
-    difficultyText: {
-      fontWeight: '500',
+    levelText: {
+      lineHeight: 20,
     },
-    factionBadge: {
-      padding: 2,
-      borderRadius: BorderRadius.sm,
-    },
-    starsContainer: {
+    levelFactRow: {
       flexDirection: 'row',
-      gap: 2,
+      gap: Spacing.sm,
+      flexWrap: 'wrap',
     },
-    lockOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'transparent',
+    levelFact: {
+      flex: 1,
+      minWidth: 160,
+      padding: Spacing.md,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: '#18120d',
+      borderWidth: 1,
+      borderColor: 'rgba(161, 125, 74, 0.14)',
+      gap: 4,
+    },
+    levelActions: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      flexWrap: 'wrap',
+    },
+    secondaryButton: {
+      flex: 1,
+      minWidth: 170,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#2a1d13',
+      borderWidth: 1,
+      borderColor: 'rgba(171, 132, 78, 0.22)',
+    },
+    primaryButton: {
+      flex: 1,
+      minWidth: 170,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#d7b26d',
+      borderWidth: 1,
+      borderColor: '#efd09b',
     },
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      backgroundColor: 'rgba(1, 1, 1, 0.74)',
       justifyContent: 'center',
       padding: Spacing.lg,
     },
-    modalContent: {
-      backgroundColor: theme.backgroundDefault,
-      borderRadius: BorderRadius.lg,
-      maxHeight: '85%',
+    modalCard: {
+      maxHeight: '84%',
+      backgroundColor: '#16100c',
+      borderRadius: BorderRadius['2xl'],
       borderWidth: 1,
-      borderColor: theme.border,
+      borderColor: 'rgba(175, 136, 79, 0.24)',
+      overflow: 'hidden',
     },
     modalHeader: {
       flexDirection: 'row',
@@ -180,80 +241,40 @@ export const createStyles = (theme: Theme) => {
       justifyContent: 'space-between',
       padding: Spacing.lg,
       borderBottomWidth: 1,
-      borderBottomColor: theme.border,
+      borderBottomColor: 'rgba(162, 126, 76, 0.14)',
+    },
+    modalClose: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#221811',
     },
     modalBody: {
       padding: Spacing.lg,
     },
-    storyCard: {
-      padding: Spacing.lg,
-      borderRadius: BorderRadius.lg,
-      marginBottom: Spacing.lg,
-    },
-    storyIconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: BorderRadius.lg,
-      backgroundColor: 'rgba(201, 169, 110, 0.1)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: Spacing.md,
-      alignSelf: 'center',
-    },
-    storyText: {
+    modalStoryText: {
       lineHeight: 22,
-      textAlign: 'center',
     },
-    conditionsContainer: {
-      gap: Spacing.md,
-      marginBottom: Spacing.lg,
-    },
-    conditionCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.md,
+    modalFactCard: {
+      marginTop: Spacing.lg,
       padding: Spacing.md,
-      borderRadius: BorderRadius.md,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: '#100c09',
+      borderWidth: 1,
+      borderColor: 'rgba(161, 124, 72, 0.16)',
+      gap: Spacing.xs,
     },
-    conditionTextContainer: {
-      flex: 1,
-    },
-    rewardsContainer: {
-      padding: Spacing.lg,
-      backgroundColor: theme.backgroundTertiary,
-      borderRadius: BorderRadius.lg,
-    },
-    rewardsTitle: {
-      marginBottom: Spacing.md,
-    },
-    rewardItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: Spacing.sm,
-      marginBottom: Spacing.sm,
+    rewardText: {
+      lineHeight: 18,
     },
     modalFooter: {
       flexDirection: 'row',
-      padding: Spacing.lg,
-      gap: Spacing.md,
-      borderTopWidth: 1,
-      borderTopColor: theme.border,
-    },
-    modalButton: {
-      flex: 1,
-      paddingVertical: Spacing.md,
-      borderRadius: BorderRadius.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    cancelButton: {
-      backgroundColor: theme.backgroundTertiary,
-    },
-    startButton: {
-      backgroundColor: theme.primary,
-      flexDirection: 'row',
-      alignItems: 'center',
       gap: Spacing.sm,
+      padding: Spacing.lg,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(163, 126, 76, 0.14)',
+      backgroundColor: '#110d09',
     },
   });
-};

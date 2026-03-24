@@ -1,133 +1,223 @@
 import { StyleSheet } from 'react-native';
-import { Spacing, BorderRadius, Theme } from '@/constants/theme';
+import { BorderRadius, Spacing, Theme } from '@/constants/theme';
 
-export const createStyles = (theme: Theme) => {
-  return StyleSheet.create({
+export const createStyles = (_theme: Theme) =>
+  StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
       paddingBottom: Spacing['5xl'],
+      backgroundColor: '#0a0706',
+      gap: Spacing.lg,
     },
     loadingContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
       gap: Spacing.md,
+      backgroundColor: '#0a0706',
     },
     loadingText: {
       marginTop: Spacing.md,
     },
     heroSection: {
-      backgroundColor: '#002FA7', // 克莱因蓝
-      paddingTop: Spacing['2xl'],
-      paddingBottom: Spacing.xl,
-      paddingHorizontal: Spacing.lg,
+      overflow: 'hidden',
+      paddingTop: Spacing['4xl'],
+      paddingBottom: Spacing['3xl'],
+      paddingHorizontal: Spacing.xl,
+      backgroundColor: '#130e0a',
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(166, 129, 73, 0.22)',
+      gap: Spacing.lg,
     },
-    heroHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: Spacing.lg,
-    },
-    heroTitleContainer: {
-      flex: 1,
+    heroHalo: {
+      position: 'absolute',
+      top: -80,
+      alignSelf: 'center',
+      width: 280,
+      height: 280,
+      borderRadius: 999,
+      backgroundColor: 'rgba(139, 74, 38, 0.18)',
     },
     heroSubtitle: {
       textTransform: 'uppercase',
-      letterSpacing: 2,
-      marginBottom: Spacing.xs,
+      letterSpacing: 5,
+      textAlign: 'center',
     },
     heroTitle: {
-      fontSize: 36,
-      fontWeight: 'bold',
+      textAlign: 'center',
+      letterSpacing: 2,
+      fontSize: 42,
+      fontWeight: '300',
     },
-    heroDivider: {
-      height: 1,
-      backgroundColor: 'rgba(201, 169, 110, 0.3)', // 香槟金
-      marginVertical: Spacing.lg,
+    heroCopy: {
+      textAlign: 'center',
+      lineHeight: 22,
+      maxWidth: 480,
+      alignSelf: 'center',
     },
-    progressContainer: {
+    progressRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+    },
+    progressChip: {
+      minWidth: 96,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.xl,
+      alignItems: 'center',
+      backgroundColor: '#1a130e',
+      borderWidth: 1,
+      borderColor: 'rgba(170, 132, 77, 0.22)',
+      gap: 2,
+    },
+    storyCard: {
+      marginHorizontal: Spacing.lg,
+      padding: Spacing.xl,
+      borderRadius: BorderRadius['2xl'],
+      backgroundColor: '#17110d',
+      borderWidth: 1,
+      borderColor: 'rgba(177, 138, 82, 0.26)',
+      gap: Spacing.lg,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 16 },
+      shadowOpacity: 0.26,
+      shadowRadius: 24,
+      elevation: 10,
+    },
+    storyCardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
+      gap: Spacing.md,
+    },
+    storyYearBadge: {
+      width: 64,
+      height: 64,
+      borderRadius: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#d7b26d',
+    },
+    storyTitleBlock: {
+      flex: 1,
+      gap: 4,
+    },
+    storyDescription: {
+      lineHeight: 22,
+    },
+    storyBackground: {
+      lineHeight: 20,
+    },
+    beatsGrid: {
+      flexDirection: 'row',
+      gap: Spacing.md,
+      flexWrap: 'wrap',
+    },
+    beatCard: {
+      flex: 1,
+      minWidth: 180,
+      padding: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: '#100c09',
+      borderWidth: 1,
+      borderColor: 'rgba(158, 123, 74, 0.16)',
       gap: Spacing.sm,
     },
-    progressLabel: {
-      textTransform: 'uppercase',
-      letterSpacing: 1,
-    },
-    progressValue: {
-      fontSize: 28,
-      fontWeight: 'bold',
-    },
-    scenariosContainer: {
-      padding: Spacing.lg,
-      gap: Spacing.lg,
-    },
-    sectionTitle: {
-      marginBottom: Spacing.lg,
-    },
-    scenarioCard: {
-      backgroundColor: theme.backgroundDefault,
-      borderRadius: BorderRadius.lg,
-      padding: Spacing.lg,
-      flexDirection: 'row',
-      gap: Spacing.lg,
-      borderWidth: 1,
-      borderColor: theme.border,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    yearBadge: {
-      width: 72,
-      height: 72,
-      borderRadius: BorderRadius.lg,
-      backgroundColor: '#C9A96E', // 香槟金
-      justifyContent: 'center',
+    beatIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
       alignItems: 'center',
-      shadowColor: '#C9A96E',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    yearText: {
-      fontSize: 24,
-      fontWeight: 'bold',
-    },
-    scenarioContent: {
-      flex: 1,
       justifyContent: 'center',
+      backgroundColor: '#1e140e',
+      borderWidth: 1,
+      borderColor: 'rgba(179, 139, 81, 0.22)',
     },
-    scenarioHeader: {
+    beatCopy: {
+      lineHeight: 19,
+    },
+    ctaRow: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      flexWrap: 'wrap',
+    },
+    secondaryAction: {
+      flex: 1,
+      minWidth: 180,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#2a1d13',
+      borderWidth: 1,
+      borderColor: 'rgba(176, 137, 82, 0.24)',
+    },
+    primaryAction: {
+      flex: 1,
+      minWidth: 180,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+      paddingVertical: Spacing.md,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#d7b26d',
+      borderWidth: 1,
+      borderColor: '#f1d39e',
+    },
+    chapterPreview: {
+      marginHorizontal: Spacing.lg,
+      padding: Spacing.xl,
+      borderRadius: BorderRadius['2xl'],
+      backgroundColor: '#130f0c',
+      borderWidth: 1,
+      borderColor: 'rgba(166, 128, 74, 0.18)',
+      gap: Spacing.md,
+    },
+    chapterPreviewHeader: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: Spacing.sm,
+      gap: Spacing.md,
     },
-    scenarioName: {
-      flex: 1,
-      marginRight: Spacing.sm,
-    },
-    eraBadge: {
+    chapterTag: {
       paddingHorizontal: Spacing.sm,
-      paddingVertical: 4,
-      backgroundColor: 'rgba(201, 169, 110, 0.1)',
-      borderRadius: BorderRadius.sm,
+      paddingVertical: 6,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#d7b26d',
     },
-    scenarioDescription: {
-      marginBottom: Spacing.xs,
-      lineHeight: 20,
+    chapterPreviewText: {
+      lineHeight: 21,
     },
-    scenarioBackground: {
-      marginBottom: Spacing.sm,
-      lineHeight: 18,
+    levelPreviewCard: {
+      padding: Spacing.md,
+      borderRadius: BorderRadius.xl,
+      backgroundColor: '#0f0b08',
+      borderWidth: 1,
+      borderColor: 'rgba(158, 122, 73, 0.16)',
+      gap: Spacing.sm,
     },
-    scenarioMeta: {
+    levelPreviewHeader: {
       flexDirection: 'row',
-      gap: Spacing.lg,
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: Spacing.md,
     },
-    metaItem: {
+    levelFactionBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: Spacing.xs,
+      gap: 4,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 5,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#1b130d',
+      borderWidth: 1,
+      borderColor: 'rgba(176, 138, 82, 0.18)',
+    },
+    levelPreviewText: {
+      lineHeight: 20,
     },
   });
-};
