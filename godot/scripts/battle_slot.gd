@@ -47,6 +47,10 @@ func _on_mouse_exited() -> void:
 	is_hovered = false
 	_apply_style(is_armed)
 
+func set_drag_highlight(active: bool) -> void:
+	is_hovered = active
+	_apply_style(is_armed)
+
 func _apply_style(armed: bool) -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("19120d")

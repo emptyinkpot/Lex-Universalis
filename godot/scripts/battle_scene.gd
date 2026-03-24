@@ -11,7 +11,9 @@ var draw_pile: Array = []
 var hand_cards: Array = []
 var discard_pile: Array = []
 var battle_slots: Array = []
+var player_slots: Array = []
 var selected_hand_index := -1
+var dragged_hand_index := -1
 var is_resolving := false
 var player_state: Dictionary = {}
 var enemy_state: Dictionary = {}
@@ -23,6 +25,10 @@ var rendered_slot_nodes: Dictionary = {}
 @onready var enemy_stats: Label = get_node("Root/TopBar/TopPadding/TopRow/EnemyStats")
 @onready var rules_label: RichTextLabel = get_node("Root/Stage/SideRail/RulesPanel/Padding/Body/RulesText")
 @onready var log_label: RichTextLabel = get_node("Root/Stage/SideRail/LogPanel/Padding/Body/LogText")
+@onready var enemy_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/EnemyFrontRow")
+@onready var enemy_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/EnemyBackRow")
+@onready var player_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/PlayerFrontRow")
+@onready var player_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/PlayerBackRow")
 @onready var front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/FrontRow")
 @onready var back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BackRow")
 @onready var hand_row: HBoxContainer = get_node("Root/BottomDock/DockPadding/DockBody/HandScroll/HandRow")
@@ -36,7 +42,7 @@ func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	battle_seed_template = data_loader.load_battle_seed()
 	base_cards = data_loader.load_base_cards()
-	rules_label.text = "[b]Battle Rules[/b]\n- Click a hand card to arm it.\n- Click a front or back slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn."
+	rules_label.text = "[b]Battle Rules[/b]\n- Click or drag a hand card to arm it.\n- Release over an enemy slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn."
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	_reset_battle_state()
 
@@ -44,7 +50,7 @@ func start_level(level_data: Dictionary) -> void:
 	active_level = level_data.duplicate(true)
 	var enemy_faction := str(active_level.get("enemyFaction", "ENGLAND"))
 	_reset_battle_state(_build_level_deck(enemy_faction))
-	rules_label.text = "[b]Battle Rules[/b]\n- Click a hand card to arm it.\n- Click a front or back slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn.\n\n[b]Scenario[/b]\nEnemy faction: %s" % enemy_faction
+	rules_label.text = "[b]Battle Rules[/b]\n- Click or drag a hand card to arm it.\n- Release over an enemy slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn.\n\n[b]Scenario[/b]\nEnemy faction: %s" % enemy_faction
 	log_label.text = "[b]Scenario Loaded[/b]\n- %s\n- %s\n\n%s" % [
 		str(active_level.get("name", "Scenario Battle")),
 		str(active_level.get("storyText", "")),
@@ -71,20 +77,27 @@ func _render_all() -> void:
 
 func _render_slots() -> void:
 	rendered_slot_nodes.clear()
-	_render_slot_row(front_row, "front")
-	_render_slot_row(back_row, "back")
+	_render_slot_row(enemy_front_row, battle_slots, "front", false)
+	_render_slot_row(enemy_back_row, battle_slots, "back", false)
+	_render_slot_row(player_front_row, player_slots, "front", true)
+	_render_slot_row(player_back_row, player_slots, "back", true)
+	if is_instance_valid(front_row):
+		front_row.visible = false
+	if is_instance_valid(back_row):
+		back_row.visible = false
 
-func _render_slot_row(row_node: HBoxContainer, row_name: String) -> void:
+func _render_slot_row(row_node: HBoxContainer, slots: Array, row_name: String, is_player_side: bool) -> void:
 	for child in row_node.get_children():
 		child.queue_free()
-	for slot in battle_slots:
+	for slot in slots:
 		if str(slot.get("row", "")) != row_name:
 			continue
 		if bool(slot.get("collapsed", false)):
 			continue
 		var slot_node := BATTLE_SLOT_SCENE.instantiate()
-		slot_node.call("setup", slot, selected_hand_index >= 0)
-		slot_node.slot_pressed.connect(_on_slot_pressed)
+		slot_node.call("setup", slot, selected_hand_index >= 0 and not is_player_side)
+		if not is_player_side:
+			slot_node.slot_pressed.connect(_on_slot_pressed)
 		row_node.add_child(slot_node)
 		rendered_slot_nodes[str(slot.get("id", ""))] = slot_node
 
@@ -100,6 +113,9 @@ func _render_hand() -> void:
 		card_node.call("setup", card)
 		card_node.call("set_selected", index == selected_hand_index)
 		card_node.card_pressed.connect(_on_card_pressed.bind(index))
+		card_node.drag_started.connect(_on_card_drag_started.bind(index))
+		card_node.drag_moved.connect(_on_card_drag_moved.bind(index))
+		card_node.drag_ended.connect(_on_card_drag_ended.bind(index))
 		hand_row.add_child(card_node)
 		rendered_hand_nodes.append(card_node)
 
@@ -117,6 +133,7 @@ func _on_slot_pressed(slot_id: String) -> void:
 	if selected_hand_index < 0 or is_resolving:
 		_append_log("Battle", "Select a card first.")
 		return
+	_clear_drag_target_highlight()
 	is_resolving = true
 	var slot_index := _find_slot_index(slot_id)
 	if slot_index < 0:
@@ -146,6 +163,24 @@ func _on_slot_pressed(slot_id: String) -> void:
 	_draw_card()
 	_render_all()
 	is_resolving = false
+
+func _on_card_drag_started(_card_data: Dictionary, index: int) -> void:
+	dragged_hand_index = index
+	if selected_hand_index != index:
+		selected_hand_index = index
+	_render_all()
+
+func _on_card_drag_moved(_card_data: Dictionary, global_position: Vector2, _index: int) -> void:
+	_update_drag_target_highlight(global_position)
+
+func _on_card_drag_ended(_card_data: Dictionary, global_position: Vector2, index: int) -> void:
+	var slot_id := _find_slot_under_pointer(global_position)
+	dragged_hand_index = -1
+	_clear_drag_target_highlight()
+	if slot_id.is_empty():
+		return
+	selected_hand_index = index
+	_on_slot_pressed(slot_id)
 
 func _on_end_turn_pressed() -> void:
 	selected_hand_index = -1
@@ -198,10 +233,12 @@ func _reset_battle_state(deck_override: Array = []) -> void:
 	hand_cards.clear()
 	discard_pile.clear()
 	selected_hand_index = -1
+	dragged_hand_index = -1
 	is_resolving = false
 	player_state = battle_seed_template.get("player", {}).duplicate(true)
 	enemy_state = battle_seed_template.get("enemy", {}).duplicate(true)
 	battle_slots = battle_seed_template.get("slots", []).duplicate(true)
+	player_slots = _build_player_slots(battle_slots)
 	if active_level.is_empty():
 		log_label.text = "[b]Combat Log[/b]\n- Godot migration shell initialized.\n- Fixed PC battlefield layout active.\n- Next step: queue resolution and animation graph."
 	for _index in range(int(player_state.get("handSize", 5))):
@@ -222,6 +259,42 @@ func _build_level_deck(enemy_faction: String) -> Array:
 
 func _normalize_faction(faction: String) -> String:
 	return "HRE" if faction == "HOLY_ROMAN_EMPIRE" else faction
+
+func _build_player_slots(enemy_slots: Array) -> Array:
+	var mirrored: Array = []
+	for slot in enemy_slots:
+		var source := (slot as Dictionary).duplicate(true)
+		source["id"] = "player_%s" % str(source.get("id", "slot"))
+		source["title"] = "Player %s" % str(source.get("title", "Slot"))
+		source["counterArmed"] = false
+		source["collapsed"] = false
+		mirrored.append(source)
+	return mirrored
+
+func _find_slot_under_pointer(global_position: Vector2) -> String:
+	for slot_id in rendered_slot_nodes.keys():
+		if str(slot_id).begins_with("player_"):
+			continue
+		var slot_node := rendered_slot_nodes[slot_id] as Control
+		if slot_node == null:
+			continue
+		var rect := Rect2(slot_node.global_position, slot_node.size)
+		if rect.has_point(global_position):
+			return str(slot_id)
+	return ""
+
+func _update_drag_target_highlight(global_position: Vector2) -> void:
+	var hovered_slot_id := _find_slot_under_pointer(global_position)
+	for slot_id in rendered_slot_nodes.keys():
+		var slot_node = rendered_slot_nodes[slot_id]
+		if slot_node != null and slot_node.has_method("set_drag_highlight"):
+			slot_node.call("set_drag_highlight", str(slot_id) == hovered_slot_id)
+
+func _clear_drag_target_highlight() -> void:
+	for slot_id in rendered_slot_nodes.keys():
+		var slot_node = rendered_slot_nodes[slot_id]
+		if slot_node != null and slot_node.has_method("set_drag_highlight"):
+			slot_node.call("set_drag_highlight", false)
 
 func _spawn_damage_text(target_node: Control, amount: int, counter: bool) -> void:
 	if target_node == null:

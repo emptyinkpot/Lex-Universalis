@@ -1,9 +1,13 @@
 extends PanelContainer
 
 signal card_pressed(card_data: Dictionary)
+signal drag_started(card_data: Dictionary)
+signal drag_moved(card_data: Dictionary, global_position: Vector2)
+signal drag_ended(card_data: Dictionary, global_position: Vector2)
 
 var card_data: Dictionary = {}
 var is_selected := false
+var is_dragging := false
 var base_position := Vector2.ZERO
 
 func _ready() -> void:
@@ -65,8 +69,17 @@ func _apply_selected_state(value: bool) -> void:
 		frame.add_theme_stylebox_override("panel", duplicated)
 
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		card_pressed.emit(card_data)
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			is_dragging = true
+			card_pressed.emit(card_data)
+			drag_started.emit(card_data)
+		else:
+			if is_dragging:
+				drag_ended.emit(card_data, get_global_mouse_position())
+			is_dragging = false
+	elif event is InputEventMouseMotion and is_dragging:
+		drag_moved.emit(card_data, get_global_mouse_position())
 
 func _on_mouse_entered() -> void:
 	var target_position := base_position + Vector2(0, -18 if not is_selected else -28)

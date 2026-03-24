@@ -79,12 +79,22 @@ layout_mode = 2
 text = "Fixed PC Battlefield"
 theme_override_font_sizes/font_size = 26
 
+[node name="EnemySectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Enemy Formation"
+theme_override_font_sizes/font_size = 19
+
 [node name="FrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
 text = "Front Line"
 theme_override_font_sizes/font_size = 17
 
 [node name="FrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+visible = false
+
+[node name="EnemyFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
@@ -94,6 +104,34 @@ text = "Back Line"
 theme_override_font_sizes/font_size = 17
 
 [node name="BackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+visible = false
+
+[node name="EnemyBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayerSectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Player Formation"
+theme_override_font_sizes/font_size = 19
+
+[node name="PlayerFrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Front Guard"
+theme_override_font_sizes/font_size = 17
+
+[node name="PlayerFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PlayerBackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Rear Guard"
+theme_override_font_sizes/font_size = 17
+
+[node name="PlayerBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
