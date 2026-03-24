@@ -15,6 +15,13 @@ import { createStyles } from './styles';
 
 type CardRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 type AbilityDraft = { type: string; value: string; description: string };
+type CardTemplate = {
+  id: string;
+  name: string;
+  defaults: Omit<Partial<EditorCard>, 'id'>;
+  createdAt: number;
+  updatedAt: number;
+};
 
 type EditorCard = {
   id: string;
@@ -44,8 +51,17 @@ type EditorCard = {
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_BACKEND_BASE_URL ?? 'http://127.0.0.1:9091';
 const STORAGE_KEY = 'lex-universalis.card-editor.cards.v1';
+const TEMPLATE_STORAGE_KEY = 'lex-universalis.card-editor.templates.v1';
 const tempId = () => `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 const isNumericId = (value: string) => /^\d+$/.test(value);
+const withAlpha = (hex: string, alpha: number) => {
+  const normalized = hex.replace('#', '');
+  if (normalized.length !== 6) return `rgba(0, 0, 0, ${alpha})`;
+  const r = Number.parseInt(normalized.slice(0, 2), 16);
+  const g = Number.parseInt(normalized.slice(2, 4), 16);
+  const b = Number.parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 const FACTION_OPTIONS = [
   { value: Faction.ENGLAND, label: '英格兰', icon: 'crown' },
@@ -206,6 +222,60 @@ function replaceCard(cards: EditorCard[], nextCard: EditorCard) {
 function removeCard(cards: EditorCard[], id: string) {
   return cards.filter((item) => item.id !== id);
 }
+
+function EditorBadge({
+  color,
+  label,
+}: {
+  color: string;
+  label: string;
+}) {
+  return (
+    <View style={{ backgroundColor: color, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 }}>
+      <ThemedText variant="tiny" color="#FFFFFF">
+        {label}
+      </ThemedText>
+    </View>
+  );
+}
+
+function templateFromCard(card: EditorCard, name: string): CardTemplate {
+  const { localOnly, needsSync, updatedAt, id, ...defaults } = card;
+  return {
+    id: tempId(),
+    name,
+    defaults,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+}
+
+function mergeTemplateIntoCard(baseCard: EditorCard, template?: CardTemplate | null): EditorCard {
+  if (!template) return baseCard;
+  const defaults = template.defaults;
+  return {
+    ...baseCard,
+    name: baseCard.name || defaults.name || baseCard.name,
+    cost: baseCard.cost || defaults.cost || 0,
+    faction: baseCard.faction || defaults.faction || baseCard.faction,
+    type: baseCard.type || defaults.type || baseCard.type,
+    rarity: baseCard.rarity || defaults.rarity || baseCard.rarity,
+    description: baseCard.description || defaults.description || '',
+    flavorText: baseCard.flavorText || defaults.flavorText || '',
+    imageUrl: baseCard.imageUrl || defaults.imageUrl || '',
+    attack: baseCard.attack ?? defaults.attack ?? null,
+    health: baseCard.health ?? defaults.health ?? null,
+    movement: baseCard.movement ?? defaults.movement ?? null,
+    durability: baseCard.durability ?? defaults.durability ?? null,
+    effect: baseCard.effect || defaults.effect || '',
+    duration: baseCard.duration ?? defaults.duration ?? null,
+    unitType: baseCard.unitType || defaults.unitType || baseCard.unitType,
+    tacticType: baseCard.tacticType || defaults.tacticType || baseCard.tacticType,
+    buildingType: baseCard.buildingType || defaults.buildingType || baseCard.buildingType,
+    abilities: baseCard.abilities.length > 0 ? baseCard.abilities : (defaults.abilities ?? []),
+    notes: baseCard.notes || defaults.notes || '',
+  };
+}
 export default function CardEditorScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -221,9 +291,14 @@ export default function CardEditorScreen() {
   const [editorVisible, setEditorVisible] = useState(false);
   const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
   const [draft, setDraft] = useState<EditorCard>(emptyCard());
+  const [templates, setTemplates] = useState<CardTemplate[]>([]);
+  const [templateVisible, setTemplateVisible] = useState(false);
+  const [templateName, setTemplateName] = useState('');
   const [importVisible, setImportVisible] = useState(false);
   const [exportVisible, setExportVisible] = useState(false);
   const [importText, setImportText] = useState('');
+  const [importTemplateId, setImportTemplateId] = useState<string>('none');
+  const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
   const [syncingAll, setSyncingAll] = useState(false);
 
   const selectedCard = useMemo(() => cards.find((item) => item.id === selectedId) ?? cards[0] ?? null, [cards, selectedId]);
@@ -285,6 +360,18 @@ export default function CardEditorScreen() {
   }, []);
 
   useEffect(() => {
+    AsyncStorage.getItem(TEMPLATE_STORAGE_KEY)
+      .then((value) => {
+        if (!value) return;
+        const parsed = JSON.parse(value) as CardTemplate[];
+        setTemplates(Array.isArray(parsed) ? parsed : []);
+      })
+      .catch((error) => {
+        console.error('加载模板失败:', error);
+      });
+  }, []);
+
+  useEffect(() => {
     if (!loading) {
       AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cards)).catch((error) => {
         console.error('保存本地缓存失败:', error);
@@ -292,16 +379,45 @@ export default function CardEditorScreen() {
     }
   }, [cards, loading]);
 
+  useEffect(() => {
+    AsyncStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(templates)).catch((error) => {
+      console.error('保存模板失败:', error);
+    });
+  }, [templates]);
+
   const openCreate = (type: CardType = CardType.UNIT) => {
     setEditorMode('create');
     setDraft(emptyCard(type));
+    setTemplateName('');
     setEditorVisible(true);
   };
 
   const openEdit = (card: EditorCard) => {
     setEditorMode('edit');
     setDraft({ ...card, abilities: card.abilities.map((item) => ({ ...item })) });
+    setTemplateName(card.name);
     setEditorVisible(true);
+  };
+
+  const saveTemplate = () => {
+    const name = templateName.trim() || `${draft.name || '未命名'} 模板`;
+    const nextTemplate = templateFromCard(draft, name);
+    setTemplates((current) => {
+      const existingIndex = current.findIndex((item) => item.name === name);
+      if (existingIndex === -1) return [nextTemplate, ...current];
+      const next = [...current];
+      next[existingIndex] = { ...current[existingIndex], ...nextTemplate, id: current[existingIndex].id, name };
+      return next;
+    });
+    setTemplateName(name);
+    Alert.alert('模板已保存', `模板「${name}」已加入模板库。`);
+  };
+
+  const applyTemplateToDraft = (templateId: string) => {
+    if (templateId === 'none') return;
+    const template = templates.find((item) => item.id === templateId);
+    if (!template) return;
+    setDraft((current) => mergeTemplateIntoCard(current, template));
   };
 
   const updateDraft = <K extends keyof EditorCard>(key: K, value: EditorCard[K]) => {
@@ -440,10 +556,19 @@ export default function CardEditorScreen() {
       const parsed = JSON.parse(importText.trim());
       const incoming = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.cards) ? parsed.cards : null;
       if (!incoming) throw new Error('JSON 必须是数组，或者包含 cards 字段。');
-      const next = incoming.map((item: any) => {
+      const selectedTemplate = templates.find((item) => item.id === importTemplateId) ?? null;
+      const importedCards = incoming.map((item: any) => {
         const card = normalizeApiCard(item, emptyCard(item?.type));
-        return { ...card, localOnly: !syncNow, needsSync: !syncNow, updatedAt: Date.now() };
+        const merged = mergeTemplateIntoCard(card, selectedTemplate);
+        return {
+          ...merged,
+          id: importMode === 'append' ? tempId() : merged.id,
+          localOnly: !syncNow,
+          needsSync: !syncNow,
+          updatedAt: Date.now(),
+        };
       });
+      const next = importMode === 'append' ? [...cards, ...importedCards] : importedCards;
       setCards(next);
       setSelectedId(next[0]?.id ?? null);
       setImportVisible(false);
@@ -453,6 +578,18 @@ export default function CardEditorScreen() {
       console.error('导入失败:', error);
       Alert.alert('导入失败', '请确认 JSON 格式正确。');
     }
+  };
+
+  const deleteTemplate = (templateId: string) => {
+    setTemplates((current) => current.filter((item) => item.id !== templateId));
+  };
+
+  const createCardFromTemplate = (template: CardTemplate) => {
+    setEditorMode('create');
+    setDraft(mergeTemplateIntoCard(emptyCard(template.defaults.type ?? CardType.UNIT), template));
+    setTemplateName(template.name);
+    setTemplateVisible(false);
+    setEditorVisible(true);
   };
 
   const renderChip = (label: string, active: boolean, onPress: () => void, color?: string) => (
@@ -490,29 +627,131 @@ export default function CardEditorScreen() {
       return <ThemedView level="tertiary" style={styles.previewEmpty}><FontAwesome6 name="rectangle-list" size={40} color={theme.textMuted} /><ThemedText variant="bodyMedium" color={theme.textPrimary}>选择一张卡牌查看详情</ThemedText><ThemedText variant="small" color={theme.textMuted}>你可以新建、复制、删除、导入和导出卡牌数据。</ThemedText></ThemedView>;
     }
 
+    const factionColorMap: Record<Faction, string> = {
+      [Faction.ENGLAND]: '#1D4ED8',
+      [Faction.FRANCE]: '#B91C1C',
+      [Faction.HOLY_ROMAN_EMPIRE]: '#B45309',
+      [Faction.VIKING]: '#0F766E',
+      [Faction.BYZANTIUM]: '#6D28D9',
+    } as const;
+    const factionColor = factionColorMap[card.faction] ?? theme.primary;
+    const rarityColor = RARITY_OPTIONS.find((item) => item.value === card.rarity)?.color ?? theme.primary;
+    const typeIcon = card.type === CardType.UNIT ? 'chess-knight' : card.type === CardType.TACTIC ? 'scroll' : 'tower-observation';
+
     return (
-      <ThemedView level="default" style={styles.previewCard}>
-        <View style={styles.previewHeader}>
-          <View style={{ flex: 1 }}>
-            <ThemedText variant="h4" color={theme.textPrimary}>{card.name || '未命名卡牌'}</ThemedText>
-            <ThemedText variant="small" color={theme.textMuted}>{card.type} · {card.rarity} · {card.faction}</ThemedText>
+      <ThemedView level="default" style={styles.cardFrame}>
+        <View style={[styles.cardBackdrop, { backgroundColor: withAlpha(factionColor, 0.14) }]} />
+        <View style={[styles.cardRim, { borderColor: rarityColor }]} />
+
+        <View style={styles.cardTopBar}>
+          <View style={[styles.cardCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
+            <ThemedText variant="h4" color={theme.textPrimary}>{card.cost}</ThemedText>
+            <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
           </View>
-          <ThemedText variant="tiny" color={card.needsSync ? theme.error : theme.success}>{card.needsSync ? '待同步' : '已同步'}</ThemedText>
+          <View style={styles.cardTopMeta}>
+            <EditorBadge color={factionColor} label={card.faction} />
+            <EditorBadge color={rarityColor} label={card.rarity} />
+          </View>
         </View>
-        <View style={styles.previewArtWrap}>{card.imageUrl ? <Image source={{ uri: card.imageUrl }} style={styles.previewImage} resizeMode="cover" /> : <View style={styles.previewPlaceholder}><FactionIcon faction={card.faction} size={54} /><ThemedText variant="small" color={theme.textMuted} style={{ marginTop: 8 }}>未设置图片</ThemedText></View>}</View>
-        <View style={styles.previewStats}>
-          <View style={styles.previewStat}><ThemedText variant="stat" color={theme.textPrimary}>{card.cost}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText></View>
-          <View style={styles.previewStat}><ThemedText variant="bodyMedium" color={theme.textPrimary}>{card.type}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>类型</ThemedText></View>
-          <View style={styles.previewStat}><ThemedText variant="bodyMedium" color={theme.textPrimary}>{card.faction}</ThemedText><ThemedText variant="tiny" color={theme.textMuted}>阵营</ThemedText></View>
+
+        <View style={[styles.cardArtwork, { borderColor: factionColor }]}>
+          {card.imageUrl ? (
+            <Image source={{ uri: card.imageUrl }} style={styles.cardArtworkImage} resizeMode="cover" />
+          ) : (
+            <View style={[styles.cardArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
+              <FactionIcon faction={card.faction} size={72} />
+              <ThemedText variant="smallMedium" color={theme.textMuted} style={{ marginTop: 8 }}>
+                未设置图片
+              </ThemedText>
+            </View>
+          )}
+          <View style={[styles.cardTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.88) }]}>
+            <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
+            <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
+          </View>
         </View>
-        <ThemedText variant="body" color={theme.textPrimary}>{card.description || '暂无描述'}</ThemedText>
-        {card.flavorText ? <ThemedText variant="small" color={theme.textMuted} style={{ fontStyle: 'italic' }}>{card.flavorText}</ThemedText> : null}
-        {card.type === CardType.UNIT && <View style={styles.previewBattleStats}><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="crosshairs" size={14} color={theme.error} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText></ThemedView><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="heart" size={14} color={theme.success} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText></ThemedView><ThemedView level="tertiary" style={styles.battleStat}><FontAwesome6 name="person-walking" size={14} color={theme.primary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText></ThemedView></View>}
-        {card.type === CardType.BUILDING && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>耐久 {card.durability ?? 0}</ThemedText><ThemedText variant="small" color={theme.textMuted}>{card.effect || '暂无建筑效果'}</ThemedText></ThemedView>}
-        {card.type === CardType.TACTIC && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>{card.effect || '暂无战术效果'}</ThemedText>{card.duration !== null ? <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText> : null}</ThemedView>}
-        {card.type === CardType.UNIT && card.abilities.length > 0 && <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>{card.abilities.map((ability, index) => <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>• {ability.description || ability.type}</Text>)}</ThemedView>}
-        {card.notes ? <ThemedView level="tertiary" style={styles.previewAbility}><ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText><ThemedText variant="small" color={theme.textMuted}>{card.notes}</ThemedText></ThemedView> : null}
-        <View style={styles.previewActions}><Pressable onPress={() => openEdit(card)} style={[styles.previewAction, { backgroundColor: theme.primary }]}><FontAwesome6 name="pen-to-square" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">编辑</ThemedText></Pressable><Pressable onPress={() => duplicateCard(card)} style={[styles.previewAction, { backgroundColor: theme.backgroundTertiary }]}><FontAwesome6 name="clone" size={14} color={theme.textPrimary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>复制</ThemedText></Pressable></View>
+
+        <View style={styles.cardTitleBlock}>
+          <ThemedText variant="h4" color={theme.textPrimary} style={styles.cardTitle} numberOfLines={2}>
+            {card.name || '未命名卡牌'}
+          </ThemedText>
+          <ThemedText variant="small" color={theme.textMuted}>
+            {card.description || '暂无描述'}
+          </ThemedText>
+          {card.flavorText ? (
+            <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText}>
+              {card.flavorText}
+            </ThemedText>
+          ) : null}
+        </View>
+
+        {card.type === CardType.UNIT && (
+          <View style={styles.cardStatGrid}>
+            <ThemedView level="tertiary" style={styles.cardStatPill}>
+              <FontAwesome6 name="crosshairs" size={13} color={theme.error} />
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
+            </ThemedView>
+            <ThemedView level="tertiary" style={styles.cardStatPill}>
+              <FontAwesome6 name="heart" size={13} color={theme.success} />
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
+            </ThemedView>
+            <ThemedView level="tertiary" style={styles.cardStatPill}>
+              <FontAwesome6 name="person-walking" size={13} color={theme.primary} />
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
+            </ThemedView>
+          </View>
+        )}
+
+        {card.type === CardType.BUILDING && (
+          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>
+              耐久 {card.durability ?? 0}
+            </ThemedText>
+            <ThemedText variant="small" color={theme.textMuted}>
+              {card.effect || '暂无建筑效果'}
+            </ThemedText>
+          </ThemedView>
+        )}
+
+        {card.type === CardType.TACTIC && (
+          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>
+              {card.effect || '暂无战术效果'}
+            </ThemedText>
+            {card.duration !== null ? (
+              <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText>
+            ) : null}
+          </ThemedView>
+        )}
+
+        {card.type === CardType.UNIT && card.abilities.length > 0 && (
+          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>
+            {card.abilities.map((ability, index) => (
+              <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>
+                • {ability.description || ability.type}
+              </Text>
+            ))}
+          </ThemedView>
+        )}
+
+        {card.notes ? (
+          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText>
+            <ThemedText variant="small" color={theme.textMuted}>{card.notes}</ThemedText>
+          </ThemedView>
+        ) : null}
+
+        <View style={styles.previewActions}>
+          <Pressable onPress={() => openEdit(card)} style={[styles.previewAction, { backgroundColor: theme.primary }]}>
+            <FontAwesome6 name="pen-to-square" size={14} color="#FFFFFF" />
+            <ThemedText variant="smallMedium" color="#FFFFFF">编辑</ThemedText>
+          </Pressable>
+          <Pressable onPress={() => duplicateCard(card)} style={[styles.previewAction, { backgroundColor: theme.backgroundTertiary }]}>
+            <FontAwesome6 name="clone" size={14} color={theme.textPrimary} />
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>复制</ThemedText>
+          </Pressable>
+        </View>
       </ThemedView>
     );
   };
@@ -527,6 +766,7 @@ export default function CardEditorScreen() {
               <Pressable onPress={loadCards} style={styles.iconButton}><FontAwesome6 name="rotate" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => setExportVisible(true)} style={styles.iconButton}><FontAwesome6 name="download" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => setImportVisible(true)} style={styles.iconButton}><FontAwesome6 name="upload" size={14} color={theme.textPrimary} /></Pressable>
+              <Pressable onPress={() => setTemplateVisible(true)} style={styles.iconButton}><FontAwesome6 name="bookmark" size={14} color={theme.textPrimary} /></Pressable>
               <Pressable onPress={() => openCreate(CardType.UNIT)} style={[styles.primaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="plus" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">新建卡牌</ThemedText></Pressable>
             </View>
           </View>
@@ -577,9 +817,9 @@ export default function CardEditorScreen() {
 
                 {draft.type === CardType.BUILDING && <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>建筑属性</ThemedText><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>{BUILDING_TYPES.map((item) => <Pressable key={item.value} onPress={() => updateDraft('buildingType', item.value)} style={[styles.selectorChip, draft.buildingType === item.value && styles.selectorChipActive, { backgroundColor: draft.buildingType === item.value ? theme.primary : theme.backgroundTertiary, borderColor: draft.buildingType === item.value ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={draft.buildingType === item.value ? '#FFFFFF' : theme.textPrimary}>{item.label}</ThemedText></Pressable>)}</ScrollView><View style={styles.fieldRow}><View style={styles.fieldHalf}><ThemedText variant="small" color={theme.textMuted}>耐久</ThemedText><TextInput value={String(draft.durability ?? 0)} onChangeText={(value) => updateDraft('durability', safeNumber(value, 0))} keyboardType="numeric" style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View></View><TextInput value={draft.effect} onChangeText={(value) => updateDraft('effect', value)} multiline placeholder="输入建筑效果" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>}
 
-                <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>备注</ThemedText><TextInput value={draft.notes} onChangeText={(value) => updateDraft('notes', value)} multiline placeholder="编辑器备注，不会影响对局" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>
+                <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>备注</ThemedText><TextInput value={draft.notes} onChangeText={(value) => updateDraft('notes', value)} multiline placeholder="编辑器备注，不会影响对局" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /><ThemedText variant="small" color={theme.textMuted}>模板名称（可选）</ThemedText><TextInput value={templateName} onChangeText={setTemplateName} placeholder="比如：帝国步兵模板" placeholderTextColor={theme.textMuted} style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>
               </ScrollView>
-              <View style={styles.modalFooter}><Pressable onPress={() => setEditorVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={saveCard} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="floppy-disk" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText></Pressable></View>
+              <View style={styles.modalFooter}><Pressable onPress={() => setEditorVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={saveTemplate} style={[styles.footerButton, styles.footerGhostButton]}><FontAwesome6 name="bookmark" size={14} color={theme.textPrimary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>保存模板</ThemedText></Pressable><Pressable onPress={saveCard} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="floppy-disk" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText></Pressable></View>
             </Pressable>
           </Pressable>
         </KeyboardAvoidingView>
@@ -589,8 +829,26 @@ export default function CardEditorScreen() {
         <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <Pressable style={styles.modalBackdrop} onPress={() => setImportVisible(false)}>
             <Pressable style={styles.modalCard} onPress={() => undefined}>
-              <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>导入 JSON</ThemedText><ThemedText variant="small" color={theme.textMuted}>支持数组，或者包含 cards 字段的对象。</ThemedText></View><Pressable onPress={() => setImportVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
-              <ScrollView contentContainerStyle={styles.modalContent}><TextInput value={importText} onChangeText={setImportText} multiline placeholder="把 JSON 粘贴到这里" placeholderTextColor={theme.textMuted} style={[styles.longInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></ScrollView>
+              <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>导入 JSON</ThemedText><ThemedText variant="small" color={theme.textMuted}>支持数组，或者包含 cards 字段的对象。可以选择模板后批量套用。</ThemedText></View><Pressable onPress={() => setImportVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
+              <ScrollView contentContainerStyle={styles.modalContent}>
+                <View style={styles.formSection}>
+                  <ThemedText variant="small" color={theme.textMuted}>导入模式</ThemedText>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>
+                    <Pressable onPress={() => setImportMode('replace')} style={[styles.selectorChip, importMode === 'replace' && styles.selectorChipActive, { backgroundColor: importMode === 'replace' ? theme.primary : theme.backgroundTertiary, borderColor: importMode === 'replace' ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={importMode === 'replace' ? '#FFFFFF' : theme.textPrimary}>覆盖现有</ThemedText></Pressable>
+                    <Pressable onPress={() => setImportMode('append')} style={[styles.selectorChip, importMode === 'append' && styles.selectorChipActive, { backgroundColor: importMode === 'append' ? theme.primary : theme.backgroundTertiary, borderColor: importMode === 'append' ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={importMode === 'append' ? '#FFFFFF' : theme.textPrimary}>追加到列表</ThemedText></Pressable>
+                  </ScrollView>
+
+                  <ThemedText variant="small" color={theme.textMuted}>导入模板</ThemedText>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.selectorRow}>
+                    <Pressable onPress={() => setImportTemplateId('none')} style={[styles.selectorChip, importTemplateId === 'none' && styles.selectorChipActive, { backgroundColor: importTemplateId === 'none' ? theme.primary : theme.backgroundTertiary, borderColor: importTemplateId === 'none' ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={importTemplateId === 'none' ? '#FFFFFF' : theme.textPrimary}>不套模板</ThemedText></Pressable>
+                    {templates.map((template) => (
+                      <Pressable key={template.id} onPress={() => setImportTemplateId(template.id)} style={[styles.selectorChip, importTemplateId === template.id && styles.selectorChipActive, { backgroundColor: importTemplateId === template.id ? theme.primary : theme.backgroundTertiary, borderColor: importTemplateId === template.id ? theme.primary : theme.borderLight }]}><ThemedText variant="small" color={importTemplateId === template.id ? '#FFFFFF' : theme.textPrimary}>{template.name}</ThemedText></Pressable>
+                    ))}
+                  </ScrollView>
+
+                  <TextInput value={importText} onChangeText={setImportText} multiline placeholder="把 JSON 粘贴到这里" placeholderTextColor={theme.textMuted} style={[styles.longInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} />
+                </View>
+              </ScrollView>
               <View style={styles.modalFooter}><Pressable onPress={() => setImportVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={() => performImport(false)} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><ThemedText variant="smallMedium" color="#FFFFFF">仅导入本地</ThemedText></Pressable><Pressable onPress={() => performImport(true)} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.success }]}><ThemedText variant="smallMedium" color="#FFFFFF">导入并同步</ThemedText></Pressable></View>
             </Pressable>
           </Pressable>
@@ -604,6 +862,52 @@ export default function CardEditorScreen() {
               <View style={styles.modalHeader}><View style={{ flex: 1 }}><ThemedText variant="h3" color={theme.textPrimary}>导出 JSON</ThemedText><ThemedText variant="small" color={theme.textMuted}>复制后可以直接保存，或者发给其他人导入。</ThemedText></View><Pressable onPress={() => setExportVisible(false)} style={styles.iconButton}><FontAwesome6 name="xmark" size={14} color={theme.textPrimary} /></Pressable></View>
               <ScrollView contentContainerStyle={styles.modalContent}><TextInput value={exportJson} editable={false} multiline style={[styles.longInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></ScrollView>
               <View style={styles.modalFooter}><Pressable onPress={async () => { if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard?.writeText) { await navigator.clipboard.writeText(exportJson); } else { await Share.share({ message: exportJson }); } Alert.alert('已复制', '卡牌 JSON 已经复制到剪贴板。'); }} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="copy" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">复制</ThemedText></Pressable><Pressable onPress={() => setExportVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>关闭</ThemedText></Pressable></View>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={templateVisible} transparent animationType="slide">
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setTemplateVisible(false)}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <View style={styles.modalHeader}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText variant="h3" color={theme.textPrimary}>模板库</ThemedText>
+                  <ThemedText variant="small" color={theme.textMuted}>保存当前编辑内容为模板，后续可以直接创建或批量导入套用。</ThemedText>
+                </View>
+                <Pressable onPress={() => setTemplateVisible(false)} style={styles.iconButton}>
+                  <FontAwesome6 name="xmark" size={14} color={theme.textPrimary} />
+                </Pressable>
+              </View>
+              <ScrollView contentContainerStyle={styles.modalContent}>
+                {templates.length > 0 ? templates.map((template) => {
+                  const summary = `${template.defaults.type ?? 'UNIT'} · ${template.defaults.faction ?? 'ENGLAND'} · ${template.defaults.rarity ?? 'COMMON'}`;
+                  return (
+                    <ThemedView key={template.id} level="tertiary" style={styles.templateCard}>
+                      <View style={{ flex: 1, gap: 4 }}>
+                        <ThemedText variant="bodyMedium" color={theme.textPrimary}>{template.name}</ThemedText>
+                        <ThemedText variant="tiny" color={theme.textMuted}>{summary}</ThemedText>
+                      </View>
+                      <View style={styles.templateActions}>
+                        <Pressable onPress={() => createCardFromTemplate(template)} style={[styles.footerButton, { backgroundColor: theme.primary, flex: 1 }]}><ThemedText variant="smallMedium" color="#FFFFFF">应用到新卡</ThemedText></Pressable>
+                        <Pressable onPress={() => deleteTemplate(template.id)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>删除</ThemedText></Pressable>
+                      </View>
+                    </ThemedView>
+                  );
+                }) : (
+                  <ThemedView level="tertiary" style={styles.emptyState}>
+                    <FontAwesome6 name="bookmark" size={40} color={theme.textMuted} />
+                    <ThemedText variant="bodyMedium" color={theme.textPrimary}>还没有保存过模板</ThemedText>
+                    <ThemedText variant="small" color={theme.textMuted}>先从编辑器里点“保存模板”。</ThemedText>
+                  </ThemedView>
+                )}
+              </ScrollView>
+              <View style={styles.modalFooter}>
+                <Pressable onPress={() => setTemplateVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>关闭</ThemedText>
+                </Pressable>
+              </View>
             </Pressable>
           </Pressable>
         </KeyboardAvoidingView>
