@@ -1,0 +1,140 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3rd8b0xmptn5"]
+
+[ext_resource type="Script" path="res://scripts/story_mode_scene.gd" id="1_ghkpg"]
+
+[node name="StoryModeScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ghkpg")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Root" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Hero" type="PanelContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="HeroPadding" type="MarginContainer" parent="Padding/Root/Hero"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 18
+
+[node name="TitleBlock" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Padding/Root/Hero/HeroPadding/TitleBlock"]
+layout_mode = 2
+text = "Story Mode"
+theme_override_font_sizes/font_size = 32
+
+[node name="Meta" type="Label" parent="Padding/Root/Hero/HeroPadding/TitleBlock"]
+layout_mode = 2
+text = ""
+theme_override_font_sizes/font_size = 15
+
+[node name="Content" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="LeftPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Content/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Body" type="VBoxContainer" parent="Padding/Root/Content/LeftPanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Padding/Root/Content/LeftPanel/Padding/Body"]
+layout_mode = 2
+text = "Chapters"
+theme_override_font_sizes/font_size = 20
+
+[node name="ChapterList" type="ItemList" parent="Padding/Root/Content/LeftPanel/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="MiddlePanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Content/MiddlePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Body" type="VBoxContainer" parent="Padding/Root/Content/MiddlePanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Padding/Root/Content/MiddlePanel/Padding/Body"]
+layout_mode = 2
+text = "Levels"
+theme_override_font_sizes/font_size = 20
+
+[node name="LevelList" type="ItemList" parent="Padding/Root/Content/MiddlePanel/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RightPanel" type="PanelContainer" parent="Padding/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Content/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Body" type="VBoxContainer" parent="Padding/Root/Content/RightPanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Background" type="RichTextLabel" parent="Padding/Root/Content/RightPanel/Padding/Body"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 150)
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="LevelDetail" type="RichTextLabel" parent="Padding/Root/Content/RightPanel/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[connection signal="item_selected" from="Padding/Root/Content/LeftPanel/Padding/Body/ChapterList" to="." method="_on_chapter_list_item_selected"]
+[connection signal="item_selected" from="Padding/Root/Content/MiddlePanel/Padding/Body/LevelList" to="." method="_on_level_list_item_selected"]

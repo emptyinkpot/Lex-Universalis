@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://c4lgw6vnk7w2f"]
+
+[ext_resource type="Script" path="res://scripts/card_node.gd" id="1_61vmw"]
+
+[node name="CardNode" type="PanelContainer"]
+custom_minimum_size = Vector2(220, 308)
+script = ExtResource("1_61vmw")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Body" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Padding/Body"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+
+[node name="Meta" type="Label" parent="Padding/Body"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Description" type="RichTextLabel" parent="Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+theme_override_font_sizes/normal_font_size = 14
+
+[node name="Stats" type="Label" parent="Padding/Body"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13

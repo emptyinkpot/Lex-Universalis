@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfgnmqp1bbqgb"]
+
+[ext_resource type="Script" path="res://scripts/card_gallery_scene.gd" id="1_v1j86"]
+
+[node name="CardGalleryScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_v1j86")
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="PanelContainer" parent="Root"]
+layout_mode = 2
+
+[node name="HeaderPadding" type="MarginContainer" parent="Root/Header"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="HeaderRow" type="VBoxContainer" parent="Root/Header/HeaderPadding"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Root/Header/HeaderPadding/HeaderRow"]
+layout_mode = 2
+text = "Card Rendering"
+theme_override_font_sizes/font_size = 28
+
+[node name="Summary" type="Label" parent="Root/Header/HeaderPadding/HeaderRow"]
+layout_mode = 2
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="Body" type="PanelContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BodyPadding" type="MarginContainer" parent="Root/Body"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="GridScroll" type="ScrollContainer" parent="Root/Body/BodyPadding"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CardsGrid" type="GridContainer" parent="Root/Body/BodyPadding/GridScroll"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14

@@ -1,0 +1,190 @@
+[gd_scene load_steps=2 format=3 uid="uid://d0m6m0t3pxb13"]
+
+[ext_resource type="Script" path="res://scripts/battle_scene.gd" id="1_hyc0q"]
+
+[node name="BattleScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hyc0q")
+
+[node name="Root" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="PanelContainer" parent="Root"]
+layout_mode = 2
+
+[node name="TopPadding" type="MarginContainer" parent="Root/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="TopRow" type="HBoxContainer" parent="Root/TopBar/TopPadding"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="EnemyLabel" type="Label" parent="Root/TopBar/TopPadding/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Enemy Fortress"
+theme_override_font_sizes/font_size = 24
+
+[node name="EnemyStats" type="Label" parent="Root/TopBar/TopPadding/TopRow"]
+layout_mode = 2
+horizontal_alignment = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Stage" type="HBoxContainer" parent="Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="Battlefield" type="PanelContainer" parent="Root/Stage"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/Battlefield"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FieldHeader" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Fixed PC Battlefield"
+theme_override_font_sizes/font_size = 26
+
+[node name="FrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Front Line"
+theme_override_font_sizes/font_size = 17
+
+[node name="FrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+text = "Back Line"
+theme_override_font_sizes/font_size = 17
+
+[node name="BackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SideRail" type="VBoxContainer" parent="Root/Stage"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="RulesPanel" type="PanelContainer" parent="Root/Stage/SideRail"]
+layout_mode = 2
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/SideRail/RulesPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/SideRail/RulesPanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RulesHeader" type="Label" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
+layout_mode = 2
+text = "Rules"
+theme_override_font_sizes/font_size = 20
+
+[node name="RulesText" type="RichTextLabel" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="LogPanel" type="PanelContainer" parent="Root/Stage/SideRail"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/SideRail/LogPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/SideRail/LogPanel/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LogHeader" type="Label" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
+layout_mode = 2
+text = "Log"
+theme_override_font_sizes/font_size = 20
+
+[node name="LogText" type="RichTextLabel" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="BottomDock" type="PanelContainer" parent="Root"]
+custom_minimum_size = Vector2(0, 292)
+layout_mode = 2
+
+[node name="DockPadding" type="MarginContainer" parent="Root/BottomDock"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="DockBody" type="VBoxContainer" parent="Root/BottomDock/DockPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MetaRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="DockTitle" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Hand Dock"
+theme_override_font_sizes/font_size = 22
+
+[node name="PlayerStats" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
+layout_mode = 2
+horizontal_alignment = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="HandScroll" type="ScrollContainer" parent="Root/BottomDock/DockPadding/DockBody"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 1
+
+[node name="HandRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody/HandScroll"]
+layout_mode = 2
+theme_override_constants/separation = 12

@@ -1,0 +1,91 @@
+extends Control
+
+const DATA_LOADER = preload("res://scripts/data_loader.gd")
+
+var story: Dictionary = {}
+var data_loader: RefCounted
+
+@onready var scenario_title: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Title")
+@onready var scenario_meta: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Meta")
+@onready var background_label: RichTextLabel = get_node("Padding/Root/Content/RightPanel/Padding/Body/Background")
+@onready var chapter_list: ItemList = get_node("Padding/Root/Content/LeftPanel/Padding/Body/ChapterList")
+@onready var level_list: ItemList = get_node("Padding/Root/Content/MiddlePanel/Padding/Body/LevelList")
+@onready var level_detail: RichTextLabel = get_node("Padding/Root/Content/RightPanel/Padding/Body/LevelDetail")
+
+func _ready() -> void:
+	data_loader = DATA_LOADER.new()
+	story = data_loader.load_story_showcase()
+	_apply_theme()
+	_render_story()
+
+func _apply_theme() -> void:
+	scenario_title.add_theme_color_override("font_color", Color("f1e2bf"))
+	scenario_meta.add_theme_color_override("font_color", Color("dbc8a2"))
+	background_label.add_theme_color_override("default_color", Color("dbc8a2"))
+	level_detail.add_theme_color_override("default_color", Color("dbc8a2"))
+
+func _render_story() -> void:
+	var factions: Array = story.get("playerFactions", [])
+	scenario_title.text = str(story.get("name", "Story Mode"))
+	scenario_meta.text = "%s  |  %s  |  Factions: %s" % [
+		str(story.get("year", "")),
+		str(story.get("era", "")),
+		", ".join(factions),
+	]
+	background_label.text = "[b]Historical Background[/b]\n%s" % str(story.get("historicalBackground", ""))
+	chapter_list.clear()
+	var chapters: Array = story.get("chapters", [])
+	for chapter in chapters:
+		if chapter is Dictionary:
+			chapter_list.add_item(str(chapter.get("name", "Unnamed Chapter")))
+	if chapters.size() > 0:
+		chapter_list.select(0)
+		_render_levels_for_chapter(0)
+
+func _render_levels_for_chapter(index: int) -> void:
+	level_list.clear()
+	level_detail.text = ""
+	var chapters: Array = story.get("chapters", [])
+	if index < 0 or index >= chapters.size():
+		return
+	var chapter := chapters[index] as Dictionary
+	var levels: Array = chapter.get("levels", [])
+	for level in levels:
+		if level is Dictionary:
+			level_list.add_item("%s  |  %s" % [
+				str(level.get("name", "Unnamed Level")),
+				str(level.get("difficulty", "NORMAL")),
+			])
+	if levels.size() > 0:
+		level_list.select(0)
+		_render_level_detail(index, 0)
+
+func _render_level_detail(chapter_index: int, level_index: int) -> void:
+	var chapters: Array = story.get("chapters", [])
+	if chapter_index < 0 or chapter_index >= chapters.size():
+		return
+	var chapter := chapters[chapter_index] as Dictionary
+	var levels: Array = chapter.get("levels", [])
+	if level_index < 0 or level_index >= levels.size():
+		return
+	var level := levels[level_index] as Dictionary
+	var reward_lines: Array[String] = []
+	for reward in level.get("rewards", []):
+		if reward is Dictionary:
+			reward_lines.append("- %s" % str(reward.get("description", "")))
+	level_detail.text = "[b]%s[/b]\n%s\n\n[i]%s[/i]\n\n[b]Victory[/b]\n%s\n\n[b]Defeat[/b]\n%s\n\n[b]Rewards[/b]\n%s" % [
+		str(level.get("name", "")),
+		str(level.get("description", "")),
+		str(level.get("storyText", "")),
+		str(level.get("victoryCondition", "")),
+		str(level.get("defeatCondition", "")),
+		"\n".join(reward_lines),
+	]
+
+func _on_chapter_list_item_selected(index: int) -> void:
+	_render_levels_for_chapter(index)
+
+func _on_level_list_item_selected(index: int) -> void:
+	var selected := chapter_list.get_selected_items()
+	var chapter_index := selected[0] if selected.size() > 0 else 0
+	_render_level_detail(chapter_index, index)

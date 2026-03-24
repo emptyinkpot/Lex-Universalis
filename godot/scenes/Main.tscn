@@ -42,7 +42,6 @@ theme_override_constants/separation = 16
 
 [node name="TopBar" type="PanelContainer" parent="Margin/Root"]
 layout_mode = 2
-size_flags_vertical = 0
 
 [node name="TopBarPadding" type="MarginContainer" parent="Margin/Root/TopBar"]
 layout_mode = 2
@@ -66,121 +65,39 @@ theme_override_font_sizes/font_size = 36
 
 [node name="Subtitle" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock"]
 layout_mode = 2
-text = "Godot desktop migration shell"
+text = "Godot desktop migration workspace"
 theme_override_font_sizes/font_size = 16
 
 [node name="TopStats" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow"]
 layout_mode = 2
 horizontal_alignment = 2
-vertical_alignment = 1
 size_flags_horizontal = 3
-text = "Loading data..."
+text = "Loading datasets..."
 theme_override_font_sizes/font_size = 16
 
-[node name="Workspace" type="HSplitContainer" parent="Margin/Root"]
+[node name="Modes" type="TabContainer" parent="Margin/Root"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 700
 
-[node name="LeftColumn" type="VBoxContainer" parent="Margin/Root/Workspace"]
+[node name="StoryTab" type="Control" parent="Margin/Root/Modes"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 16
 
-[node name="StoryPanel" type="PanelContainer" parent="Margin/Root/Workspace/LeftColumn"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="StoryPadding" type="MarginContainer" parent="Margin/Root/Workspace/LeftColumn/StoryPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 18
-
-[node name="StoryBox" type="VBoxContainer" parent="Margin/Root/Workspace/LeftColumn/StoryPanel/StoryPadding"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="StoryTitle" type="Label" parent="Margin/Root/Workspace/LeftColumn/StoryPanel/StoryPadding/StoryBox"]
-layout_mode = 2
-text = "Story Mode Shell"
-theme_override_font_sizes/font_size = 24
-
-[node name="StorySummary" type="RichTextLabel" parent="Margin/Root/Workspace/LeftColumn/StoryPanel/StoryPadding/StoryBox"]
-layout_mode = 2
-size_flags_vertical = 3
-bbcode_enabled = true
-scroll_active = false
-fit_content = false
-text = ""
-
-[node name="BattlePanel" type="PanelContainer" parent="Margin/Root/Workspace/LeftColumn"]
-layout_mode = 2
-size_flags_vertical = 2
-
-[node name="BattlePadding" type="MarginContainer" parent="Margin/Root/Workspace/LeftColumn/BattlePanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 18
-
-[node name="BattleBox" type="VBoxContainer" parent="Margin/Root/Workspace/LeftColumn/BattlePanel/BattlePadding"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="BattleTitle" type="Label" parent="Margin/Root/Workspace/LeftColumn/BattlePanel/BattlePadding/BattleBox"]
-layout_mode = 2
-text = "Battle Seed"
-theme_override_font_sizes/font_size = 22
-
-[node name="BattleSummary" type="Label" parent="Margin/Root/Workspace/LeftColumn/BattlePanel/BattlePadding/BattleBox"]
-layout_mode = 2
-autowrap_mode = 3
-text = ""
-theme_override_font_sizes/font_size = 15
-
-[node name="RightColumn" type="VBoxContainer" parent="Margin/Root/Workspace"]
+[node name="BattleTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/separation = 16
 
-[node name="CardPanel" type="PanelContainer" parent="Margin/Root/Workspace/RightColumn"]
+[node name="CardsTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
 layout_mode = 2
-size_flags_vertical = 3
-
-[node name="CardPadding" type="MarginContainer" parent="Margin/Root/Workspace/RightColumn/CardPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 18
-
-[node name="CardBox" type="VBoxContainer" parent="Margin/Root/Workspace/RightColumn/CardPanel/CardPadding"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="CardTitle" type="Label" parent="Margin/Root/Workspace/RightColumn/CardPanel/CardPadding/CardBox"]
-layout_mode = 2
-text = "Card Archive"
-theme_override_font_sizes/font_size = 24
-
-[node name="CardSummary" type="Label" parent="Margin/Root/Workspace/RightColumn/CardPanel/CardPadding/CardBox"]
-layout_mode = 2
-autowrap_mode = 3
-text = ""
-theme_override_font_sizes/font_size = 15
-
-[node name="ChapterList" type="ItemList" parent="Margin/Root/Workspace/RightColumn/CardPanel/CardPadding/CardBox"]
-layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Footer" type="PanelContainer" parent="Margin/Root"]
 layout_mode = 2
-size_flags_vertical = 0
 
 [node name="FooterPadding" type="MarginContainer" parent="Margin/Root/Footer"]
 layout_mode = 2
@@ -191,6 +108,6 @@ theme_override_constants/margin_bottom = 12
 
 [node name="FooterLabel" type="Label" parent="Margin/Root/Footer/FooterPadding"]
 layout_mode = 2
-text = "Desktop-first Godot shell. Next step: replace this bootstrap with story flow, card viewport, and battle scene."
+text = "Single-window desktop target: story, battle, and cards all move into Godot-native fixed-viewport scenes."
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 14
