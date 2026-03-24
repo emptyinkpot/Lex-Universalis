@@ -7,6 +7,7 @@ const DATA_LOADER = preload("res://scripts/data_loader.gd")
 var story: Dictionary = {}
 var data_loader: RefCounted
 var campaign_scenarios: Array = []
+var progress: Dictionary = {}
 var selected_chapter_index := 0
 var selected_level_index := 0
 
@@ -22,6 +23,7 @@ func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	story = data_loader.load_story_showcase()
 	campaign_scenarios = data_loader.load_campaign_scenarios()
+	progress = data_loader.load_story_progress()
 	_apply_theme()
 	launch_button.pressed.connect(_on_launch_button_pressed)
 	_render_story()
@@ -61,9 +63,11 @@ func _render_levels_for_chapter(index: int) -> void:
 	var levels: Array = chapter.get("levels", [])
 	for level in levels:
 		if level is Dictionary:
-			level_list.add_item("%s  |  %s" % [
+			var stars: int = data_loader.get_level_stars(str(level.get("id", "")))
+			level_list.add_item("%s  |  %s  |  %s" % [
 				str(level.get("name", "Unnamed Level")),
 				str(level.get("difficulty", "NORMAL")),
+				("%d star" % stars) if stars == 1 else ("%d stars" % stars),
 			])
 	if levels.size() > 0:
 		level_list.select(0)
@@ -134,3 +138,7 @@ func _find_campaign_level(level_id: String) -> Dictionary:
 				if level is Dictionary and str(level.get("id", "")) == level_id:
 					return (level as Dictionary).duplicate(true)
 	return {}
+
+func refresh_progress() -> void:
+	progress = data_loader.load_story_progress()
+	_render_story()

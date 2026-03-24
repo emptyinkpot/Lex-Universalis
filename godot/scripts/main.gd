@@ -57,9 +57,16 @@ func _on_story_launch_level(level_data: Dictionary) -> void:
 		battle_view.start_level(level_data)
 
 func _on_battle_finished(result_data: Dictionary) -> void:
+	if bool(result_data.get("won", false)):
+		var level_id := str(result_data.get("levelId", ""))
+		if not level_id.is_empty():
+			data_loader.update_story_progress(level_id, int(result_data.get("starsEarned", 0)), result_data.get("rewards", []))
+		_render_stats()
 	tab_container.current_tab = 3
 	if result_view.has_method("setup_result"):
 		result_view.setup_result(result_data)
 
 func _on_return_to_story() -> void:
 	tab_container.current_tab = 0
+	if story_view.has_method("refresh_progress"):
+		story_view.refresh_progress()

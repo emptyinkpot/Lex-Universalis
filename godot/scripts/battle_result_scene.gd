@@ -20,7 +20,7 @@ func setup_result(result_data: Dictionary) -> void:
 	]
 	summary_label.text = "[b]Objective[/b]\n%s\n\n[b]Outcome[/b]\n%s\n\n[b]Battle Summary[/b]\n%s" % [
 		str(result_data.get("victoryCondition", "")),
-		str(result_data.get("outcomeText", "")),
+		"%s\nStars earned: %d" % [str(result_data.get("outcomeText", "")), int(result_data.get("starsEarned", 0))],
 		str(result_data.get("logSummary", "")),
 	]
 	var reward_lines: Array[String] = []

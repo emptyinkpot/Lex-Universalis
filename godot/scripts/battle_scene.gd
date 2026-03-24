@@ -15,6 +15,7 @@ var discard_pile: Array = []
 var battle_slots: Array = []
 var player_slots: Array = []
 var selected_hand_index := -1
+var selected_player_slot_id := ""
 var dragged_hand_index := -1
 var is_resolving := false
 var player_state: Dictionary = {}
@@ -82,7 +83,7 @@ func _render_all() -> void:
 		int(player_state.get("influence", 0)),
 	]
 	pile_label.text = "Draw %d   Discard %d" % [draw_pile.size(), discard_pile.size()]
-	queue_label.text = "Selected: %s" % ("None" if selected_hand_index < 0 else str(hand_cards[selected_hand_index].get("name", "Card")))
+	queue_label.text = "Selected: %s" % _build_selection_label()
 	_render_slots()
 	_render_hand()
 
@@ -106,9 +107,13 @@ func _render_slot_row(row_node: HBoxContainer, slots: Array, row_name: String, i
 		if bool(slot.get("collapsed", false)):
 			continue
 		var slot_node := BATTLE_SLOT_SCENE.instantiate()
-		slot_node.call("setup", slot, selected_hand_index >= 0 and not is_player_side)
-		if not is_player_side:
-			slot_node.slot_pressed.connect(_on_slot_pressed)
+		var armed := false
+		if is_player_side:
+			armed = str(slot.get("id", "")) == selected_player_slot_id
+		else:
+			armed = selected_hand_index >= 0 or not selected_player_slot_id.is_empty()
+		slot_node.call("setup", slot, armed)
+		slot_node.slot_pressed.connect(_on_slot_pressed)
 		row_node.add_child(slot_node)
 		rendered_slot_nodes[str(slot.get("id", ""))] = slot_node
 
@@ -136,12 +141,21 @@ func _draw_card() -> void:
 	hand_cards.append(draw_pile.pop_front())
 
 func _on_card_pressed(_card_data: Dictionary, index: int) -> void:
+	selected_player_slot_id = ""
 	selected_hand_index = -1 if selected_hand_index == index else index
 	_append_log("Hand", "Selected %s" % ("none" if selected_hand_index < 0 else str(hand_cards[selected_hand_index].get("name", "Card"))))
 	_render_all()
 
 func _on_slot_pressed(slot_id: String) -> void:
-	if selected_hand_index < 0 or is_resolving:
+	if is_resolving:
+		return
+	if slot_id.begins_with("player_"):
+		_on_player_slot_pressed(slot_id)
+		return
+	if not selected_player_slot_id.is_empty():
+		await _resolve_player_unit_attack(slot_id)
+		return
+	if selected_hand_index < 0:
 		_append_log("Battle", "Select a card first.")
 		return
 	if not _can_target_enemy_slot(slot_id):
@@ -160,6 +174,10 @@ func _on_slot_pressed(slot_id: String) -> void:
 	var keep_on_field := false
 	if _is_unit_card(card):
 		keep_on_field = await _deploy_unit_to_player_slot(card, slot)
+	elif str(card.get("type", "")).to_upper() == "BUILDING":
+		keep_on_field = _resolve_building_play(card)
+	elif str(card.get("type", "")).to_upper() == "TACTIC":
+		await _resolve_tactic_play(card, slot)
 	else:
 		await _resolve_spell_attack(card, slot)
 	if not keep_on_field:
@@ -199,6 +217,7 @@ func _on_card_drag_ended(_card_data: Dictionary, global_position: Vector2, index
 
 func _on_end_turn_pressed() -> void:
 	selected_hand_index = -1
+	selected_player_slot_id = ""
 	await _process_enemy_turn()
 	_append_log("Turn", "Enemy pressure resolved. Queue cleared.")
 	_render_all()
@@ -214,6 +233,15 @@ func _get_card_damage(card: Dictionary) -> int:
 	if card.get("attack", null) != null:
 		return int(card.get("attack", 0))
 	return maxi(1, int(card.get("cost", 0)))
+
+func _build_selection_label() -> String:
+	if selected_hand_index >= 0 and selected_hand_index < hand_cards.size():
+		return str(hand_cards[selected_hand_index].get("name", "Card"))
+	if not selected_player_slot_id.is_empty():
+		var selected_slot := _find_slot_by_id(selected_player_slot_id)
+		if not selected_slot.is_empty():
+			return "%s (Attack/Wait)" % str(selected_slot.get("occupantName", "Unit"))
+	return "None"
 
 func _is_unit_card(card: Dictionary) -> bool:
 	return str(card.get("type", "")).to_upper() == "UNIT"
@@ -290,10 +318,44 @@ func _deploy_unit_to_player_slot(card: Dictionary, enemy_slot: Dictionary) -> bo
 	player_slot["health"] = int(player_slot.get("maxHealth", 1))
 	player_slot["collapsed"] = false
 	player_slot["keywords"] = _get_card_keywords(card)
+	player_slot["spent"] = false
 	_append_log("Deploy", "%s entered %s." % [str(card.get("name", "Unit")), str(player_slot.get("title", "lane"))])
 	if _card_has_keyword(card, "FIRST_STRIKE") or _card_has_keyword(card, "RANGED"):
 		await _resolve_unit_attack_from_slot(player_slot, enemy_slot)
 	return true
+
+func _resolve_building_play(card: Dictionary) -> bool:
+	var slot := _find_empty_player_back_slot()
+	if slot.is_empty():
+		_append_log("Build", "No backline slot available for %s." % str(card.get("name", "Building")))
+		return false
+	slot["occupantCardId"] = str(card.get("id", ""))
+	slot["occupantName"] = str(card.get("name", slot.get("title", "Building")))
+	slot["occupantCard"] = card.duplicate(true)
+	slot["attack"] = 0
+	slot["maxHealth"] = max(4, int(card.get("health", 4)))
+	slot["health"] = int(slot.get("maxHealth", 4))
+	slot["collapsed"] = false
+	slot["keywords"] = ["ARMORED"]
+	slot["spent"] = true
+	player_state["influence"] = int(player_state.get("influence", 0)) + 1
+	_append_log("Build", "%s fortified the backline. Influence +1." % str(card.get("name", "Building")))
+	return true
+
+func _resolve_tactic_play(card: Dictionary, slot: Dictionary) -> void:
+	var slot_id := str(slot.get("id", ""))
+	var damage := _get_effective_damage(card, slot) + 1
+	slot["health"] = maxi(0, int(slot.get("health", 0)) - damage)
+	enemy_state["health"] = maxi(0, int(enemy_state.get("health", 0)) - damage)
+	player_state["gold"] = int(player_state.get("gold", 0)) + 1
+	if rendered_slot_nodes.has(slot_id):
+		_spawn_damage_text(rendered_slot_nodes[slot_id], damage, false)
+		await rendered_slot_nodes[slot_id].play_hit_feedback()
+	_append_log("Tactic", "%s broke formation for %d and generated +1 gold." % [str(card.get("name", "Tactic")), damage])
+	if int(slot.get("health", 0)) == 0:
+		slot["collapsed"] = true
+		await _play_slot_break(slot_id)
+		_append_log("Break", "%s collapsed." % str(slot.get("title", "Slot")))
 
 func _reset_battle_state(deck_override: Array = []) -> void:
 	draw_pile = deck_override.duplicate(true) if not deck_override.is_empty() else base_cards.duplicate(true)
@@ -464,6 +526,7 @@ func _seed_slot_occupants(slots: Array, deck: Array, faction: String, player_sid
 			slot["playerSide"] = player_side
 			slot["collapsed"] = false
 			slot["keywords"] = []
+			slot["spent"] = false
 			continue
 		var card := (unit_cards[index % unit_cards.size()] as Dictionary).duplicate(true)
 		slot["faction"] = faction
@@ -476,6 +539,7 @@ func _seed_slot_occupants(slots: Array, deck: Array, faction: String, player_sid
 		slot["playerSide"] = player_side
 		slot["collapsed"] = false
 		slot["keywords"] = _get_card_keywords(card)
+		slot["spent"] = false
 
 func _apply_enemy_retaliation(enemy_slot: Dictionary) -> void:
 	if bool(enemy_slot.get("collapsed", false)) or int(enemy_slot.get("health", 0)) <= 0 or not _slot_has_unit(enemy_slot):
@@ -573,6 +637,9 @@ func _can_target_enemy_slot(slot_id: String) -> bool:
 	var selected_card := hand_cards[selected_hand_index] as Dictionary if selected_hand_index >= 0 and selected_hand_index < hand_cards.size() else {}
 	if not selected_card.is_empty() and _card_has_keyword(selected_card, "RANGED"):
 		return true
+	var selected_slot := _find_slot_by_id(selected_player_slot_id)
+	if not selected_slot.is_empty() and _slot_has_keyword(selected_slot, "RANGED"):
+		return true
 	return not _has_alive_row(battle_slots, "front")
 
 func _animate_slot_attack(attacker_slot_id: String, target_slot_id: String, target_slot: Dictionary) -> void:
@@ -621,6 +688,12 @@ func _find_matching_player_slot(enemy_slot: Dictionary) -> Dictionary:
 func _slot_has_unit(slot: Dictionary) -> bool:
 	return str(slot.get("occupantCardId", "")).strip_edges() != "" and int(slot.get("health", 0)) > 0
 
+func _find_empty_player_back_slot() -> Dictionary:
+	for slot in player_slots:
+		if str(slot.get("row", "")) == "back" and not _slot_has_unit(slot):
+			return slot
+	return {}
+
 func _card_has_keyword(card: Dictionary, keyword: String) -> bool:
 	return keyword.to_upper() in _get_card_keywords(card)
 
@@ -659,6 +732,42 @@ func _resolve_unit_attack_from_slot(player_slot: Dictionary, enemy_slot: Diction
 		await _play_slot_break(enemy_slot_id)
 		_append_log("Break", "%s collapsed." % str(enemy_slot.get("title", "Slot")))
 
+func _on_player_slot_pressed(slot_id: String) -> void:
+	if selected_hand_index >= 0:
+		return
+	var slot := _find_slot_by_id(slot_id)
+	if slot.is_empty() or not _slot_has_unit(slot):
+		selected_player_slot_id = ""
+		_render_all()
+		return
+	if bool(slot.get("spent", false)):
+		_append_log("Orders", "%s is already waiting." % str(slot.get("occupantName", "Unit")))
+		selected_player_slot_id = ""
+		_render_all()
+		return
+	selected_player_slot_id = "" if selected_player_slot_id == slot_id else slot_id
+	_append_log("Orders", "Selected %s." % str(slot.get("occupantName", "Unit")))
+	_render_all()
+
+func _resolve_player_unit_attack(enemy_slot_id: String) -> void:
+	if selected_player_slot_id.is_empty():
+		return
+	if not _can_target_enemy_slot(enemy_slot_id):
+		_append_log("Battle", "Front line must be broken before attacking the back line.")
+		return
+	var player_slot := _find_slot_by_id(selected_player_slot_id)
+	var enemy_slot := _find_slot_by_id(enemy_slot_id)
+	if player_slot.is_empty() or enemy_slot.is_empty():
+		return
+	is_resolving = true
+	await _resolve_unit_attack_from_slot(player_slot, enemy_slot)
+	player_slot["spent"] = true
+	selected_player_slot_id = ""
+	_render_all()
+	if _check_battle_finished():
+		return
+	is_resolving = false
+
 func _find_base_card_by_id(card_id: String) -> Dictionary:
 	for card in base_cards:
 		if card is Dictionary and str(card.get("id", "")) == card_id:
@@ -684,15 +793,20 @@ func _has_any_unit(slots: Array) -> bool:
 	return false
 
 func _build_result_payload(won: bool) -> Dictionary:
+	var stars := 0
+	if won:
+		stars = 3 if int(player_state.get("health", 0)) >= 24 else (2 if int(player_state.get("health", 0)) >= 12 else 1)
 	var log_summary := log_label.text.replace("[b]", "").replace("[/b]", "")
 	return {
 		"won": won,
+		"levelId": str(active_level.get("id", "")),
 		"scenarioName": str(active_level.get("scenarioName", "Story Mode")),
 		"levelName": str(active_level.get("name", "Battle")),
 		"victoryCondition": str(active_level.get("victoryCondition", "")),
 		"outcomeText": "Objective secured." if won else str(active_level.get("defeatCondition", "The line was broken.")),
 		"rewards": active_level.get("rewards", []),
 		"enemyDeck": active_level.get("enemyDeck", []),
+		"starsEarned": stars,
 		"logSummary": log_summary,
 	}
 
