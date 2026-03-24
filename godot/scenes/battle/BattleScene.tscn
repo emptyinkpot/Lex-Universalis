@@ -180,6 +180,14 @@ horizontal_alignment = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 15
 
+[node name="QueueLabel" type="Label" parent="Root/BottomDock/DockPadding/DockBody"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="PileLabel" type="Label" parent="Root/BottomDock/DockPadding/DockBody"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
 [node name="HandScroll" type="ScrollContainer" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2
 size_flags_vertical = 3
@@ -188,3 +196,14 @@ horizontal_scroll_mode = 1
 [node name="HandRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody/HandScroll"]
 layout_mode = 2
 theme_override_constants/separation = 12
+
+[node name="ActionRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody"]
+layout_mode = 2
+
+[node name="ActionSpacer" type="Control" parent="Root/BottomDock/DockPadding/DockBody/ActionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="EndTurnButton" type="Button" parent="Root/BottomDock/DockPadding/DockBody/ActionRow"]
+layout_mode = 2
+text = "End Turn"
