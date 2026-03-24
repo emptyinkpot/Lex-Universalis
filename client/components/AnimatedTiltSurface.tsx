@@ -1,11 +1,8 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { Pressable, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withRepeat,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 
@@ -30,18 +27,6 @@ export function AnimatedTiltSurface({
 }: AnimatedTiltSurfaceProps) {
   const hover = useSharedValue(0);
   const press = useSharedValue(0);
-  const sheen = useSharedValue(-1);
-
-  useEffect(() => {
-    sheen.value = withRepeat(
-      withSequence(
-        withTiming(-1, { duration: 0 }),
-        withTiming(1, { duration: 2800, easing: Easing.inOut(Easing.quad) }),
-      ),
-      -1,
-      false,
-    );
-  }, [sheen]);
 
   const animatedStyle = useAnimatedStyle(() => {
     const tilt = hover.value * 6;
@@ -63,11 +48,6 @@ export function AnimatedTiltSurface({
     };
   });
 
-  const sheenStyle = useAnimatedStyle(() => ({
-    opacity: 0.22 + hover.value * 0.14,
-    transform: [{ translateX: `${sheen.value * 140}%` as any }],
-  }));
-
   return (
     <Pressable
       disabled={disabled}
@@ -80,20 +60,6 @@ export function AnimatedTiltSurface({
     >
       <Animated.View style={[animatedStyle, contentStyle]}>
         {children}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              top: -20,
-              bottom: -20,
-              width: '24%',
-              backgroundColor: 'rgba(255,255,255,0.12)',
-              transform: [{ rotate: '18deg' }],
-            },
-            sheenStyle,
-          ]}
-        />
       </Animated.View>
     </Pressable>
   );

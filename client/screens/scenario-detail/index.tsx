@@ -5,6 +5,7 @@ import { useSafeRouter, useSafeSearchParams } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
+import { STORY_SHOWCASE_SCENARIO } from '@/data/story-showcase';
 import { createStyles } from './styles';
 
 interface Scenario {
@@ -74,7 +75,7 @@ export default function ScenarioDetailScreen() {
       const chaptersData = await chaptersRes.json();
 
       if (scenarioData.success) {
-        setScenario(scenarioData.data);
+        setScenario(scenarioData.data ?? STORY_SHOWCASE_SCENARIO);
       }
       if (chaptersData.success) {
         const firstChapter = Array.isArray(chaptersData.data) ? chaptersData.data[0] ?? null : null;
@@ -83,10 +84,21 @@ export default function ScenarioDetailScreen() {
       }
     } catch (error) {
       console.error('加载剧本详情失败:', error);
+      setScenario(STORY_SHOWCASE_SCENARIO);
+      setChapter(STORY_SHOWCASE_SCENARIO.chapters[0]);
+      setSelectedLevel(STORY_SHOWCASE_SCENARIO.chapters[0].levels[0]);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading && (!scenario || !chapter || !selectedLevel)) {
+      setScenario(STORY_SHOWCASE_SCENARIO);
+      setChapter(STORY_SHOWCASE_SCENARIO.chapters[0]);
+      setSelectedLevel(STORY_SHOWCASE_SCENARIO.chapters[0].levels[0]);
+    }
+  }, [loading, scenario, chapter, selectedLevel]);
 
   const handleStartBattle = () => {
     if (!selectedLevel) return;

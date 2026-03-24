@@ -6,6 +6,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { AnimatedTiltSurface } from '@/components/AnimatedTiltSurface';
+import { STORY_SHOWCASE_PROGRESS, STORY_SHOWCASE_SCENARIO } from '@/data/story-showcase';
 import { createStyles } from './styles';
 
 interface Scenario {
@@ -72,17 +73,26 @@ export default function StoryModeScreen() {
       const progressData = await progressRes.json();
 
       if (scenariosData.success) {
-        setScenario(Array.isArray(scenariosData.data) ? scenariosData.data[0] ?? null : null);
+        setScenario(Array.isArray(scenariosData.data) ? scenariosData.data[0] ?? STORY_SHOWCASE_SCENARIO : STORY_SHOWCASE_SCENARIO);
       }
       if (progressData.success) {
         setProgress(progressData.data);
       }
     } catch (error) {
       console.error('加载故事模式失败:', error);
+      setScenario(STORY_SHOWCASE_SCENARIO);
+      setProgress(STORY_SHOWCASE_PROGRESS);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading && !scenario) {
+      setScenario(STORY_SHOWCASE_SCENARIO);
+      setProgress((current) => current ?? STORY_SHOWCASE_PROGRESS);
+    }
+  }, [loading, scenario]);
 
   const firstChapter = scenario?.chapters?.[0] ?? null;
   const firstLevel = firstChapter?.levels?.[0] ?? null;
