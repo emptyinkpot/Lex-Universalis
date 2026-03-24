@@ -34,7 +34,8 @@ interface KardsCardProps {
   totalFanCards?: number; // 扇形布局总卡数
   onDragStart?: () => void;
   onDragEnd?: () => void;
-  onDropInZone?: () => void;
+  onDropInZone?: (point?: { x: number; y: number }) => void;
+  onDragMove?: (point: { x: number; y: number }) => void;
   onDeselect?: () => void; // 取消选中回调
   isDraggable?: boolean; // 是否允许拖动
 }
@@ -54,6 +55,7 @@ export const KardsCard: React.FC<KardsCardProps> = ({
   onDragStart,
   onDragEnd,
   onDropInZone,
+  onDragMove,
   onDeselect,
   isDraggable = true,
 }) => {
@@ -268,6 +270,7 @@ export const KardsCard: React.FC<KardsCardProps> = ({
         }
         dragOffsetX.value = event.translationX;
         dragOffsetY.value = event.translationY;
+        if (onDragMove) runOnJS(onDragMove)({ x: event.absoluteX, y: event.absoluteY });
         // 轻微旋转效果
         dragRotation.value = event.translationX * 0.05;
       })
@@ -276,14 +279,14 @@ export const KardsCard: React.FC<KardsCardProps> = ({
         runOnJS(setShowParticles)(false);
         runOnJS(setIsDraggingState)(false);
         
-        const isDropZone = event.translationY < -150;
+        const isDropZone = event.translationY < -96;
         
         if (isDropZone && hasMoved.value && onDropInZone) {
           // 拖到目标区域：打出卡牌
           dragScale.value = withSpring(1);
           dragOffsetX.value = withTiming(0, { duration: 150 });
           dragOffsetY.value = withTiming(0, { duration: 150 }, () => {
-            if (onDropInZone) runOnJS(onDropInZone)();
+            if (onDropInZone) runOnJS(onDropInZone)({ x: event.absoluteX, y: event.absoluteY });
           });
         } else {
           // 在手牌区域松手：回归原位 + 取消选中（快速复位）

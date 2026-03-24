@@ -13,6 +13,7 @@ interface BattleHandCardMotionProps {
   hovered: boolean;
   selected: boolean;
   targeting: boolean;
+  collapsed?: boolean;
   delay?: number;
 }
 
@@ -21,6 +22,7 @@ export function BattleHandCardMotion({
   hovered,
   selected,
   targeting,
+  collapsed = false,
   delay = 0,
 }: BattleHandCardMotionProps) {
   const hoverValue = useSharedValue(0);
@@ -28,6 +30,7 @@ export function BattleHandCardMotion({
   const entryOffset = useSharedValue(64);
   const entryOpacity = useSharedValue(0);
   const auraValue = useSharedValue(0);
+  const collapseValue = useSharedValue(0);
 
   useEffect(() => {
     hoverValue.value = withSpring(hovered ? 1 : 0, { damping: 16, stiffness: 180 });
@@ -48,16 +51,20 @@ export function BattleHandCardMotion({
     auraValue.value = withTiming(hovered || selected ? 1 : 0, { duration: 180 });
   }, [auraValue, hovered, selected]);
 
+  useEffect(() => {
+    collapseValue.value = withTiming(collapsed ? 1 : 0, { duration: 220 });
+  }, [collapseValue, collapsed]);
+
   const cardStyle = useAnimatedStyle(() => {
     const hoverLift = hovered ? -16 : 0;
     const selectLift = selected ? -24 : 0;
     const rotate = (hoverValue.value * -6) + (selectValue.value * -2);
-    const scale = 1 + hoverValue.value * 0.04 + selectValue.value * 0.06;
+    const scale = 1 + hoverValue.value * 0.04 + selectValue.value * 0.06 - collapseValue.value * 0.08;
 
     return {
       opacity: entryOpacity.value,
       transform: [
-        { translateY: entryOffset.value + hoverLift + selectLift },
+        { translateY: entryOffset.value + hoverLift + selectLift + collapseValue.value * 22 },
         { rotateZ: `${rotate}deg` },
         { scale },
       ],

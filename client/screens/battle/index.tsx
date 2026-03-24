@@ -120,6 +120,8 @@ export default function BattleScreen() {
   const [selectedHandIndex, setSelectedHandIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isHandDragging, setIsHandDragging] = useState(false);
+  const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null);
+  const [handCollapsed, setHandCollapsed] = useState(false);
   const [battleFocus, setBattleFocus] = useState<BattleFocus>('enemy-line');
   const [isTargeting, setIsTargeting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -280,6 +282,27 @@ export default function BattleScreen() {
     };
   };
 
+  const getDraggedTargetSlotId = () => {
+    if (!dragPoint) {
+      return null;
+    }
+
+    const hitSlot = battleSlots.find((slot) => {
+      if (slot.status !== 'alive') {
+        return false;
+      }
+
+      const point = getTargetPoint(slot);
+      const withinX = Math.abs(dragPoint.x - point.x) <= 88;
+      const withinY = Math.abs(dragPoint.y - point.y) <= 68;
+      return withinX && withinY;
+    });
+
+    return hitSlot?.id ?? null;
+  };
+
+  const draggedTargetSlotId = getDraggedTargetSlotId();
+
   const queueDeathFade = (slotId: string) => {
     if (deathTimersRef.current.has(slotId)) {
       clearTimeout(deathTimersRef.current.get(slotId));
@@ -300,6 +323,7 @@ export default function BattleScreen() {
   const cancelTargetMode = () => {
     setIsTargeting(false);
     setIsHandDragging(false);
+    setDragPoint(null);
     setSelectedCard(null);
     setSelectedHandIndex(null);
     emitFeedback({
@@ -323,6 +347,9 @@ export default function BattleScreen() {
     setSelectedCard(null);
     setSelectedHandIndex(null);
     setIsHandDragging(false);
+    setDragPoint(null);
+    setHandCollapsed(true);
+    setTimeout(() => setHandCollapsed(false), 360);
     setIsTargeting(false);
     emitFeedback({
       kind: 'turn',
@@ -506,6 +533,7 @@ export default function BattleScreen() {
     setSelectedCard(null);
     setSelectedHandIndex(null);
     setIsTargeting(false);
+    setDragPoint(null);
     setBattleFocus('enemy-line');
     setTimeout(() => {
       setCastEvent(null);
@@ -599,6 +627,7 @@ export default function BattleScreen() {
       hovered={hoveredIndex === index}
       selected={selectedCard?.id === card.id}
       targeting={isTargeting}
+      collapsed={handCollapsed}
       delay={index * 80}
     >
       <KardsCard
@@ -614,23 +643,33 @@ export default function BattleScreen() {
         onPressOut={() => setHoveredIndex(null)}
         onDragStart={() => {
           setIsHandDragging(true);
+          setDragPoint(null);
           setHoveredIndex(index);
           stageCardSelection(card, index, 'drag');
         }}
         onDragEnd={() => {
           setIsHandDragging(false);
           setHoveredIndex(null);
+          setDragPoint(null);
         }}
         onDropInZone={() => {
           setHoveredIndex(null);
+          if (draggedTargetSlotId) {
+            resolveTargetSelection(draggedTargetSlotId);
+            return;
+          }
           stageCardSelection(card, index, 'drag');
           enterTargetMode(card);
+        }}
+        onDragMove={(point) => {
+          setDragPoint(point);
         }}
         onDeselect={() => {
           if (selectedCard?.id === card.id) {
             setSelectedCard(null);
             setSelectedHandIndex(null);
             setIsHandDragging(false);
+            setDragPoint(null);
             setIsTargeting(false);
           }
         }}
@@ -642,7 +681,7 @@ export default function BattleScreen() {
     <BattleTargetSlot
       key={slot.id}
       slot={slot}
-      selected={false}
+      selected={draggedTargetSlotId === slot.id}
       targeting={isTargeting && selectedCard != null}
       accent={selectedCard?.faction === 'FRANCE'
         ? '#002FA7'

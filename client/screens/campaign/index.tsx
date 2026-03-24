@@ -75,7 +75,11 @@ export default function StoryModeScreen() {
       const progressData = await progressRes.json();
 
       if (scenariosData.success) {
-        setScenario(Array.isArray(scenariosData.data) ? scenariosData.data[0] ?? STORY_SHOWCASE_SCENARIO : STORY_SHOWCASE_SCENARIO);
+        const remoteScenario = Array.isArray(scenariosData.data) ? scenariosData.data[0] ?? null : null;
+        const nextScenario = remoteScenario && Array.isArray(remoteScenario.chapters) && remoteScenario.chapters.length >= 2
+          ? remoteScenario
+          : STORY_SHOWCASE_SCENARIO;
+        setScenario(nextScenario);
       }
       if (progressData.success) {
         setProgress(progressData.data);
