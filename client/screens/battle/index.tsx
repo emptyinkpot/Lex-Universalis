@@ -111,6 +111,7 @@ export default function BattleScreen() {
   const { theme } = useTheme();
   const router = useSafeRouter();
   const { width, height } = useWindowDimensions();
+  const isDesktopBattle = width >= 1100;
   const styles = useMemo(() => createStyles(theme, width, height), [height, theme, width]);
   const { shake, animatedStyle: shakeStyle } = useScreenShake();
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -868,6 +869,70 @@ export default function BattleScreen() {
     ? `连携队列 ${selectedQueue.length} 张：${selectedQueue.map((card) => card.name).join(' / ')}`
     : '未选中手牌';
 
+  const battleCore = (
+    <BattleSwipeZone onSwipe={handleBattleSwipe}>
+      <Animated.View
+        style={[shakeStyle, isDesktopBattle ? styles.desktopBattlefield : styles.battlefield]}
+      >
+        <View style={styles.battlefieldHeader}>
+          <View style={styles.battlefieldFocusRow}>
+            <ThemedText variant="caption" color={theme.textMuted} style={styles.battlefieldLabel}>
+              {battleFocus === 'enemy-line' ? 'Enemy Line Focus' : 'Player Line Focus'}
+            </ThemedText>
+            {isTargeting && selectedCard && (
+              <View style={styles.targetBadge}>
+                <ThemedText variant="caption" color="#FFFFFF" style={styles.targetBadgeText}>
+                  Targeting
+                </ThemedText>
+              </View>
+            )}
+          </View>
+          <ThemedText variant="small" color={theme.textSecondary} style={styles.selectionText}>
+            {selectedCardLabel}
+          </ThemedText>
+          <View style={styles.swipeHintRow}>
+            <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+              Switch Focus
+            </ThemedText>
+            <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+              Play Card
+            </ThemedText>
+            <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
+              Cancel
+            </ThemedText>
+          </View>
+        </View>
+
+        {renderRow('front')}
+        <View style={styles.battleDivider} />
+        {renderRow('back')}
+      </Animated.View>
+    </BattleSwipeZone>
+  );
+
+  const battleLogPanel = (
+    <FlashList
+      data={battleLog}
+      numColumns={isDesktopBattle ? 1 : 2}
+      key={isDesktopBattle ? 'desktop-log' : 'mobile-log'}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={isDesktopBattle ? styles.desktopLogPanel : styles.logPanel}
+      renderItem={({ item }) => (
+        <View style={styles.logItem}>
+          <View style={[styles.logAccent, { backgroundColor: item.accent }]} />
+          <View style={styles.logCopy}>
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>
+              {item.title}
+            </ThemedText>
+            <ThemedText variant="caption" color={theme.textSecondary} style={styles.logDetail}>
+              {item.detail}
+            </ThemedText>
+          </View>
+        </View>
+      )}
+    />
+  );
+
   return (
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
       <View style={styles.container}>
@@ -907,75 +972,67 @@ export default function BattleScreen() {
           </View>
         </View>
 
-        <View style={styles.rulesBar}>
-          {battleRules.map((item) => (
-            <View key={item.label} style={styles.ruleChip}>
-              <ThemedText variant="caption" color={theme.textMuted} style={styles.ruleChipLabel}>
-                {item.label}
-              </ThemedText>
-              <ThemedText variant="smallMedium" color={theme.textPrimary} style={styles.ruleChipValue}>
-                {item.value}
-              </ThemedText>
-            </View>
-          ))}
-        </View>
+        {isDesktopBattle ? (
+          <View style={styles.desktopBattleStage}>
+            {battleCore}
 
-        <BattleSwipeZone onSwipe={handleBattleSwipe}>
-          <Animated.View style={[shakeStyle, styles.battlefield]}>
-            <View style={styles.battlefieldHeader}>
-              <View style={styles.battlefieldFocusRow}>
-                <ThemedText variant="caption" color={theme.textMuted} style={styles.battlefieldLabel}>
-                  {battleFocus === 'enemy-line' ? '当前聚焦：敌方阵线' : '当前聚焦：己方阵线'}
-                </ThemedText>
-                {isTargeting && selectedCard && (
-                  <View style={styles.targetBadge}>
-                    <ThemedText variant="caption" color="#FFFFFF" style={styles.targetBadgeText}>
-                      目标选择中
-                    </ThemedText>
-                  </View>
-                )}
+            <View style={styles.desktopSideRail}>
+              <View style={styles.desktopSideCard}>
+                <View style={styles.desktopSideHeader}>
+                  <ThemedText
+                    variant="caption"
+                    color={theme.textMuted}
+                    style={styles.desktopSideHeaderLabel}
+                  >
+                    Rules
+                  </ThemedText>
+                </View>
+                <View style={styles.desktopRuleStack}>
+                  {battleRules.map((item) => (
+                    <View key={item.label} style={styles.ruleChip}>
+                      <ThemedText variant="caption" color={theme.textMuted} style={styles.ruleChipLabel}>
+                        {item.label}
+                      </ThemedText>
+                      <ThemedText variant="smallMedium" color={theme.textPrimary} style={styles.ruleChipValue}>
+                        {item.value}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
               </View>
-              <ThemedText variant="small" color={theme.textSecondary} style={styles.selectionText}>
-                {selectedCardLabel}
-              </ThemedText>
-              <View style={styles.swipeHintRow}>
-                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
-                  左右切换视角
-                </ThemedText>
-                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
-                  上滑出牌
-                </ThemedText>
-                <ThemedText variant="caption" color={theme.textMuted} style={styles.swipeHint}>
-                  下滑取消
-                </ThemedText>
-              </View>
-            </View>
 
-            {renderRow('front')}
-            <View style={styles.battleDivider} />
-            {renderRow('back')}
-          </Animated.View>
-        </BattleSwipeZone>
-
-        <FlashList
-          data={battleLog}
-          numColumns={2}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.logPanel}
-          renderItem={({ item }) => (
-            <View style={styles.logItem}>
-              <View style={[styles.logAccent, { backgroundColor: item.accent }]} />
-              <View style={styles.logCopy}>
-                <ThemedText variant="smallMedium" color={theme.textPrimary}>
-                  {item.title}
-                </ThemedText>
-                <ThemedText variant="caption" color={theme.textSecondary} style={styles.logDetail}>
-                  {item.detail}
-                </ThemedText>
+              <View style={[styles.desktopSideCard, styles.desktopLogCard]}>
+                <View style={styles.desktopSideHeader}>
+                  <ThemedText
+                    variant="caption"
+                    color={theme.textMuted}
+                    style={styles.desktopSideHeaderLabel}
+                  >
+                    Log
+                  </ThemedText>
+                </View>
+                {battleLogPanel}
               </View>
             </View>
-          )}
-        />
+          </View>
+        ) : (
+          <>
+            <View style={styles.rulesBar}>
+              {battleRules.map((item) => (
+                <View key={item.label} style={styles.ruleChip}>
+                  <ThemedText variant="caption" color={theme.textMuted} style={styles.ruleChipLabel}>
+                    {item.label}
+                  </ThemedText>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary} style={styles.ruleChipValue}>
+                    {item.value}
+                  </ThemedText>
+                </View>
+              ))}
+            </View>
+            {battleCore}
+            {battleLogPanel}
+          </>
+        )}
 
         <View style={styles.handContainer}>
           <View style={styles.handInfoRow}>
