@@ -2,7 +2,7 @@
 
 This folder is the canonical design space for the card game project.
 
-The original `.docx` sources have been harvested into `server/src/data/moon-cards.generated.ts`, and the remaining prose notes were converted to markdown.
+The original `.docx` sources have been harvested into `godot/data/generated/`, and the remaining prose notes were converted to markdown.
 
 ## Canonical Structure
 
@@ -12,6 +12,6 @@ The original `.docx` sources have been harvested into `server/src/data/moon-card
 
 ## Card Material Status
 
-- The original Moon card source materials have been centralized into `client/data/moon-card-drafts.ts`.
+- The original Moon card source materials have been centralized into `godot/data/generated/moon-card-drafts.json`.
 - The old raw card folders under `cards/`, `drafts/`, and `archive/` are now retired.
 - This folder now keeps the living rule and lore documents only.

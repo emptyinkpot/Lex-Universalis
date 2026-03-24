@@ -2,26 +2,24 @@
 
 ## Repository layout
 
-- `client/`: Expo React Native app
-- `server/`: Express API
-- `docs/`: game design docs and source materials
-- `config/`: standalone config files, including theme settings
-- `.cozeproj/`: local runner scripts used by the workspace
+- `godot/`: active Godot game project
+- `build/`: packaged desktop output
+- `docs/`: design notes, rules, lore, and Godot implementation records
+- `config/`: retained project configuration and reference data
+- `scripts/`: helper scripts for export and maintenance
 
 ## Common commands
 
 ```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm start
+.\validate-godot.bat
+.\start-godot.bat
 ```
 
 ## Package rules
 
-- Add frontend dependencies in `client/package.json`
-- Add backend dependencies in `server/package.json`
-- Keep shared root tooling minimal and focused on workspace orchestration
+- Keep runtime behavior in the Godot project.
+- Keep generated data under `godot/data/generated/`.
+- Keep packaged build outputs under `build/windows/`.
 
 ## Commit rules
 

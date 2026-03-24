@@ -1,11 +1,11 @@
 # Battle Performance Notes
 
-The battle screen now uses a few lightweight building blocks:
+The Godot battle screen uses a few lightweight building blocks:
 
-- `FlashList` for the battle log feed, so the log can grow without forcing a full re-render of every row.
-- `BattleSwipeZone` for gesture translation.
-- `BattleDamageOverlay` for floating damage text.
-- `BattleFeedbackLayer` for high-impact combat moments.
+- `RichTextLabel` for the battle log feed.
+- `Line2D` for drag guidance.
+- `Control` overlays for floating damage text and card fly-ins.
+- Slot feedback is kept on the slot nodes so the battlefield stays readable.
 
 Why this split helps:
 
@@ -17,4 +17,4 @@ Potential follow-ups:
 
 - Batch log entries by turn.
 - Add a compact event timeline above the battlefield.
-- Reuse the same pattern for deck-builder change history.
+- Reuse the same pattern for the story result screen and deck workspace.

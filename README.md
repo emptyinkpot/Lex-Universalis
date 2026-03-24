@@ -1,8 +1,6 @@
 # Lex Universalis
 
-`Lex Universalis` is now a Godot desktop game project.
-
-The old Expo/Web client and Node backend have been retired from the mainline repository. The active runtime is:
+`Lex Universalis` is now a Godot desktop game project. The active runtime is:
 
 - [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot)
 
@@ -15,7 +13,11 @@ The old Expo/Web client and Node backend have been retired from the mainline rep
 
 ## Run
 
-Double-click:
+Double-click the packaged desktop build:
+
+- [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
+
+To run the project from source:
 
 - [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
 
@@ -28,3 +30,4 @@ Validate the Godot project headlessly:
 - Active Godot workspace notes: [`E:\Lex Universalis\godot\README.md`](/E:/Lex%20Universalis/godot/README.md)
 - Game design archive: [`E:\Lex Universalis\docs\game-design\moon\README.md`](/E:/Lex%20Universalis/docs/game-design/moon/README.md)
 - Reference notes: [`E:\Lex Universalis\docs\reference\README.md`](/E:/Lex%20Universalis/docs/reference/README.md)
+- Packaged Windows build output: [`E:\Lex Universalis\build\windows`](/E:/Lex%20Universalis/build/windows)

@@ -1,29 +1,28 @@
 # Battle Interaction Architecture
 
-The battle screen is being split into three layers:
+The Godot battle scene is split into three layers:
 
 ## Input Layer
 
-- `BattleSwipeZone` handles swipe and tap gestures on the battlefield.
-- Card taps still come from `KardsCard`.
-- The current prototype uses swipe directions to switch focus, enter target mode, confirm a play, or cancel a selection.
-- `BattleTargetSlot` is the concrete clickable target surface for front and back rows.
+- `CardNode` handles card taps and drag gestures.
+- `BattleSlot` handles slot clicks and drag hover highlighting.
+- The current desktop build uses drag-to-target and click-to-order interaction.
+- `BattleScene` keeps the front-line blocking rules in the battle script, not in the view shell.
 
 ## Feedback Layer
 
-- `BattleFeedbackLayer` renders large combat feedback: hit flashes, rings, and battle callouts.
-- `BattleDamageOverlay` renders floating damage numbers and quick resource feedback.
-- `expo-haptics` provides tactile feedback on supported devices.
+- `BattleResultScene` handles victory and defeat presentation.
+- Floating damage numbers and hit flashes are driven by the battle scene overlay layer.
 - Slot death uses a short fade-out before removal so the battle state remains readable.
 
 ## Rules Layer
 
 - The battle UI surfaces core rules from `docs/game-design/moon/rules/battle-rules.md`.
 - The screen keeps a short battle log to make the current action readable at a glance.
-- Future work should add deeper target validation, per-turn action limits, and card-specific collision rules here.
+- Target validation, row blocking, keyword effects, and end-of-turn resolution live in the battle script.
 
 ## Integration Notes
 
 - Keep the input layer dumb: it should only translate gestures into semantic actions.
 - Keep visual effects isolated from rules so damage math stays testable.
-- Avoid putting card state, target state, and animation state in one component.
+- Avoid putting card state, target state, and animation state in one node.

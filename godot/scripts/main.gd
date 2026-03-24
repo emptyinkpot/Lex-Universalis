@@ -13,9 +13,12 @@ var story_view: Control
 var battle_view: Control
 var card_view: Control
 var result_view: Control
+var ui_theme: Theme
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
+	ui_theme = _build_desktop_theme()
+	theme = ui_theme
 	top_stats.add_theme_color_override("font_color", Color("f1e2bf"))
 	_render_stats()
 	story_view = _mount_scene("StoryTab", STORY_SCENE)
@@ -70,3 +73,81 @@ func _on_return_to_story() -> void:
 	tab_container.current_tab = 0
 	if story_view.has_method("refresh_progress"):
 		story_view.refresh_progress()
+
+func _build_desktop_theme() -> Theme:
+	var theme := Theme.new()
+	var panel_bg := Color("1b140f")
+	var panel_bg_alt := Color("241915")
+	var panel_border := Color("9d7b4a")
+	var panel_border_strong := Color("d7bf86")
+	var text_main := Color("f2e2bf")
+	var text_soft := Color("d8c39a")
+	var text_dim := Color("8f7757")
+
+	theme.set_color("font_color", "Label", text_main)
+	theme.set_color("font_color", "Button", text_main)
+	theme.set_color("font_hover_color", "Button", Color("fff0c5"))
+	theme.set_color("font_pressed_color", "Button", Color("fff8df"))
+	theme.set_color("font_disabled_color", "Button", text_dim)
+	theme.set_color("default_color", "RichTextLabel", text_soft)
+	theme.set_color("font_color", "TabBar", text_main)
+	theme.set_color("font_hover_color", "TabBar", Color("fff0c5"))
+	theme.set_color("font_selected_color", "TabBar", Color("fff6de"))
+	theme.set_color("font_color", "ItemList", text_main)
+	theme.set_color("font_selected_color", "ItemList", Color("20140f"))
+	theme.set_color("font_hover_color", "ItemList", text_main)
+	theme.set_color("selected_font_color", "ItemList", Color("20140f"))
+	theme.set_font_size("font_size", "Label", 16)
+	theme.set_font_size("font_size", "Button", 16)
+	theme.set_font_size("font_size", "ItemList", 14)
+	theme.set_font_size("normal_font_size", "RichTextLabel", 14)
+	theme.set_font_size("font_size", "TabBar", 16)
+
+	theme.set_stylebox("panel", "PanelContainer", _make_panel_style(panel_bg, panel_border, 16, 2))
+	theme.set_stylebox("panel", "ScrollContainer", _make_panel_style(panel_bg, panel_border, 12, 1))
+	theme.set_stylebox("panel", "TabContainer", _make_panel_style(panel_bg_alt, panel_border, 12, 1))
+	theme.set_stylebox("panel", "RichTextLabel", _make_panel_style(panel_bg, panel_border, 8, 1))
+	theme.set_stylebox("normal", "Button", _make_button_style(panel_bg_alt, panel_border, 14, 2))
+	theme.set_stylebox("hover", "Button", _make_button_style(Color("2f2219"), panel_border_strong, 14, 2))
+	theme.set_stylebox("pressed", "Button", _make_button_style(Color("3a2a1e"), panel_border_strong, 14, 2))
+	theme.set_stylebox("focus", "Button", _make_button_style(Color("2f2219"), panel_border_strong, 14, 2))
+	theme.set_stylebox("disabled", "Button", _make_button_style(Color("19130f"), text_dim, 14, 1))
+	theme.set_stylebox("panel", "ItemList", _make_panel_style(Color("17100d"), panel_border, 10, 1))
+	theme.set_stylebox("selected", "ItemList", _make_button_style(Color("d0b06e"), Color("f5ddb0"), 10, 2))
+	theme.set_stylebox("cursor", "ItemList", _make_button_style(Color("2c2017"), panel_border_strong, 10, 1))
+	theme.set_stylebox("tab_selected", "TabBar", _make_button_style(Color("312116"), panel_border_strong, 12, 2))
+	theme.set_stylebox("tab_unselected", "TabBar", _make_button_style(Color("1e1711"), panel_border, 12, 1))
+	theme.set_stylebox("panel", "TabBar", _make_panel_style(panel_bg, panel_border, 10, 1))
+	return theme
+
+func _make_panel_style(bg_color: Color, border_color: Color, shadow_size: int, border_width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = 18
+	style.corner_radius_top_right = 18
+	style.corner_radius_bottom_left = 18
+	style.corner_radius_bottom_right = 18
+	style.shadow_size = shadow_size
+	style.shadow_color = Color(0, 0, 0, 0.35)
+	return style
+
+func _make_button_style(bg_color: Color, border_color: Color, radius: int, border_width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.shadow_size = 8
+	style.shadow_color = Color(0, 0, 0, 0.28)
+	return style

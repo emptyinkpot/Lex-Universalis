@@ -1,6 +1,6 @@
 # Dev Reference
 
-Repository and workflow notes live here.
+Repository and Godot workflow notes live here.
 
-- `git-config.md`
-
+- `godot-repo-guide.md`
+- `godot-migration-checklist.md`

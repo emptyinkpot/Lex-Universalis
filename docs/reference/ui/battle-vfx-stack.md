@@ -1,17 +1,17 @@
 # Battle VFX Stack
 
-Battle page feedback currently leans on three layers:
+Battle page feedback currently leans on three layers in Godot:
 
-- `@shopify/react-native-skia` for fast hit flashes, impact rings, and slash overlays.
-- `react-native-reanimated` for existing fan-layout, selection, and shake animation.
-- `expo-haptics` for selection and damage feedback on supported devices.
+- `Control` overlays for hit flashes, impact rings, and slash cards.
+- `Tween`-driven motion for fan-layout, selection, and shake animation.
+- Windows haptics are not part of the current desktop build; feedback is visual and audio-first.
 
 Possible future additions:
 
-- `lottie-react-native` for one-shot spell, victory, or defeat sequences.
-- `react-native-svg` for lightweight icons and battle timeline markers.
+- `AnimatedSprite2D` or particle scenes for one-shot spell, victory, or defeat sequences.
+- `TextureRect` overlays for lightweight icons and battle timeline markers.
 
 Notes:
 
-- Skia is wired through a web wrapper so the Expo web preview can still render the battle overlay.
-- The battle page should keep combat rules visible in the UI, not only in markdown.
+- Keep the battle rules visible in the UI, not only in markdown.
+- Keep the effect layer separate from the combat resolution layer.

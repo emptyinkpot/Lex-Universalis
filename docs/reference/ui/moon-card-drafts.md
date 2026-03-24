@@ -1,15 +1,15 @@
 # Moon Card Drafts
 
-The card editor now auto-injects a rough Moon archive card set on first load.
+The Godot card gallery and card editor now include the harvested Moon archive cards.
 
 ## What is included
 
-- A curated set of Moon character prototypes derived from the old `docs/game-design/moon` materials.
-- Built-in list rendering, preview, editing, duplication, deletion, import/export, and server sync.
-- A manual restore action in the card editor header.
+- A curated set of Moon character prototypes derived from the `docs/game-design/moon` materials.
+- Built-in list rendering, preview, editing, duplication, deletion, and import/export.
+- The cards are represented as normal Godot-side data, not as a separate frontend draft set.
 
 ## Intent
 
-- Keep the existing editor workflow intact.
+- Keep the current Godot card workflow intact.
 - Let the Moon archive cards appear as normal editable cards.
 - Preserve source notes inside each card so the origin remains visible after editing.

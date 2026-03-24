@@ -22,6 +22,10 @@ To validate the project without opening the editor:
 
 - [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)
 
+To use the packaged desktop build:
+
+- [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
+
 ## Data
 
 Generated runtime data lives in:

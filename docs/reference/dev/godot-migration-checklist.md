@@ -1,50 +1,18 @@
 # Godot Migration Checklist
 
-## Goal
+The migration is now in the maintenance phase. The Godot project is the runtime source of truth.
 
-Move `Lex Universalis` from an Expo/Web-first prototype to a Godot desktop game without losing the current card, story, and battle design work.
+## Completed
 
-## Migration Order
+1. Desktop Godot project scaffolded under [`E:\Lex Universalis\godot`](/E:/Lex%20Universalis/godot).
+2. Story, battle, results, and card gallery scenes moved into Godot.
+3. Generated JSON data feeds the Godot runtime.
+4. Story progress is written to a user save file.
+5. The retired browser-based client has been removed from the mainline repository.
 
-1. Freeze the current Web/Expo version as a checkpoint.
-2. Extract cards, story, and battle seed data into engine-agnostic JSON.
-3. Create a standalone Godot desktop project under [`E:\Lex Universalis\godot`](/E:/Lex%20Universalis/godot).
-4. Build a fixed-viewport PC shell first, not mobile-style pages.
-5. Recreate the main loop in Godot:
-   - Main menu
-   - Story mode
-   - Battle scene
-   - Card/deck workspace
-6. Move rules logic out of UI assumptions and into reusable data/services.
-7. Replace temporary prototype visuals with Godot-native scene composition and animation.
+## Current Follow-Ups
 
-## What Can Be Reused
-
-- Card data and draft archive
-- Story/showcase scenario data
-- Existing faction/card taxonomy
-- Battle interaction ideas and flow
-- Docs and worldbuilding content
-
-## What Must Be Rebuilt
-
-- Screen/router structure
-- React component tree
-- Reanimated/gesture-based animation layer
-- Expo/Electron/Web startup path
-- UI layout assumptions based on scrolling pages
-
-## Immediate Deliverables In This Phase
-
-- `godot/` project scaffold
-- Godot-readable JSON export pipeline
-- Desktop viewport baseline scene
-- Migration notes for the next implementation phase
-
-## Next Engine Tasks
-
-1. Build a fixed `16:9` main shell scene.
-2. Load story JSON and render chapter/level selection inside one viewport.
-3. Load card JSON and render card instances with consistent size rules.
-4. Rebuild battle scene as a single-screen desktop battlefield.
-5. Port combat resolution state out of the current front-end-only interaction layer.
+1. Finish scene-level art polish and UI consistency.
+2. Add remaining card keywords and rule branches.
+3. Package a Windows desktop build from the Godot project.
+4. Keep docs aligned with Godot-only paths and runtime behavior.
