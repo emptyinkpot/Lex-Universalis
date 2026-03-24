@@ -1,6 +1,5 @@
 extends Control
 
-const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 @onready var summary_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock/Summary")
@@ -14,7 +13,7 @@ const DATA_LOADER = preload("res://scripts/data_loader.gd")
 @onready var health_field: SpinBox = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/HealthField")
 @onready var description_field: TextEdit = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/DescriptionField")
 @onready var flavor_field: TextEdit = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/FlavorField")
-@onready var preview_card: PanelContainer = get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewCard")
+@onready var preview_card: Control = get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewCard")
 @onready var preview_notes: RichTextLabel = get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewNotes")
 
 var data_loader: RefCounted
@@ -52,11 +51,10 @@ func _select_card(index: int) -> void:
 	card_list.select(index)
 
 func _update_preview(card: Dictionary) -> void:
-	var card_node := CARD_NODE_SCENE.instantiate()
-	card_node.call("setup", card)
-	for child in preview_card.get_children():
-		child.queue_free()
-	preview_card.add_child(card_node)
+	if preview_card.has_method("setup"):
+		preview_card.call("setup", card)
+	if preview_card.has_method("set_selected"):
+		preview_card.call("set_selected", true)
 	preview_notes.text = "Source id: [b]%s[/b]\nEditable locally through `user://card-drafts.save.json`.\nThis is the Godot-side card editor entry." % str(card.get("id", ""))
 
 func _read_form() -> Dictionary:

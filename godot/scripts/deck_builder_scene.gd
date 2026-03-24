@@ -1,13 +1,12 @@
 extends Control
 
-const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 @onready var summary_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock/Summary")
 @onready var status_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderBody/Status")
 @onready var pool_list: ItemList = get_node("Padding/Root/Content/PoolPanel/PoolPadding/PoolBody/PoolList")
 @onready var deck_list: ItemList = get_node("Padding/Root/Content/DeckPanel/DeckPadding/DeckBody/DeckList")
-@onready var preview_holder: VBoxContainer = get_node("Padding/Root/Content/EditPanel/EditPadding/EditBody")
+@onready var preview_card: Control = get_node("Padding/Root/Content/EditPanel/EditPadding/EditBody/CardPreview")
 @onready var detail_title: Label = get_node("Padding/Root/Content/EditPanel/EditPadding/EditBody/DetailTitle")
 
 var data_loader: RefCounted
@@ -47,19 +46,13 @@ func _get_card_from_deck(index: int) -> Dictionary:
 	return card if card is Dictionary else {}
 
 func _show_preview(card: Dictionary) -> void:
-	for child in preview_holder.get_children():
-		if child.name == "DetailTitle":
-			continue
-		if child.name == "ActionRow":
-			continue
-		child.queue_free()
 	if card.is_empty():
 		status_label.text = "Select a card from the pool or deck."
 		return
-	var card_node := CARD_NODE_SCENE.instantiate()
-	card_node.call("setup", card)
-	preview_holder.add_child(card_node)
-	preview_holder.move_child(card_node, 1)
+	if preview_card.has_method("setup"):
+		preview_card.call("setup", card)
+	if preview_card.has_method("set_selected"):
+		preview_card.call("set_selected", true)
 	detail_title.text = "%s  |  %s" % [str(card.get("name", "Unknown")), str(card.get("faction", "NEUTRAL"))]
 	status_label.text = "Selected %s" % str(card.get("id", ""))
 
