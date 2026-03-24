@@ -21,68 +21,40 @@ export default function HomeScreen() {
   const router = useSafeRouter();
 
   const menuItems: MenuItem[] = [
-    {
-      title: '故事模式',
-      subtitle: '单剧本剧情与战斗',
-      icon: 'scroll',
-      iconColor: '#C9A96E',
-      route: '/campaign',
-    },
-    {
-      title: '对战模式',
-      subtitle: '多人 PvP 竞技',
-      icon: 'swords',
-      iconColor: '#C8102E',
-      route: '/battle-select',
-    },
-    {
-      title: '卡组编辑',
-      subtitle: '构建你的卡组',
-      icon: 'cards',
-      iconColor: '#002FA7',
-      route: '/deck-builder',
-    },
-    {
-      title: '阵营选择',
-      subtitle: '选择你的国家',
-      icon: 'flag',
-      iconColor: '#10B981',
-      route: '/faction-select',
-    },
-    {
-      title: '主题设置',
-      subtitle: '自定义游戏外观',
-      icon: 'palette',
-      iconColor: '#9333EA',
-      route: '/theme-settings',
-    },
-    {
-      title: '卡牌编辑',
-      subtitle: '管理卡牌内容与素材状态',
-      icon: 'wand-magic-sparkles',
-      iconColor: '#7C3AED',
-      route: '/card-editor',
-    },
-    {
-      title: '规则与设定',
-      subtitle: '查看规则与世界观设定',
-      icon: 'book-open',
-      iconColor: '#F59E0B',
-      route: '/lore-library',
-    },
+    { title: '故事模式', subtitle: '单剧本剧情与战斗', icon: 'scroll', iconColor: '#d6b36a', route: '/campaign' },
+    { title: '对战模式', subtitle: '多人 PvP 竞技', icon: 'swords', iconColor: '#c65a49', route: '/battle-select' },
+    { title: '卡组编辑', subtitle: '构建你的卡组', icon: 'cards', iconColor: '#d0c3a2', route: '/deck-builder' },
+    { title: '阵营选择', subtitle: '选择你的国家', icon: 'flag', iconColor: '#8f6f45', route: '/faction-select' },
+    { title: '主题设置', subtitle: '自定义游戏外观', icon: 'palette', iconColor: '#836c56', route: '/theme-settings' },
+    { title: '卡牌编辑', subtitle: '编辑卡牌、模板与素材', icon: 'wand-magic-sparkles', iconColor: '#c99e52', route: '/card-editor' },
+    { title: '规则与设定', subtitle: '查看规则与世界观', icon: 'book-open', iconColor: '#d77f42', route: '/lore-library' },
   ];
 
   return (
-    <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="light">
+    <Screen backgroundColor="#0b0907" statusBarStyle="light">
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.heroSection}>
-          <ThemedText variant="caption" color="#C9A96E" style={styles.heroSubtitle}>
-            Lex Universalis
+          <View style={styles.heroGlow} />
+          <View style={styles.heroDustLeft} />
+          <View style={styles.heroDustRight} />
+          <ThemedText variant="caption" color="#d6b36a" style={styles.heroSubtitle}>
+            LEX UNIVERSALIS
           </ThemedText>
-          <ThemedText variant="h1" color="#FFFFFF" style={styles.heroTitle}>
+          <ThemedText variant="h1" color="#f3e7c8" style={styles.heroTitle}>
             我即真理
           </ThemedText>
+          <ThemedText variant="small" color="#b9a98d" style={styles.heroDescription}>
+            仪式、法则、献祭与审判，在一张张卡牌之间被重新书写。
+          </ThemedText>
           <View style={styles.heroDivider} />
+          <View style={styles.heroSealRow}>
+            <View style={styles.heroSeal}>
+              <FontAwesome6 name="eye" size={14} color="#2d160f" />
+            </View>
+            <ThemedText variant="tiny" color="#8e7b61" style={styles.heroSealText}>
+              桌面原型 / 邪典卡牌 / 叙事战斗
+            </ThemedText>
+          </View>
         </View>
 
         <View style={styles.menuContainer}>
@@ -91,27 +63,28 @@ export default function HomeScreen() {
               key={index}
               style={styles.menuItem}
               onPress={() => router.push(item.route)}
-              activeOpacity={0.7}
+              activeOpacity={0.86}
             >
-              <View style={styles.menuIconContainer}>
-                <FontAwesome6 name={item.icon as any} size={32} color={item.iconColor} />
+              <View style={styles.menuEtching} />
+              <View style={[styles.menuIconContainer, { borderColor: item.iconColor }]}>
+                <FontAwesome6 name={item.icon as any} size={26} color={item.iconColor} />
               </View>
               <View style={styles.menuTextContainer}>
-                <ThemedText variant="h3" color={theme.textPrimary}>
+                <ThemedText variant="h3" color="#f1e4c3">
                   {item.title}
                 </ThemedText>
-                <ThemedText variant="small" color={theme.textSecondary} style={styles.menuSubtitle}>
+                <ThemedText variant="small" color="#a99679" style={styles.menuSubtitle}>
                   {item.subtitle}
                 </ThemedText>
               </View>
-              <FontAwesome6 name="chevron-right" size={20} color={theme.textMuted} />
+              <FontAwesome6 name="chevron-right" size={18} color="#8f7a57" />
             </TouchableOpacity>
           ))}
         </View>
 
         <View style={styles.footer}>
-          <ThemedText variant="caption" color={theme.textMuted} style={styles.footerText}>
-            v1.0.0 | Lex Universalis | 规则与设定已接入 UI
+          <ThemedText variant="caption" color="#7d6b53" style={styles.footerText}>
+            v1.0.0 | Lex Universalis | occult table prototype
           </ThemedText>
         </View>
       </ScrollView>
