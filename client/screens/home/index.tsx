@@ -49,6 +49,13 @@ export default function HomeScreen() {
       route: '/theme-settings',
     },
     {
+      title: '卡牌编辑',
+      subtitle: '管理卡牌内容与素材状态',
+      icon: 'wand-magic-sparkles',
+      iconColor: '#7C3AED',
+      route: '/card-editor',
+    },
+    {
       title: '规则与设定',
       subtitle: '查看规则与世界观设定',
       icon: 'book-open',

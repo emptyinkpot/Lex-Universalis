@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
-import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -15,14 +14,13 @@ import { FontAwesome6 } from '@expo/vector-icons';
 export default function ThemeSettingsScreen() {
   const { theme, isDark } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const router = useSafeRouter();
 
-  // 主题设置
+  // 涓婚璁剧疆
   const [settings, setSettings] = useState<ThemeSettings>(defaultThemeSettings);
   const [availableThemes, setAvailableThemes] = useState<ThemeConfig[]>([]);
   const [selectedThemeId, setSelectedThemeId] = useState<string>('light');
 
-  // 加载主题设置
+  // 鍔犺浇涓婚璁剧疆
   const loadSettings = async () => {
     try {
       const loadedSettings = await ThemeConfigManager.loadThemeSettings();
@@ -32,42 +30,42 @@ export default function ThemeSettingsScreen() {
       const themes = await ThemeConfigManager.getAllThemes();
       setAvailableThemes(themes);
 
-      // 设置当前主题
+      // 璁剧疆褰撳墠涓婚
       const currentThemeId = loadedSettings.customThemeId || loadedSettings.mode;
       setSelectedThemeId(currentThemeId);
     } catch (error) {
-      console.error('加载主题设置失败', error);
+      console.error('鍔犺浇涓婚璁剧疆澶辫触', error);
     }
   };
 
   useEffect(() => {
-    // 包装为异步函数避免 setState 警告
+    // 鍖呰涓哄紓姝ュ嚱鏁伴伩鍏?setState 璀﹀憡
     const init = async () => {
       await loadSettings();
     };
     init();
   }, []);
 
-  // 保存主题设置
+  // 淇濆瓨涓婚璁剧疆
   const saveSettings = async (newSettings: ThemeSettings) => {
     try {
       await ThemeConfigManager.saveThemeSettings(newSettings);
       setSettings(newSettings);
     } catch (error) {
-      console.error('保存主题设置失败', error);
-      Alert.alert('错误', '保存主题设置失败');
+      console.error('淇濆瓨涓婚璁剧疆澶辫触', error);
+      Alert.alert('閿欒', '淇濆瓨涓婚璁剧疆澶辫触');
     }
   };
 
-  // 切换主题模式
+  // 鍒囨崲涓婚妯″紡
   const handleModeChange = async (mode: ThemeMode) => {
     const newSettings = { ...settings, mode };
     await saveSettings(newSettings);
-    // TODO: 集成到主题系统以实时切换主题
+    // TODO: 闆嗘垚鍒颁富棰樼郴缁熶互瀹炴椂鍒囨崲涓婚
     Alert.alert('提示', '主题模式已切换，重启应用后生效');
   };
 
-  // 选择主题
+  // 閫夋嫨涓婚
   const handleThemeSelect = async (themeId: string) => {
     setSelectedThemeId(themeId);
 
@@ -80,29 +78,29 @@ export default function ThemeSettingsScreen() {
     await saveSettings(newSettings);
 
     // 触发主题刷新（需要集成到主题系统）
-    Alert.alert('成功', `已应用主题: ${themeId}`);
+    Alert.alert('成功', `已应用主题 ${themeId}`);
   };
 
   // 删除自定义主题
   const handleDeleteTheme = async (themeId: string) => {
     Alert.alert(
-      '确认删除',
-      '确定要删除这个自定义主题吗？',
+      '纭鍒犻櫎',
+      '纭畾瑕佸垹闄よ繖涓嚜瀹氫箟涓婚鍚楋紵',
       [
-        { text: '取消', style: 'cancel' },
+        { text: '鍙栨秷', style: 'cancel' },
         {
-          text: '删除',
+          text: '鍒犻櫎',
           style: 'destructive',
           onPress: async () => {
             try {
               await ThemeConfigManager.deleteCustomTheme(themeId);
-              // 重新加载主题列表
+              // 閲嶆柊鍔犺浇涓婚鍒楄〃
               const themes = await ThemeConfigManager.getAllThemes();
               setAvailableThemes(themes);
               Alert.alert('成功', '主题已删除');
             } catch (error) {
-              console.error('删除主题失败', error);
-              Alert.alert('错误', '删除主题失败');
+              console.error('鍒犻櫎涓婚澶辫触', error);
+              Alert.alert('閿欒', '鍒犻櫎涓婚澶辫触');
             }
           },
         },
@@ -114,16 +112,16 @@ export default function ThemeSettingsScreen() {
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle={isDark ? 'light' : 'dark'}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ThemedView level="root" style={styles.header}>
-          <ThemedText variant="h2" color={theme.textPrimary}>主题设置</ThemedText>
+          <ThemedText variant="h2" color={theme.textPrimary}>涓婚璁剧疆</ThemedText>
           <ThemedText variant="small" color={theme.textMuted}>
-            自定义游戏外观和配色
+            鑷畾涔夋父鎴忓瑙傚拰閰嶈壊
           </ThemedText>
         </ThemedView>
 
-        {/* 主题模式选择 */}
+        {/* 涓婚妯″紡閫夋嫨 */}
         <ThemedView level="default" style={styles.section}>
           <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-            主题模式
+            涓婚妯″紡
           </ThemedText>
 
           <View style={styles.modeOptions}>
@@ -145,7 +143,7 @@ export default function ThemeSettingsScreen() {
                 color={settings.mode === 'light' ? '#FFFFFF' : theme.textPrimary}
                 style={styles.modeOptionText}
               >
-                亮色
+                浜壊
               </ThemedText>
             </TouchableOpacity>
 
@@ -167,7 +165,7 @@ export default function ThemeSettingsScreen() {
                 color={settings.mode === 'dark' ? '#FFFFFF' : theme.textPrimary}
                 style={styles.modeOptionText}
               >
-                暗色
+                鏆楄壊
               </ThemedText>
             </TouchableOpacity>
 
@@ -189,16 +187,16 @@ export default function ThemeSettingsScreen() {
                 color={settings.mode === 'auto' ? '#FFFFFF' : theme.textPrimary}
                 style={styles.modeOptionText}
               >
-                跟随系统
+                璺熼殢绯荤粺
               </ThemedText>
             </TouchableOpacity>
           </View>
         </ThemedView>
 
-        {/* 预设主题 */}
+        {/* 棰勮涓婚 */}
         <ThemedView level="default" style={styles.section}>
           <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-            预设主题
+            棰勮涓婚
           </ThemedText>
 
           <View style={styles.themeList}>
@@ -247,12 +245,11 @@ export default function ThemeSettingsScreen() {
           </View>
         </ThemedView>
 
-        {/* 自定义主题列表 */}
+        {/* 鑷畾涔変富棰樺垪琛?*/}
         {availableThemes.filter((t) => t.id.startsWith('custom')).length > 0 && (
           <ThemedView level="default" style={styles.section}>
             <ThemedText variant="h4" color={theme.textPrimary} style={styles.sectionTitle}>
-              自定义主题
-            </ThemedText>
+              鑷畾涔変富棰?            </ThemedText>
 
             <View style={styles.themeList}>
               {availableThemes
@@ -303,31 +300,9 @@ export default function ThemeSettingsScreen() {
           </ThemedView>
         )}
 
-        {/* 创建自定义主题按钮 */}
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: theme.primary }]}
-          onPress={() => {
-            // TODO: 导航到主题编辑器
-            Alert.alert('提示', '主题编辑器功能开发中');
-          }}
-        >
-          <FontAwesome6 name="plus" size={20} color="#FFFFFF" />
-          <ThemedText variant="bodyMedium" color="#FFFFFF" style={styles.createButtonText}>
-            创建自定义主题
-          </ThemedText>
-        </TouchableOpacity>
 
-        {/* 卡牌编辑入口 */}
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: theme.accent, marginTop: Spacing.md }]}
-          onPress={() => router.push('/card-editor')}
-        >
-          <FontAwesome6 name="wand-magic-sparkles" size={20} color="#FFFFFF" />
-          <ThemedText variant="bodyMedium" color="#FFFFFF" style={styles.createButtonText}>
-            卡牌编辑器
-          </ThemedText>
-        </TouchableOpacity>
       </ScrollView>
     </Screen>
   );
 }
+

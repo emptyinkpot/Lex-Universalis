@@ -727,22 +727,74 @@ export default function CardEditorScreen() {
   const renderCardTile = (card: EditorCard) => {
     const active = selectedCard?.id === card.id;
     const rarityColor = RARITY_OPTIONS.find((item) => item.value === card.rarity)?.color ?? theme.primary;
+    const factionColor = {
+      [Faction.ENGLAND]: '#1D4ED8',
+      [Faction.FRANCE]: '#B91C1C',
+      [Faction.HOLY_ROMAN_EMPIRE]: '#B45309',
+      [Faction.VIKING]: '#0F766E',
+      [Faction.BYZANTIUM]: '#6D28D9',
+    }[card.faction] ?? theme.primary;
+    const typeIcon = card.type === CardType.UNIT ? 'chess-knight' : card.type === CardType.TACTIC ? 'scroll' : 'tower-observation';
     return (
-      <Pressable key={card.id} onPress={() => setSelectedId(card.id)} style={[styles.cardTile, active && styles.cardTileActive, { borderColor: active ? theme.primary : theme.borderLight }]}>
-        <View style={styles.cardHead}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <ThemedText variant="bodyMedium" color={theme.textPrimary} numberOfLines={1} style={{ flex: 1 }}>
-              {card.name || '未命名卡牌'}
-            </ThemedText>
-            {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
+      <Pressable key={card.id} onPress={() => setSelectedId(card.id)} style={[styles.cardTile, active && styles.cardTileActive]}>
+        <View style={[styles.cardTileFace, { borderColor: active ? theme.primary : theme.borderLight }]}>
+          <View style={[styles.cardTileBackdrop, { backgroundColor: withAlpha(factionColor, 0.12) }]} />
+          <View style={styles.cardTileFaceContent}>
+            <View style={styles.cardTileTopBar}>
+              <View style={[styles.cardTileCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.cost}</ThemedText>
+                <ThemedText variant="tiny" color={theme.textMuted}>费</ThemedText>
+              </View>
+              <View style={styles.cardTileTopMeta}>
+                {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
+                <EditorBadge color={factionColor} label={card.faction} />
+                <EditorBadge color={rarityColor} label={card.rarity} />
+              </View>
+            </View>
+
+            <View style={[styles.cardTileArtwork, { borderColor: factionColor }]}>
+              {card.imageUrl ? (
+                <Image source={{ uri: card.imageUrl }} style={styles.cardTileArtworkImage} resizeMode="cover" />
+              ) : (
+                <View style={[styles.cardTileArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
+                  <FactionIcon faction={card.faction} size={48} />
+                  <ThemedText variant="small" color={theme.textMuted} style={{ marginTop: 6 }}>
+                    未设置图片
+                  </ThemedText>
+                </View>
+              )}
+              <View style={[styles.cardTileTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.9) }]}>
+                <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
+                <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
+              </View>
+            </View>
+
+            <View style={styles.cardTileTitleBlock}>
+              <ThemedText variant="bodyMedium" color={theme.textPrimary} numberOfLines={2} style={styles.cardTileTitle}>
+                {card.name || '未命名卡牌'}
+              </ThemedText>
+              <ThemedText variant="tiny" color={theme.textMuted} numberOfLines={2}>
+                {card.type} · {card.description || '暂无描述'}
+              </ThemedText>
+            </View>
+
+            {card.type === CardType.UNIT ? (
+              <View style={styles.cardTileStats}>
+                <ThemedView level="tertiary" style={styles.cardTileStatPill}>
+                  <FontAwesome6 name="crosshairs" size={11} color={theme.error} />
+                  <ThemedText variant="tiny" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
+                </ThemedView>
+                <ThemedView level="tertiary" style={styles.cardTileStatPill}>
+                  <FontAwesome6 name="heart" size={11} color={theme.success} />
+                  <ThemedText variant="tiny" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
+                </ThemedView>
+                <ThemedView level="tertiary" style={styles.cardTileStatPill}>
+                  <FontAwesome6 name="person-walking" size={11} color={theme.primary} />
+                  <ThemedText variant="tiny" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
+                </ThemedView>
+              </View>
+            ) : null}
           </View>
-          <ThemedText variant="tiny" color={theme.textMuted}>{card.type} · 费用 {card.cost}</ThemedText>
-        </View>
-        <View style={styles.cardBody}>
-          <View style={[styles.costBadge, { borderColor: rarityColor }]}>
-            <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.cost}</ThemedText>
-          </View>
-          <ThemedText variant="small" color={theme.textSecondary} numberOfLines={2}>{card.description || '暂无描述'}</ThemedText>
         </View>
         <View style={styles.tileActions}>
           <Pressable onPress={() => openEdit(card)} style={styles.tileAction}><FontAwesome6 name="pen-to-square" size={12} color={theme.textPrimary} /><Text style={{ color: theme.textPrimary, fontSize: 12 }}>编辑</Text></Pressable>
