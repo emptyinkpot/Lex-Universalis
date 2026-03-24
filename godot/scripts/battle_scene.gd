@@ -5,6 +5,8 @@ const BATTLE_SLOT_SCENE := preload("res://scenes/components/BattleSlot.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 var data_loader: RefCounted
+var base_cards: Array = []
+var battle_seed_template: Dictionary = {}
 var draw_pile: Array = []
 var hand_cards: Array = []
 var discard_pile: Array = []
@@ -32,33 +34,26 @@ var rendered_slot_nodes: Dictionary = {}
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
-	var battle_seed: Dictionary = data_loader.load_battle_seed()
-	var cards: Array = data_loader.load_base_cards()
-	draw_pile = cards.duplicate(true)
-	player_state = battle_seed.get("player", {}).duplicate(true)
-	enemy_state = battle_seed.get("enemy", {}).duplicate(true)
-	battle_slots = battle_seed.get("slots", []).duplicate(true)
+	battle_seed_template = data_loader.load_battle_seed()
+	base_cards = data_loader.load_base_cards()
 	rules_label.text = "[b]Battle Rules[/b]\n- Click a hand card to arm it.\n- Click a front or back slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn."
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
-	for _index in range(int(player_state.get("handSize", 5))):
-		_draw_card()
-	_render_all()
+	_reset_battle_state()
 
 func start_level(level_data: Dictionary) -> void:
 	active_level = level_data.duplicate(true)
-	var level_name := str(active_level.get("name", "Scenario Battle"))
-	var enemy_faction := str(active_level.get("enemyFaction", enemy_label.text))
-	enemy_label.text = level_name
+	var enemy_faction := str(active_level.get("enemyFaction", "ENGLAND"))
+	_reset_battle_state(_build_level_deck(enemy_faction))
 	rules_label.text = "[b]Battle Rules[/b]\n- Click a hand card to arm it.\n- Click a front or back slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn.\n\n[b]Scenario[/b]\nEnemy faction: %s" % enemy_faction
 	log_label.text = "[b]Scenario Loaded[/b]\n- %s\n- %s\n\n%s" % [
-		level_name,
+		str(active_level.get("name", "Scenario Battle")),
 		str(active_level.get("storyText", "")),
 		log_label.text,
 	]
 	_render_all()
 
 func _render_all() -> void:
-	enemy_label.text = "Enemy Fortress"
+	enemy_label.text = str(active_level.get("name", "Enemy Fortress"))
 	enemy_stats.text = "HP %d   Gold %d   Influence %d" % [
 		int(enemy_state.get("health", 0)),
 		int(enemy_state.get("gold", 0)),
@@ -84,6 +79,8 @@ func _render_slot_row(row_node: HBoxContainer, row_name: String) -> void:
 		child.queue_free()
 	for slot in battle_slots:
 		if str(slot.get("row", "")) != row_name:
+			continue
+		if bool(slot.get("collapsed", false)):
 			continue
 		var slot_node := BATTLE_SLOT_SCENE.instantiate()
 		slot_node.call("setup", slot, selected_hand_index >= 0)
@@ -129,10 +126,12 @@ func _on_slot_pressed(slot_id: String) -> void:
 	var slot := battle_slots[slot_index] as Dictionary
 	await _animate_card_play(selected_hand_index, slot_id, card)
 	var damage := _get_card_damage(card)
+	_spawn_damage_text(rendered_slot_nodes.get(slot_id), damage, false)
 	if bool(slot.get("counterArmed", false)):
 		damage = maxi(1, damage - 1)
 		player_state["health"] = maxi(0, int(player_state.get("health", 0)) - 1)
 		slot["counterArmed"] = false
+		_spawn_damage_text(self, 1, true)
 		_append_log("Counter", "%s countered and hit the player for 1." % str(slot.get("title", "Slot")))
 	slot["health"] = maxi(0, int(slot.get("health", 0)) - damage)
 	enemy_state["health"] = maxi(0, int(enemy_state.get("health", 0)) - damage)
@@ -141,6 +140,8 @@ func _on_slot_pressed(slot_id: String) -> void:
 	hand_cards.remove_at(selected_hand_index)
 	selected_hand_index = -1
 	if int(slot.get("health", 0)) == 0:
+		slot["collapsed"] = true
+		await _play_slot_break(slot_id)
 		_append_log("Break", "%s collapsed." % str(slot.get("title", "Slot")))
 	_draw_card()
 	_render_all()
@@ -191,3 +192,66 @@ func _animate_card_play(hand_index: int, slot_id: String, card: Dictionary) -> v
 	if rendered_slot_nodes.has(slot_id):
 		await rendered_slot_nodes[slot_id].play_hit_feedback()
 	ghost.queue_free()
+
+func _reset_battle_state(deck_override: Array = []) -> void:
+	draw_pile = deck_override.duplicate(true) if not deck_override.is_empty() else base_cards.duplicate(true)
+	hand_cards.clear()
+	discard_pile.clear()
+	selected_hand_index = -1
+	is_resolving = false
+	player_state = battle_seed_template.get("player", {}).duplicate(true)
+	enemy_state = battle_seed_template.get("enemy", {}).duplicate(true)
+	battle_slots = battle_seed_template.get("slots", []).duplicate(true)
+	if active_level.is_empty():
+		log_label.text = "[b]Combat Log[/b]\n- Godot migration shell initialized.\n- Fixed PC battlefield layout active.\n- Next step: queue resolution and animation graph."
+	for _index in range(int(player_state.get("handSize", 5))):
+		_draw_card()
+	_render_all()
+
+func _build_level_deck(enemy_faction: String) -> Array:
+	var filtered: Array = []
+	for card in base_cards:
+		if card is Dictionary and _normalize_faction(str(card.get("faction", ""))) == _normalize_faction(enemy_faction):
+			filtered.append(card.duplicate(true))
+	if filtered.is_empty():
+		filtered = base_cards.duplicate(true)
+	var deck: Array = []
+	for index in range(maxi(8, filtered.size())):
+		deck.append((filtered[index % filtered.size()] as Dictionary).duplicate(true))
+	return deck
+
+func _normalize_faction(faction: String) -> String:
+	return "HRE" if faction == "HOLY_ROMAN_EMPIRE" else faction
+
+func _spawn_damage_text(target_node: Control, amount: int, counter: bool) -> void:
+	if target_node == null:
+		return
+	var label := Label.new()
+	label.text = ("-%d" % amount) if not counter else ("Counter -%d" % amount)
+	label.add_theme_font_size_override("font_size", 22 if not counter else 18)
+	label.add_theme_color_override("font_color", Color("ffcf7a") if not counter else Color("ff8f8f"))
+	overlay_layer.add_child(label)
+	var offset := Vector2(0, -18)
+	label.global_position = target_node.global_position + Vector2(target_node.size.x * 0.5 - 30, 18)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "global_position", label.global_position + offset, 0.42)
+	tween.tween_property(label, "modulate", Color(1, 1, 1, 0), 0.42)
+	await tween.finished
+	label.queue_free()
+
+func _play_slot_break(slot_id: String) -> void:
+	if not rendered_slot_nodes.has(slot_id):
+		return
+	var slot_node: Control = rendered_slot_nodes[slot_id]
+	var crack := ColorRect.new()
+	crack.color = Color(1, 0.86, 0.65, 0.55)
+	crack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	crack.size = slot_node.size
+	slot_node.add_child(crack)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(slot_node, "scale", Vector2.ONE * 0.92, 0.16)
+	tween.tween_property(slot_node, "modulate", Color(0.65, 0.55, 0.5, 0.0), 0.32)
+	tween.tween_property(crack, "modulate", Color(1, 1, 1, 0), 0.26)
+	await tween.finished
