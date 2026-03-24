@@ -1,20 +1,14 @@
 # Docs
 
-This folder contains non-runtime game materials.
+This folder holds non-runtime project material.
 
 ## Layout
 
-- `game-design/moon/`: the main `Lex Universalis` design archive
-- `reference-images/`: reference images and screenshots
+- `game-design/moon/` - canonical card-game design archive
+- `reference/` - general project references and maintenance notes
 
-## Current Game Layout
+## Notes
 
-- `game-design/moon/cards/characters/`: canonical character cards
-- `game-design/moon/cards/common/`: common cards such as events, actions, tricks, items, and generic cards
-- `game-design/moon/cards/spells/`: spell cards by element
-- `game-design/moon/cards/support/`: support/status cards
-- `game-design/moon/lore/setting/`: worldbuilding and setting notes
-- `game-design/moon/rules/`: the main card/rule system notes
-- `game-design/moon/drafts/`: loose drafts and in-progress ideas
-- `game-design/moon/archive/0.1/`: older rule/card drafts kept for reference
-- `game-design/moon/archive/needs-repair/`: zero-length or broken documents
+- Canonical card materials live under `docs/game-design/moon/cards/`
+- Archived or broken source docs are kept out of the active card tree
+
