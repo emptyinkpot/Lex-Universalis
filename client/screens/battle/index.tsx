@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
@@ -486,25 +486,30 @@ export default function BattleScreen() {
   };
 
   const renderHandCard = (card: AnyCard, index: number) => (
-    <KardsCard
+    <Animated.View
       key={`${card.id}-${index}`}
-      card={card}
-      size="medium"
-      showStats
-      fanIndex={index}
-      totalFanCards={hand.length}
-      isHovered={hoveredIndex === index}
-      isSelected={selectedCard?.id === card.id}
-      onPress={() => handleCardPress(card)}
-      onPressIn={() => setHoveredIndex(index)}
-      onPressOut={() => setHoveredIndex(null)}
-      onDeselect={() => {
-        if (selectedCard?.id === card.id) {
-          setSelectedCard(null);
-          setIsTargeting(false);
-        }
-      }}
-    />
+      entering={FadeInDown.delay(index * 80).duration(420)}
+      style={styles.handCardShell}
+    >
+      <KardsCard
+        card={card}
+        size="medium"
+        showStats
+        fanIndex={index}
+        totalFanCards={hand.length}
+        isHovered={hoveredIndex === index}
+        isSelected={selectedCard?.id === card.id}
+        onPress={() => handleCardPress(card)}
+        onPressIn={() => setHoveredIndex(index)}
+        onPressOut={() => setHoveredIndex(null)}
+        onDeselect={() => {
+          if (selectedCard?.id === card.id) {
+            setSelectedCard(null);
+            setIsTargeting(false);
+          }
+        }}
+      />
+    </Animated.View>
   );
 
   const renderBattleSlot = (slot: BattleSlot) => (

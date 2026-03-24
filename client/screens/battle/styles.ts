@@ -220,6 +220,9 @@ export const createStyles = (_theme: Theme) =>
       justifyContent: 'flex-end',
       paddingBottom: 0,
     },
+    handCardShell: {
+      ...StyleSheet.absoluteFillObject,
+    },
     actionBar: {
       flexDirection: 'row',
       gap: Spacing.sm,

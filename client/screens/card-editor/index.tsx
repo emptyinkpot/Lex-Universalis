@@ -2,6 +2,7 @@
 import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome6 } from '@expo/vector-icons';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Screen } from '@/components/Screen';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -342,9 +343,19 @@ export default function CardEditorScreen() {
   const [importTemplateId, setImportTemplateId] = useState<string>('none');
   const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
   const [syncingAll, setSyncingAll] = useState(false);
+  const [previewFace, setPreviewFace] = useState<'front' | 'back'>('front');
+  const previewRotation = useSharedValue(0);
 
   const selectedCard = useMemo(() => cards.find((item) => item.id === selectedId) ?? cards[0] ?? null, [cards, selectedId]);
   const exportJson = useMemo(() => JSON.stringify(cards.map(stripRuntime), null, 2), [cards]);
+  const previewFrontStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1400 }, { rotateY: `${previewRotation.value}deg` }],
+    opacity: previewRotation.value < 90 ? 1 : 0,
+  }));
+  const previewBackStyle = useAnimatedStyle(() => ({
+    transform: [{ perspective: 1400 }, { rotateY: `${previewRotation.value + 180}deg` }],
+    opacity: previewRotation.value > 90 ? 1 : 0,
+  }));
 
   const stats = useMemo(() => ({
     total: cards.length,
@@ -435,6 +446,14 @@ export default function CardEditorScreen() {
       console.error('保存模板失败:', error);
     });
   }, [templates]);
+
+  useEffect(() => {
+    previewRotation.value = withTiming(previewFace === 'front' ? 0 : 180, { duration: 360 });
+  }, [previewFace, previewRotation]);
+
+  useEffect(() => {
+    setPreviewFace('front');
+  }, [selectedId]);
 
   const openCreate = (type: CardType = CardType.UNIT) => {
     setEditorMode('create');
@@ -808,114 +827,179 @@ export default function CardEditorScreen() {
     const factionColor = factionColorMap[card.faction] ?? theme.primary;
     const rarityColor = RARITY_OPTIONS.find((item) => item.value === card.rarity)?.color ?? theme.primary;
     const typeIcon = card.type === CardType.UNIT ? 'chess-knight' : card.type === CardType.TACTIC ? 'scroll' : 'tower-observation';
+    const typeLabel = card.type === CardType.UNIT
+      ? '单位卡'
+      : card.type === CardType.TACTIC
+        ? '战术卡'
+        : '建筑卡';
+    const subtypeLabel = card.type === CardType.UNIT
+      ? card.unitType
+      : card.type === CardType.TACTIC
+        ? card.tacticType
+        : card.buildingType;
+    const effectSummary = card.type === CardType.UNIT
+      ? card.abilities.map((ability) => ability.description || ability.type).filter(Boolean)
+      : [card.effect, card.duration !== null ? `持续 ${card.duration} 回合` : ''].filter(Boolean);
+    const noteLines = card.notes.split('\n').map((line) => line.trim()).filter(Boolean);
 
     return (
       <ThemedView level="default" style={styles.cardFrame}>
         <View style={[styles.cardBackdrop, { backgroundColor: withAlpha(factionColor, 0.12) }]} />
         <View style={[styles.cardRim, { borderColor: rarityColor }]} />
-
-        <View style={styles.cardContent}>
-          <View style={styles.cardTopBar}>
-            <View style={[styles.cardCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
-              <ThemedText variant="h4" color={theme.textPrimary}>{card.cost}</ThemedText>
-              <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
-            </View>
-            <View style={styles.cardTopMeta}>
-              {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
-              <EditorBadge color={factionColor} label={card.faction} />
-              <EditorBadge color={rarityColor} label={card.rarity} />
-            </View>
-          </View>
-
-          <View style={[styles.cardArtwork, { borderColor: factionColor }]}>
-            {card.imageUrl ? (
-              <Image source={{ uri: card.imageUrl }} style={styles.cardArtworkImage} resizeMode="cover" />
-            ) : (
-              <View style={[styles.cardArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
-                <FactionIcon faction={card.faction} size={64} />
-                <ThemedText variant="smallMedium" color={theme.textMuted} style={{ marginTop: 8 }}>
-                  未设置图片
-                </ThemedText>
+        <View style={styles.cardFlipStage}>
+          <Animated.View style={[styles.cardFace, previewFrontStyle]}>
+            <View style={styles.cardContent}>
+              <View style={styles.cardTopBar}>
+                <View style={[styles.cardCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
+                  <ThemedText variant="h4" color={theme.textPrimary}>{card.cost}</ThemedText>
+                  <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
+                </View>
+                <View style={styles.cardTopMeta}>
+                  {isMoonDraftId(card.id) ? <EditorBadge color="#7C3AED" label="月球毛坯" /> : null}
+                  <EditorBadge color={factionColor} label={card.faction} />
+                  <EditorBadge color={rarityColor} label={card.rarity} />
+                </View>
               </View>
-            )}
-            <View style={[styles.cardTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.9) }]}>
-              <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
-              <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
-            </View>
-          </View>
 
-          <View style={styles.cardTitleBlock}>
-            <ThemedText variant="h4" color={theme.textPrimary} style={styles.cardTitle} numberOfLines={2}>
-              {card.name || '未命名卡牌'}
-            </ThemedText>
-            <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
-              {card.description || '暂无描述'}
-            </ThemedText>
-            {card.flavorText ? (
-              <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText} numberOfLines={2}>
-                {card.flavorText}
+              <View style={[styles.cardArtwork, { borderColor: factionColor }]}>
+                {card.imageUrl ? (
+                  <Image source={{ uri: card.imageUrl }} style={styles.cardArtworkImage} resizeMode="cover" />
+                ) : (
+                  <View style={[styles.cardArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
+                    <FactionIcon faction={card.faction} size={64} />
+                    <ThemedText variant="smallMedium" color={theme.textMuted} style={{ marginTop: 8 }}>
+                      未设置图片
+                    </ThemedText>
+                  </View>
+                )}
+                <View style={[styles.cardTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.9) }]}>
+                  <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
+                  <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
+                </View>
+              </View>
+
+              <View style={styles.cardTitleBlock}>
+                <ThemedText variant="h4" color={theme.textPrimary} style={styles.cardTitle} numberOfLines={2}>
+                  {card.name || '未命名卡牌'}
+                </ThemedText>
+                <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
+                  {card.description || '暂无描述'}
+                </ThemedText>
+                {card.flavorText ? (
+                  <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText} numberOfLines={2}>
+                    {card.flavorText}
+                  </ThemedText>
+                ) : null}
+              </View>
+
+              {card.type === CardType.UNIT && (
+                <View style={styles.cardStatGrid}>
+                  <ThemedView level="tertiary" style={styles.cardStatPill}>
+                    <FontAwesome6 name="crosshairs" size={13} color={theme.error} />
+                    <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
+                  </ThemedView>
+                  <ThemedView level="tertiary" style={styles.cardStatPill}>
+                    <FontAwesome6 name="heart" size={13} color={theme.success} />
+                    <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
+                  </ThemedView>
+                  <ThemedView level="tertiary" style={styles.cardStatPill}>
+                    <FontAwesome6 name="person-walking" size={13} color={theme.primary} />
+                    <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
+                  </ThemedView>
+                </View>
+              )}
+
+              {card.type === CardType.BUILDING && (
+                <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>
+                    耐久 {card.durability ?? 0}
+                  </ThemedText>
+                  <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
+                    {card.effect || '暂无建筑效果'}
+                  </ThemedText>
+                </ThemedView>
+              )}
+
+              {card.type === CardType.TACTIC && (
+                <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary} numberOfLines={4}>
+                    {card.effect || '暂无战术效果'}
+                  </ThemedText>
+                  {card.duration !== null ? (
+                    <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText>
+                  ) : null}
+                </ThemedView>
+              )}
+
+              {card.type === CardType.UNIT && card.abilities.length > 0 && (
+                <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>
+                  {card.abilities.slice(0, 3).map((ability, index) => (
+                    <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>
+                      • {ability.description || ability.type}
+                    </Text>
+                  ))}
+                </ThemedView>
+              )}
+            </View>
+          </Animated.View>
+
+          <Animated.View style={[styles.cardFace, styles.cardFaceBack, previewBackStyle]}>
+            <View style={styles.cardBackTop}>
+              <ThemedText variant="small" color={theme.textMuted}>卡背资料</ThemedText>
+              <ThemedText variant="h4" color={theme.textPrimary} numberOfLines={2}>
+                {card.name || '未命名卡牌'}
               </ThemedText>
+              <ThemedText variant="small" color={theme.textMuted}>
+                {typeLabel} · {subtypeLabel} · {card.faction}
+              </ThemedText>
+            </View>
+
+            <ThemedView level="tertiary" style={styles.cardBackSection}>
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>设计摘要</ThemedText>
+              <ThemedText variant="small" color={theme.textMuted}>
+                {card.description || '暂无描述'}
+              </ThemedText>
+            </ThemedView>
+
+            {effectSummary.length > 0 ? (
+              <ThemedView level="tertiary" style={styles.cardBackSection}>
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>效果拆解</ThemedText>
+                {effectSummary.slice(0, 4).map((line, index) => (
+                  <ThemedText key={`${card.id}-effect-${index}`} variant="small" color={theme.textMuted}>
+                    {`• ${line}`}
+                  </ThemedText>
+                ))}
+              </ThemedView>
             ) : null}
-          </View>
 
-          {card.type === CardType.UNIT && (
-            <View style={styles.cardStatGrid}>
-              <ThemedView level="tertiary" style={styles.cardStatPill}>
-                <FontAwesome6 name="crosshairs" size={13} color={theme.error} />
-                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
+            {card.flavorText ? (
+              <ThemedView level="tertiary" style={styles.cardBackSection}>
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>风味文本</ThemedText>
+                <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText}>
+                  {card.flavorText}
+                </ThemedText>
               </ThemedView>
-              <ThemedView level="tertiary" style={styles.cardStatPill}>
-                <FontAwesome6 name="heart" size={13} color={theme.success} />
-                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
+            ) : null}
+
+            {noteLines.length > 0 ? (
+              <ThemedView level="tertiary" style={styles.cardBackSection}>
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>备注与来源</ThemedText>
+                {noteLines.slice(0, 4).map((line, index) => (
+                  <ThemedText key={`${card.id}-note-${index}`} variant="small" color={theme.textMuted}>
+                    {`• ${line}`}
+                  </ThemedText>
+                ))}
               </ThemedView>
-              <ThemedView level="tertiary" style={styles.cardStatPill}>
-                <FontAwesome6 name="person-walking" size={13} color={theme.primary} />
-                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
-              </ThemedView>
-            </View>
-          )}
+            ) : null}
+          </Animated.View>
+        </View>
 
-          {card.type === CardType.BUILDING && (
-            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>
-                耐久 {card.durability ?? 0}
-              </ThemedText>
-              <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
-                {card.effect || '暂无建筑效果'}
-              </ThemedText>
-            </ThemedView>
-          )}
-
-          {card.type === CardType.TACTIC && (
-            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-              <ThemedText variant="smallMedium" color={theme.textPrimary} numberOfLines={4}>
-                {card.effect || '暂无战术效果'}
-              </ThemedText>
-              {card.duration !== null ? (
-                <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText>
-              ) : null}
-            </ThemedView>
-          )}
-
-          {card.type === CardType.UNIT && card.abilities.length > 0 && (
-            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>
-              {card.abilities.slice(0, 3).map((ability, index) => (
-                <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>
-                  • {ability.description || ability.type}
-                </Text>
-              ))}
-            </ThemedView>
-          )}
-
-          {card.notes ? (
-            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText>
-              <ThemedText variant="small" color={theme.textMuted} numberOfLines={2}>{card.notes}</ThemedText>
-            </ThemedView>
-          ) : null}
-
-          <View style={styles.previewActions}>
+        <View style={styles.previewActions}>
+          <Pressable onPress={() => setPreviewFace((current) => current === 'front' ? 'back' : 'front')} style={[styles.previewAction, { backgroundColor: theme.backgroundTertiary }]}>
+            <FontAwesome6 name="arrows-rotate" size={14} color={theme.textPrimary} />
+            <ThemedText variant="smallMedium" color={theme.textPrimary}>{previewFace === 'front' ? '翻到背面' : '翻到正面'}</ThemedText>
+          </Pressable>
           <Pressable onPress={() => openEdit(card)} style={[styles.previewAction, { backgroundColor: theme.primary }]}>
             <FontAwesome6 name="pen-to-square" size={14} color="#FFFFFF" />
             <ThemedText variant="smallMedium" color="#FFFFFF">编辑</ThemedText>
@@ -924,7 +1008,6 @@ export default function CardEditorScreen() {
             <FontAwesome6 name="clone" size={14} color={theme.textPrimary} />
             <ThemedText variant="smallMedium" color={theme.textPrimary}>复制</ThemedText>
           </Pressable>
-          </View>
         </View>
       </ThemedView>
     );

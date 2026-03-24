@@ -239,7 +239,7 @@ export const createStyles = (_theme: Theme) =>
       borderColor: 'rgba(164, 128, 76, 0.16)',
     },
     previewAbility: { borderRadius: BorderRadius.xl, padding: Spacing.md, gap: 4 },
-    previewActions: { flexDirection: 'row', gap: Spacing.sm },
+    previewActions: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
     previewAction: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.xs, paddingVertical: Spacing.md, borderRadius: BorderRadius.full },
     quickHint: {
       flexDirection: 'row',
@@ -283,6 +283,20 @@ export const createStyles = (_theme: Theme) =>
       borderColor: 'rgba(181, 142, 85, 0.34)',
       overflow: 'hidden',
       backgroundColor: '#1c140e',
+    },
+    cardFlipStage: {
+      flex: 1,
+      position: 'relative',
+    },
+    cardFace: {
+      ...StyleSheet.absoluteFillObject,
+      backfaceVisibility: 'hidden',
+    },
+    cardFaceBack: {
+      padding: Spacing.md,
+      gap: Spacing.sm,
+      justifyContent: 'space-between',
+      backgroundColor: '#16100c',
     },
     cardBackdrop: {
       position: 'absolute',
@@ -354,6 +368,20 @@ export const createStyles = (_theme: Theme) =>
       borderRadius: BorderRadius.xl,
       padding: Spacing.sm,
       gap: 4,
+      backgroundColor: '#0f0b08',
+      borderWidth: 1,
+      borderColor: 'rgba(166, 129, 74, 0.16)',
+    },
+    cardBackTop: {
+      gap: Spacing.xs,
+      paddingBottom: Spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(166, 129, 74, 0.18)',
+    },
+    cardBackSection: {
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.md,
+      gap: Spacing.xs,
       backgroundColor: '#0f0b08',
       borderWidth: 1,
       borderColor: 'rgba(166, 129, 74, 0.16)',
