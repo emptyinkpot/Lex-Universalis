@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
@@ -52,10 +52,12 @@ export default function StoryModeScreen() {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
+  const { width } = useWindowDimensions();
 
   const [loading, setLoading] = useState(true);
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [progress, setProgress] = useState<StoryProgress | null>(null);
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
 
   useEffect(() => {
     void loadData();
@@ -95,7 +97,8 @@ export default function StoryModeScreen() {
   }, [loading, scenario]);
 
   const firstChapter = scenario?.chapters?.[0] ?? null;
-  const firstLevel = firstChapter?.levels?.[0] ?? null;
+  const activeChapter = scenario?.chapters?.[activeChapterIndex] ?? firstChapter;
+  const firstLevel = activeChapter?.levels?.[0] ?? null;
 
   const openScenario = () => {
     if (!scenario) return;
@@ -111,6 +114,15 @@ export default function StoryModeScreen() {
     });
   };
 
+  const handleChapterSnap = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const pageWidth = event.nativeEvent.layoutMeasurement.width;
+    if (!pageWidth) {
+      return;
+    }
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
+    setActiveChapterIndex(nextIndex);
+  };
+
   if (loading) {
     return (
       <Screen backgroundColor="#0a0706" statusBarStyle="light">
@@ -124,7 +136,7 @@ export default function StoryModeScreen() {
     );
   }
 
-  if (!scenario || !firstChapter || !firstLevel) {
+  if (!scenario || !activeChapter || !firstLevel) {
     return (
       <Screen backgroundColor="#0a0706" statusBarStyle="light">
         <View style={styles.loadingContainer}>
@@ -162,7 +174,7 @@ export default function StoryModeScreen() {
             </View>
             <View style={styles.progressChip}>
               <ThemedText variant="tiny" color="#8f7759">关卡</ThemedText>
-              <ThemedText variant="h4" color="#f2e4c4">{firstChapter.levels.length}</ThemedText>
+              <ThemedText variant="h4" color="#f2e4c4">{activeChapter.levels.length}</ThemedText>
             </View>
           </View>
         </View>
@@ -215,27 +227,59 @@ export default function StoryModeScreen() {
           <View style={styles.chapterPreviewHeader}>
             <ThemedText variant="h3" color="#f2e4c4">当前展示章节</ThemedText>
             <View style={styles.chapterTag}>
-              <ThemedText variant="tiny" color="#21150d">chapter 01</ThemedText>
+              <ThemedText variant="tiny" color="#21150d">{`chapter ${String(activeChapterIndex + 1).padStart(2, '0')}`}</ThemedText>
             </View>
           </View>
-          <ThemedText variant="bodyMedium" color="#e6d8b8">{firstChapter.name}</ThemedText>
-          <ThemedText variant="small" color="#ab9577" style={styles.chapterPreviewText}>
-            {firstChapter.storyIntro}
-          </ThemedText>
-          <View style={styles.levelPreviewCard}>
-            <View style={styles.levelPreviewHeader}>
-              <View>
-                <ThemedText variant="smallMedium" color="#f2e4c4">{firstLevel.name}</ThemedText>
-                <ThemedText variant="tiny" color="#947f63">{firstLevel.difficulty}</ThemedText>
-              </View>
-              <View style={styles.levelFactionBadge}>
-                <FontAwesome6 name="flag" size={12} color="#d7b26d" />
-                <ThemedText variant="tiny" color="#d7b26d">{firstLevel.enemyFaction}</ThemedText>
-              </View>
-            </View>
-            <ThemedText variant="small" color="#b6a081" style={styles.levelPreviewText}>
-              {firstLevel.storyText}
-            </ThemedText>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            snapToInterval={width}
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleChapterSnap}
+            contentContainerStyle={styles.chapterCarousel}
+          >
+            {scenario.chapters.map((chapter, index) => {
+              const previewLevel = chapter.levels[0];
+              return (
+                <View key={chapter.id} style={[styles.chapterSlide, { width: width - 32 }]}>
+                  <ThemedText variant="bodyMedium" color="#e6d8b8">{chapter.name}</ThemedText>
+                  <ThemedText variant="small" color="#ab9577" style={styles.chapterPreviewText}>
+                    {chapter.storyIntro}
+                  </ThemedText>
+                  {previewLevel ? (
+                    <View style={styles.levelPreviewCard}>
+                      <View style={styles.levelPreviewHeader}>
+                        <View>
+                          <ThemedText variant="smallMedium" color="#f2e4c4">{previewLevel.name}</ThemedText>
+                          <ThemedText variant="tiny" color="#947f63">{previewLevel.difficulty}</ThemedText>
+                        </View>
+                        <View style={styles.levelFactionBadge}>
+                          <FontAwesome6 name="flag" size={12} color="#d7b26d" />
+                          <ThemedText variant="tiny" color="#d7b26d">{previewLevel.enemyFaction}</ThemedText>
+                        </View>
+                      </View>
+                      <ThemedText variant="small" color="#b6a081" style={styles.levelPreviewText}>
+                        {previewLevel.storyText}
+                      </ThemedText>
+                    </View>
+                  ) : null}
+                  <View style={styles.chapterSlideFooter}>
+                    <ThemedText variant="tiny" color={index === activeChapterIndex ? '#f2e4c4' : '#8f7759'}>
+                      左右滑动切换章节
+                    </ThemedText>
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+          <View style={styles.chapterDots}>
+            {scenario.chapters.map((chapter, index) => (
+              <View
+                key={chapter.id}
+                style={[styles.chapterDot, index === activeChapterIndex && styles.chapterDotActive]}
+              />
+            ))}
           </View>
         </View>
       </ScrollView>

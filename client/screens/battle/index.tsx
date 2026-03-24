@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { FlashList } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
@@ -16,7 +16,9 @@ import {
   BattleFeedbackLayer,
   type BattleFeedbackEvent,
 } from '@/components/BattleFeedbackLayer';
+import { BattleCastOverlay, type BattleCastEvent } from '@/components/BattleCastOverlay';
 import { BattleDamageOverlay, type DamageEvent } from '@/components/BattleDamageOverlay';
+import { BattleHandCardMotion } from '@/components/BattleHandCardMotion';
 import { BattleSwipeZone } from '@/components/BattleSwipeZone';
 import { BattleSlot, BattleTargetSlot } from '@/components/BattleTargetSlot';
 import { createStyles } from './styles';
@@ -111,14 +113,18 @@ export default function BattleScreen() {
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const damageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deathTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const dealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const drawCursorRef = useRef(0);
 
   const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
+  const [selectedHandIndex, setSelectedHandIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [battleFocus, setBattleFocus] = useState<BattleFocus>('enemy-line');
   const [isTargeting, setIsTargeting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [feedbackEvent, setFeedbackEvent] = useState<BattleFeedbackEvent | null>(null);
   const [damageEvent, setDamageEvent] = useState<DamageEvent | null>(null);
+  const [castEvent, setCastEvent] = useState<BattleCastEvent | null>(null);
   const [battleSlots, setBattleSlots] = useState<BattleSlot[]>(() => createInitialBattleSlots());
   const [battleLog, setBattleLog] = useState<BattleLogEntry[]>([
     {
@@ -137,7 +143,14 @@ export default function BattleScreen() {
   const [enemyInfluence] = useState(2);
   const currentTurn = 3;
   const isPlayerTurn = true;
-  const hand = useMemo(() => INITIAL_CARDS.slice(0, 5), []);
+  const battleDeck = useMemo(
+    () => [...INITIAL_CARDS, ...INITIAL_CARDS.slice(0, 5)].map((card, index) => ({
+      ...card,
+      id: `${card.id}-battle-${index}`,
+    })),
+    []
+  );
+  const [hand, setHand] = useState<AnyCard[]>([]);
 
   useEffect(
     () => () => {
@@ -149,6 +162,8 @@ export default function BattleScreen() {
       }
       deathTimersRef.current.forEach((timer) => clearTimeout(timer));
       deathTimersRef.current.clear();
+      dealTimersRef.current.forEach((timer) => clearTimeout(timer));
+      dealTimersRef.current = [];
     },
     []
   );
@@ -193,6 +208,55 @@ export default function BattleScreen() {
     }, 900);
   };
 
+  const getHandPoint = (index: number) => {
+    const spread = Math.min(width * 0.12, 86);
+    const centerOffset = index - Math.max(0, hand.length - 1) / 2;
+    return {
+      x: width * 0.5 + centerOffset * spread,
+      y: height - 154,
+    };
+  };
+
+  const scheduleDrawCard = (delay = 0, reason: 'deal' | 'draw' = 'draw') => {
+    if (drawCursorRef.current >= battleDeck.length) {
+      return;
+    }
+
+    const card = battleDeck[drawCursorRef.current];
+    drawCursorRef.current += 1;
+    const timer = setTimeout(() => {
+      setHand((current) => [...current, card]);
+      if (reason === 'draw') {
+        appendLog({
+          id: `draw-${Date.now()}`,
+          title: '抽取手牌',
+          detail: `${card.name} 已加入手牌。`,
+          accent: '#C9A96E',
+        });
+        emitFeedback({
+          kind: 'turn',
+          title: '补入新牌',
+          detail: `${card.name} 已进入手牌区。`,
+          accent: '#C9A96E',
+          side: 'player',
+          duration: 420,
+        });
+      }
+    }, delay);
+
+    dealTimersRef.current.push(timer);
+  };
+
+  useEffect(() => {
+    setHand([]);
+    drawCursorRef.current = 0;
+    dealTimersRef.current.forEach((timer) => clearTimeout(timer));
+    dealTimersRef.current = [];
+    for (let index = 0; index < 5; index += 1) {
+      scheduleDrawCard(index * 130, 'deal');
+    }
+  }, [battleDeck]);
+
   const getCardDamage = (card: AnyCard) => {
     if (card.type === CardType.UNIT) {
       return card.attack;
@@ -235,6 +299,7 @@ export default function BattleScreen() {
   const cancelTargetMode = () => {
     setIsTargeting(false);
     setSelectedCard(null);
+    setSelectedHandIndex(null);
     emitFeedback({
       kind: 'counter',
       title: '取消目标选择',
@@ -254,6 +319,7 @@ export default function BattleScreen() {
 
   const handleEndTurn = () => {
     setSelectedCard(null);
+    setSelectedHandIndex(null);
     setIsTargeting(false);
     emitFeedback({
       kind: 'turn',
@@ -314,6 +380,7 @@ export default function BattleScreen() {
     }
 
     setIsResolving(true);
+    const currentHandIndex = selectedHandIndex ?? hand.findIndex((card) => card.id === selectedCard.id);
     const baseDamage = getCardDamage(selectedCard);
     const isCounterHit = targetSlot.counterArmed && selectedCard.type === CardType.UNIT;
     const rowPenalty = targetSlot.row === 'back' && selectedCard.type === CardType.UNIT ? 1 : 0;
@@ -325,6 +392,16 @@ export default function BattleScreen() {
       : selectedCard.faction === 'ENGLAND'
         ? '#C8102E'
         : '#C9A96E';
+    const handPoint = getHandPoint(Math.max(0, currentHandIndex));
+
+    setCastEvent({
+      id: `${Date.now()}-${selectedCard.id}`,
+      accent,
+      fromX: handPoint.x,
+      fromY: handPoint.y,
+      toX: slotPoint.x,
+      toY: slotPoint.y,
+    });
 
     setBattleSlots((current) =>
       current.map((slot) => {
@@ -399,17 +476,38 @@ export default function BattleScreen() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
+    setHand((current) => current.filter((card) => card.id !== selectedCard.id));
     setSelectedCard(null);
+    setSelectedHandIndex(null);
     setIsTargeting(false);
     setBattleFocus('enemy-line');
+    setTimeout(() => {
+      setCastEvent(null);
+    }, 440);
+    scheduleDrawCard(420, 'draw');
 
     setTimeout(() => {
       setIsResolving(false);
     }, 260);
   };
 
-  const handleCardPress = (card: AnyCard) => {
+  const handleCardPress = (card: AnyCard, index: number) => {
+    if (selectedCard?.id === card.id && !isTargeting) {
+      setSelectedCard(null);
+      setSelectedHandIndex(null);
+      emitFeedback({
+        kind: 'counter',
+        title: '取消手牌选择',
+        detail: `${card.name} 已从待出牌状态移除。`,
+        accent: '#6B7280',
+        side: 'player',
+        duration: 360,
+      });
+      return;
+    }
+
     setSelectedCard(card);
+    setSelectedHandIndex(index);
     setIsTargeting(false);
     setBattleFocus('enemy-line');
     emitFeedback({
@@ -486,10 +584,12 @@ export default function BattleScreen() {
   };
 
   const renderHandCard = (card: AnyCard, index: number) => (
-    <Animated.View
+    <BattleHandCardMotion
       key={`${card.id}-${index}`}
-      entering={FadeInDown.delay(index * 80).duration(420)}
-      style={styles.handCardShell}
+      hovered={hoveredIndex === index}
+      selected={selectedCard?.id === card.id}
+      targeting={isTargeting}
+      delay={index * 80}
     >
       <KardsCard
         card={card}
@@ -499,17 +599,18 @@ export default function BattleScreen() {
         totalFanCards={hand.length}
         isHovered={hoveredIndex === index}
         isSelected={selectedCard?.id === card.id}
-        onPress={() => handleCardPress(card)}
+        onPress={() => handleCardPress(card, index)}
         onPressIn={() => setHoveredIndex(index)}
         onPressOut={() => setHoveredIndex(null)}
         onDeselect={() => {
           if (selectedCard?.id === card.id) {
             setSelectedCard(null);
+            setSelectedHandIndex(null);
             setIsTargeting(false);
           }
         }}
       />
-    </Animated.View>
+    </BattleHandCardMotion>
   );
 
   const renderBattleSlot = (slot: BattleSlot) => (
@@ -558,6 +659,7 @@ export default function BattleScreen() {
       <View style={styles.container}>
         <BattleFeedbackLayer event={feedbackEvent} />
         <BattleDamageOverlay event={damageEvent} />
+        <BattleCastOverlay event={castEvent} />
 
         <View style={styles.enemyInfoBar}>
           <View style={styles.enemyNameSection}>
@@ -669,6 +771,14 @@ export default function BattleScreen() {
               {isPlayerTurn ? '你的回合' : '敌方回合'}
             </ThemedText>
           </View>
+          {selectedCard ? (
+            <View style={styles.selectionTray}>
+              <View style={styles.selectionDot} />
+              <ThemedText variant="small" color={theme.textPrimary} style={styles.selectionTrayText}>
+                {isTargeting ? `${selectedCard.name} 已抬手，点击目标完成出牌` : `${selectedCard.name} 已选中，上滑进入出牌`}
+              </ThemedText>
+            </View>
+          ) : null}
           <View style={styles.handFanContainer}>
             {hand.map((card, index) => renderHandCard(card, index))}
           </View>

@@ -195,6 +195,32 @@ export const createStyles = (_theme: Theme) =>
     chapterPreviewText: {
       lineHeight: 21,
     },
+    chapterCarousel: {
+      paddingTop: Spacing.xs,
+    },
+    chapterSlide: {
+      gap: Spacing.md,
+      paddingRight: Spacing.lg,
+    },
+    chapterSlideFooter: {
+      alignItems: 'flex-end',
+    },
+    chapterDots: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+    },
+    chapterDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 999,
+      backgroundColor: 'rgba(143, 119, 89, 0.5)',
+    },
+    chapterDotActive: {
+      width: 24,
+      backgroundColor: '#d7b26d',
+    },
     levelPreviewCard: {
       padding: Spacing.md,
       borderRadius: BorderRadius.xl,
