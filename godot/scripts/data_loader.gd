@@ -19,6 +19,9 @@ func load_manifest() -> Dictionary:
 func load_story_showcase() -> Dictionary:
 	return load_json_file("story-showcase.json", {}) as Dictionary
 
+func load_campaign_scenarios() -> Array:
+	return load_json_file("campaign-scenarios.json", []) as Array
+
 func load_story_progress() -> Dictionary:
 	return load_json_file("story-progress.json", {}) as Dictionary
 

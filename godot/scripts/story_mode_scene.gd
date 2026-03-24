@@ -109,5 +109,10 @@ func _on_launch_button_pressed() -> void:
 	var levels: Array = chapter.get("levels", [])
 	if selected_level_index < 0 or selected_level_index >= levels.size():
 		return
-	var level := levels[selected_level_index] as Dictionary
+	var level := (levels[selected_level_index] as Dictionary).duplicate(true)
+	level["playerFaction"] = str(story.get("recommendedFaction", "ENGLAND"))
+	level["scenarioName"] = str(story.get("name", "Story Mode"))
+	level["scenarioYear"] = int(story.get("year", 0))
+	level["scenarioEra"] = str(story.get("era", ""))
+	level["chapterName"] = str(chapter.get("name", "Chapter"))
 	launch_level.emit(level)

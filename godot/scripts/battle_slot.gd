@@ -16,8 +16,10 @@ func setup(slot: Dictionary, armed: bool) -> void:
 	is_armed = armed
 	var title_label: Label = get_node("Padding/Body/Title")
 	var stats_label: Label = get_node("Padding/Body/Stats")
-	title_label.text = str(slot.get("title", "Slot"))
-	stats_label.text = "HP %d / %d   Counter %s" % [
+	var occupant_name := str(slot.get("occupantName", ""))
+	title_label.text = occupant_name if not occupant_name.is_empty() else str(slot.get("title", "Slot"))
+	stats_label.text = "ATK %d   HP %d / %d   Counter %s" % [
+		int(slot.get("attack", 0)),
 		int(slot.get("health", 0)),
 		int(slot.get("maxHealth", 0)),
 		"On" if bool(slot.get("counterArmed", false)) else "Off",
