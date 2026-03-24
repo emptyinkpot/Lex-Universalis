@@ -1,0 +1,71 @@
+[
+  {
+    "id": "scenario_hundred_years_war",
+    "name": "百年战争",
+    "year": 1337,
+    "era": "中世纪",
+    "description": "英格兰与法兰西之间持续百年的争夺。",
+    "historicalBackground": "1337年，英格兰国王爱德华三世宣称自己拥有法兰西王位继承权，引发百年战争。战争持续一百余年，改变了欧洲的政治格局。",
+    "playerFactions": [
+      "ENGLAND",
+      "FRANCE",
+      "HRE",
+      "VIKING",
+      "BYZANTIUM"
+    ],
+    "recommendedFaction": "ENGLAND",
+    "chapters": [
+      {
+        "id": "chapter_1",
+        "scenarioId": "scenario_hundred_years_war",
+        "name": "第一章：英格兰的崛起",
+        "description": "百年战争的开端，英格兰必须站稳脚跟。",
+        "storyIntro": "1337年，英格兰与法兰西之间的矛盾全面爆发。王位、领土与荣誉交织成漫长的战争，第一场战斗决定了故事的走向。",
+        "order": 1,
+        "levels": [
+          {
+            "id": "level_1_1",
+            "chapterId": "chapter_1",
+            "name": "黑斯廷斯初战",
+            "description": "守住第一波冲击，稳住故事的开端。",
+            "difficulty": "NORMAL",
+            "storyText": "诺曼军队正在逼近，英格兰的前线必须先站稳。你将带领第一支部队迎战，撑过这场开局之战。",
+            "enemyFaction": "VIKING",
+            "enemyDeck": [
+              "VIK_001",
+              "VIK_002",
+              "TAC_004",
+              "BLD_004",
+              "VIK_001",
+              "VIK_002",
+              "TAC_004",
+              "BLD_004"
+            ],
+            "playerDeckConstraint": {
+              "minCards": 8,
+              "allowedFactions": [
+                "ENGLAND"
+              ]
+            },
+            "rewards": [
+              {
+                "type": "gold",
+                "amount": 100,
+                "description": "100 黄金"
+              },
+              {
+                "type": "influence",
+                "amount": 20,
+                "description": "20 影响力"
+              }
+            ],
+            "victoryCondition": "击败敌方全部单位，或摧毁敌方城墙",
+            "defeatCondition": "己方城墙生命值归零",
+            "order": 1
+          }
+        ]
+      }
+    ],
+    "order": 1
+  }
+]

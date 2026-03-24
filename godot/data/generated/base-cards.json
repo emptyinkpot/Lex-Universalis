@@ -1,0 +1,317 @@
+[
+  {
+    "id": "ENG_001",
+    "name": "英格兰长弓手",
+    "type": "UNIT",
+    "faction": "ENGLAND",
+    "cost": 3,
+    "unitType": "ARCHER",
+    "attack": 2,
+    "health": 3,
+    "abilities": [
+      {
+        "type": "RANGED",
+        "value": 2,
+        "description": "远程攻击2"
+      },
+      {
+        "type": "FIRST_STRIKE",
+        "value": true,
+        "description": "先攻"
+      }
+    ],
+    "description": "远程攻击，先攻能力",
+    "flavorText": "英格兰长弓手在百年战争中威名远扬"
+  },
+  {
+    "id": "ENG_002",
+    "name": "英格兰重步兵",
+    "type": "UNIT",
+    "faction": "ENGLAND",
+    "cost": 4,
+    "unitType": "INFANTRY",
+    "attack": 3,
+    "health": 5,
+    "abilities": [
+      {
+        "type": "ARMORED",
+        "value": 1,
+        "description": "护甲+1"
+      }
+    ],
+    "description": "高防御步兵单位"
+  },
+  {
+    "id": "ENG_003",
+    "name": "英格兰骑士",
+    "type": "UNIT",
+    "faction": "ENGLAND",
+    "cost": 5,
+    "unitType": "CAVALRY",
+    "attack": 4,
+    "health": 4,
+    "abilities": [
+      {
+        "type": "CHARGE",
+        "value": 1,
+        "description": "冲锋+1"
+      }
+    ],
+    "description": "快速骑兵单位"
+  },
+  {
+    "id": "FRA_001",
+    "name": "法兰西重装骑士",
+    "type": "UNIT",
+    "faction": "FRANCE",
+    "cost": 5,
+    "unitType": "CAVALRY",
+    "attack": 4,
+    "health": 5,
+    "abilities": [
+      {
+        "type": "CHARGE",
+        "value": 2,
+        "description": "冲锋+2"
+      },
+      {
+        "type": "ARMORED",
+        "value": 1,
+        "description": "护甲+1"
+      }
+    ],
+    "description": "冲锋能力，高护甲",
+    "flavorText": "法兰西骑士是欧洲最精锐的骑兵之一"
+  },
+  {
+    "id": "FRA_002",
+    "name": "法兰西步兵",
+    "type": "UNIT",
+    "faction": "FRANCE",
+    "cost": 3,
+    "unitType": "INFANTRY",
+    "attack": 2,
+    "health": 4,
+    "abilities": [],
+    "description": "标准步兵单位"
+  },
+  {
+    "id": "FRA_003",
+    "name": "法兰西弓箭手",
+    "type": "UNIT",
+    "faction": "FRANCE",
+    "cost": 2,
+    "unitType": "ARCHER",
+    "attack": 1,
+    "health": 3,
+    "abilities": [
+      {
+        "type": "RANGED",
+        "value": 1,
+        "description": "远程攻击1"
+      }
+    ],
+    "description": "远程攻击单位"
+  },
+  {
+    "id": "HRE_001",
+    "name": "帝国士兵",
+    "type": "UNIT",
+    "faction": "HRE",
+    "cost": 2,
+    "unitType": "INFANTRY",
+    "attack": 2,
+    "health": 3,
+    "abilities": [],
+    "description": "基础帝国士兵"
+  },
+  {
+    "id": "HRE_002",
+    "name": "帝国重装步兵",
+    "type": "UNIT",
+    "faction": "HRE",
+    "cost": 4,
+    "unitType": "INFANTRY",
+    "attack": 3,
+    "health": 6,
+    "abilities": [
+      {
+        "type": "ARMORED",
+        "value": 2,
+        "description": "护甲+2"
+      }
+    ],
+    "description": "高护甲重步兵"
+  },
+  {
+    "id": "VIK_001",
+    "name": "维京狂战士",
+    "type": "UNIT",
+    "faction": "VIKING",
+    "cost": 3,
+    "unitType": "INFANTRY",
+    "attack": 3,
+    "health": 2,
+    "abilities": [
+      {
+        "type": "PLUNDER",
+        "value": true,
+        "description": "掠夺"
+      }
+    ],
+    "description": "高攻击低防御",
+    "flavorText": "维京狂战士无畏生死"
+  },
+  {
+    "id": "VIK_002",
+    "name": "维京弓箭手",
+    "type": "UNIT",
+    "faction": "VIKING",
+    "cost": 2,
+    "unitType": "ARCHER",
+    "attack": 2,
+    "health": 2,
+    "abilities": [
+      {
+        "type": "RANGED",
+        "value": 1,
+        "description": "远程攻击1"
+      }
+    ],
+    "description": "远程攻击单位"
+  },
+  {
+    "id": "BYZ_001",
+    "name": "拜占庭士兵",
+    "type": "UNIT",
+    "faction": "BYZANTIUM",
+    "cost": 2,
+    "unitType": "INFANTRY",
+    "attack": 2,
+    "health": 3,
+    "abilities": [],
+    "description": "基础拜占庭士兵"
+  },
+  {
+    "id": "BYZ_002",
+    "name": "希腊火战士",
+    "type": "UNIT",
+    "faction": "BYZANTIUM",
+    "cost": 4,
+    "unitType": "INFANTRY",
+    "attack": 3,
+    "health": 3,
+    "abilities": [
+      {
+        "type": "RANGED",
+        "value": 2,
+        "description": "远程攻击2"
+      }
+    ],
+    "description": "使用希腊火的特殊单位",
+    "flavorText": "希腊火是拜占庭的秘密武器"
+  },
+  {
+    "id": "TAC_001",
+    "name": "箭雨",
+    "type": "TACTIC",
+    "faction": "ENGLAND",
+    "cost": 2,
+    "tacticType": "INSTANT",
+    "effect": "对所有敌方单位造成2点伤害",
+    "description": "大范围远程打击"
+  },
+  {
+    "id": "TAC_002",
+    "name": "冲锋号角",
+    "type": "TACTIC",
+    "faction": "FRANCE",
+    "cost": 1,
+    "tacticType": "INSTANT",
+    "effect": "本回合所有己方单位攻击力+1",
+    "description": "提升单位攻击力"
+  },
+  {
+    "id": "TAC_003",
+    "name": "加固城墙",
+    "type": "TACTIC",
+    "faction": "HRE",
+    "cost": 1,
+    "tacticType": "INSTANT",
+    "effect": "本回合城堡受到伤害减少2",
+    "description": "防御性战术"
+  },
+  {
+    "id": "TAC_004",
+    "name": "掠夺令",
+    "type": "TACTIC",
+    "faction": "VIKING",
+    "cost": 1,
+    "tacticType": "INSTANT",
+    "effect": "获得2点黄金",
+    "description": "经济战术"
+  },
+  {
+    "id": "TAC_005",
+    "name": "希腊火攻",
+    "type": "TACTIC",
+    "faction": "BYZANTIUM",
+    "cost": 2,
+    "tacticType": "INSTANT",
+    "effect": "对单个敌方单位造成3点伤害",
+    "description": "单体高伤害"
+  },
+  {
+    "id": "BLD_001",
+    "name": "箭塔",
+    "type": "BUILDING",
+    "faction": "ENGLAND",
+    "cost": 3,
+    "buildingType": "DEFENSE",
+    "effect": "每回合对敌方前线单位造成1点伤害",
+    "health": 4,
+    "description": "远程防御建筑"
+  },
+  {
+    "id": "BLD_002",
+    "name": "兵营",
+    "type": "BUILDING",
+    "faction": "FRANCE",
+    "cost": 2,
+    "buildingType": "MILITARY",
+    "effect": "每回合额外获得1点黄金",
+    "description": "经济建筑，增加资源"
+  },
+  {
+    "id": "BLD_003",
+    "name": "城墙",
+    "type": "BUILDING",
+    "faction": "HRE",
+    "cost": 2,
+    "buildingType": "DEFENSE",
+    "effect": "城堡生命值+3",
+    "health": 5,
+    "description": "防御建筑"
+  },
+  {
+    "id": "BLD_004",
+    "name": "市场",
+    "type": "BUILDING",
+    "faction": "VIKING",
+    "cost": 2,
+    "buildingType": "ECONOMIC",
+    "effect": "每回合额外获得1点影响力",
+    "description": "经济建筑"
+  },
+  {
+    "id": "BLD_005",
+    "name": "防御塔",
+    "type": "BUILDING",
+    "faction": "BYZANTIUM",
+    "cost": 3,
+    "buildingType": "DEFENSE",
+    "effect": "每回合对单个敌方单位造成1点伤害",
+    "health": 4,
+    "description": "防御建筑"
+  }
+]

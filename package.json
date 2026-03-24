@@ -6,6 +6,7 @@
     "dev": "bash .cozeproj/scripts/dev_run.sh",
     "build": "bash .cozeproj/scripts/prod_build.sh",
     "start": "bash .cozeproj/scripts/prod_run.sh",
+    "godot:export-data": "corepack pnpm --dir client exec tsx ../scripts/export-godot-data.ts",
     "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {},

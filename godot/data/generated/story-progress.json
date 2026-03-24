@@ -1,0 +1,13 @@
+{
+  "totalStars": 4,
+  "completedLevels": [
+    {
+      "levelId": "level_1_1",
+      "stars": 2
+    },
+    {
+      "levelId": "level_2_1",
+      "stars": 2
+    }
+  ]
+}

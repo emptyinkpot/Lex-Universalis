@@ -1,0 +1,38 @@
+{
+  "exportedAt": "2026-03-24T15:33:44.707Z",
+  "datasets": [
+    {
+      "id": "base-cards",
+      "file": "base-cards.json",
+      "count": 22,
+      "description": "Core starter cards from the current server data source."
+    },
+    {
+      "id": "moon-card-drafts",
+      "file": "moon-card-drafts.json",
+      "count": 123,
+      "description": "The harvested Moon card drafts already absorbed into the editor."
+    },
+    {
+      "id": "story-showcase",
+      "file": "story-showcase.json",
+      "description": "The front-end showcase story with sample chapters and levels."
+    },
+    {
+      "id": "story-progress",
+      "file": "story-progress.json",
+      "description": "Sample story progression state."
+    },
+    {
+      "id": "campaign-scenarios",
+      "file": "campaign-scenarios.json",
+      "count": 1,
+      "description": "Current scenario definitions from the backend campaign data."
+    },
+    {
+      "id": "battle-seed",
+      "file": "battle-seed.json",
+      "description": "Godot battle bootstrap data aligned to the current prototype battlefield."
+    }
+  ]
+}
