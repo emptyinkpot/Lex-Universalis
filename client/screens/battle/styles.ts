@@ -78,17 +78,36 @@ export const createStyles = (theme: Theme) =>
     },
     battlefield: {
       flex: 1,
-      padding: Spacing.md,
-      justifyContent: 'center',
-      minHeight: 180,
+      paddingHorizontal: Spacing.md,
+      paddingTop: Spacing.md,
+      paddingBottom: Spacing.sm,
       gap: Spacing.sm,
     },
-    battlefieldTopRow: {
+    battlefieldHeader: {
       gap: Spacing.xs,
+    },
+    battlefieldFocusRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: Spacing.sm,
     },
     battlefieldLabel: {
       letterSpacing: 1,
       textTransform: 'uppercase',
+    },
+    targetBadge: {
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: 4,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#002FA7',
+    },
+    targetBadgeText: {
+      letterSpacing: 1,
+      fontWeight: '700',
+    },
+    selectionText: {
+      lineHeight: 20,
     },
     swipeHintRow: {
       flexDirection: 'row',
@@ -102,38 +121,32 @@ export const createStyles = (theme: Theme) =>
       backgroundColor: theme.backgroundTertiary,
       overflow: 'hidden',
     },
-    battlefieldZone: {
-      justifyContent: 'center',
-      paddingVertical: Spacing.xs,
-    },
-    zoneRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
+    slotRowBlock: {
       gap: Spacing.sm,
     },
-    zoneSlot: {
-      width: (width - Spacing.md * 2 - Spacing.sm * 2) / 3,
-      aspectRatio: 3 / 4,
-      backgroundColor: theme.backgroundTertiary,
-      borderWidth: 1,
-      borderColor: 'rgba(0,47,167,0.1)',
-      borderRadius: BorderRadius.sm,
-    },
-    zoneSlotEmpty: {
-      width: (width - Spacing.md * 2 - Spacing.sm * 2) / 3,
-      aspectRatio: 3 / 4,
-      backgroundColor: theme.backgroundTertiary,
-      borderWidth: 1,
-      borderColor: 'rgba(0,47,167,0.1)',
-      borderStyle: 'dashed',
-      justifyContent: 'center',
+    rowHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
       alignItems: 'center',
-      borderRadius: BorderRadius.sm,
+      gap: Spacing.sm,
     },
-    divider: {
+    rowHeaderLabel: {
+      letterSpacing: 1,
+      fontWeight: '700',
+    },
+    rowHeaderHint: {
+      lineHeight: 18,
+      textAlign: 'right',
+      flexShrink: 1,
+    },
+    slotRowGrid: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+    },
+    battleDivider: {
       height: 1,
-      backgroundColor: 'rgba(0,47,167,0.1)',
-      marginVertical: Spacing.sm,
+      backgroundColor: 'rgba(0,47,167,0.12)',
+      marginVertical: Spacing.xs,
     },
     logPanel: {
       flexDirection: 'row',
