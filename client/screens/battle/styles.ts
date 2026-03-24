@@ -1,15 +1,14 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import { Spacing, BorderRadius, Theme } from '@/constants/theme';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-export const createStyles = (theme: Theme) => {
-  return StyleSheet.create({
+export const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.backgroundRoot,
     },
-    // 敌方信息栏 - 紧凑设计
     enemyInfoBar: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -35,7 +34,6 @@ export const createStyles = (theme: Theme) => {
       alignItems: 'center',
       gap: Spacing.xs,
     },
-    // 紧凑统计项
     statItemCompact: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -51,7 +49,33 @@ export const createStyles = (theme: Theme) => {
       backgroundColor: 'rgba(255,255,255,0.3)',
       marginHorizontal: 4,
     },
-    // 战场区域 - 自适应高度
+    rulesBar: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.sm,
+      backgroundColor: theme.backgroundDefault,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.borderLight,
+    },
+    ruleChip: {
+      flexGrow: 1,
+      minWidth: 145,
+      paddingHorizontal: Spacing.sm,
+      paddingVertical: Spacing.xs,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: theme.backgroundTertiary,
+      borderWidth: 1,
+      borderColor: theme.borderLight,
+      gap: 2,
+    },
+    ruleChipLabel: {
+      letterSpacing: 1,
+    },
+    ruleChipValue: {
+      lineHeight: 18,
+    },
     battlefield: {
       flex: 1,
       padding: Spacing.md,
@@ -69,7 +93,7 @@ export const createStyles = (theme: Theme) => {
     },
     zoneSlot: {
       width: (width - Spacing.md * 2 - Spacing.sm * 2) / 3,
-      aspectRatio: 3/4,
+      aspectRatio: 3 / 4,
       backgroundColor: theme.backgroundTertiary,
       borderWidth: 1,
       borderColor: 'rgba(0,47,167,0.1)',
@@ -77,7 +101,7 @@ export const createStyles = (theme: Theme) => {
     },
     zoneSlotEmpty: {
       width: (width - Spacing.md * 2 - Spacing.sm * 2) / 3,
-      aspectRatio: 3/4,
+      aspectRatio: 3 / 4,
       backgroundColor: theme.backgroundTertiary,
       borderWidth: 1,
       borderColor: 'rgba(0,47,167,0.1)',
@@ -91,40 +115,67 @@ export const createStyles = (theme: Theme) => {
       backgroundColor: 'rgba(0,47,167,0.1)',
       marginVertical: Spacing.sm,
     },
-    // 手牌区域 - 扇形布局
+    logPanel: {
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      paddingHorizontal: Spacing.md,
+      paddingBottom: Spacing.sm,
+      backgroundColor: theme.backgroundDefault,
+      flexWrap: 'wrap',
+    },
+    logItem: {
+      flex: 1,
+      minWidth: 180,
+      flexDirection: 'row',
+      gap: Spacing.sm,
+      padding: Spacing.sm,
+      borderRadius: BorderRadius.lg,
+      backgroundColor: theme.backgroundTertiary,
+      borderWidth: 1,
+      borderColor: theme.borderLight,
+    },
+    logAccent: {
+      width: 4,
+      borderRadius: 999,
+    },
+    logCopy: {
+      flex: 1,
+      gap: 2,
+    },
+    logDetail: {
+      lineHeight: 18,
+    },
     handContainer: {
       borderTopWidth: 0.5,
       borderTopColor: theme.border,
-      paddingVertical: Spacing.xs, // 减小padding，让卡牌和操作栏更近
+      paddingVertical: Spacing.xs,
       backgroundColor: theme.backgroundDefault,
-      height: 280, // 减小高度，避免actionBar被挤出屏幕
+      height: 280,
     },
     handInfoRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: Spacing.md,
-      marginBottom: 4, // 减小margin
+      marginBottom: 4,
     },
     handLabel: {
       letterSpacing: 1,
       fontWeight: '600',
     },
-    // 扇形布局容器 - 圆心在底部中央，扇形向上展开
     handFanContainer: {
       position: 'relative',
       width: '100%',
-      height: 230, // 减小高度，避免actionBar被挤出屏幕
+      height: 230,
       alignItems: 'center',
-      justifyContent: 'flex-end', // 圆心在底部
-      paddingBottom: 0, // 移除padding，让卡牌底部和操作栏相切
+      justifyContent: 'flex-end',
+      paddingBottom: 0,
     },
-    // 操作按钮 - 包含玩家统计信息，在最底部
     actionBar: {
       flexDirection: 'row',
       gap: Spacing.sm,
       padding: Spacing.md,
-      paddingTop: Spacing.sm, // 减小顶部padding，让卡牌和操作栏更近
+      paddingTop: Spacing.sm,
       backgroundColor: theme.backgroundRoot,
       minHeight: 56,
       alignItems: 'center',
@@ -143,7 +194,6 @@ export const createStyles = (theme: Theme) => {
     buttonTextSecondary: {
       fontWeight: '600',
     },
-    // 玩家统计信息 - 紧凑布局
     playerStatsCompact: {
       flexDirection: 'column',
       alignItems: 'center',
@@ -154,7 +204,6 @@ export const createStyles = (theme: Theme) => {
       alignItems: 'center',
       gap: Spacing.xs,
     },
-    // 回合徽章
     turnBadge: {
       backgroundColor: '#C9A96E',
       paddingHorizontal: Spacing.sm,
@@ -178,4 +227,3 @@ export const createStyles = (theme: Theme) => {
       fontWeight: '700',
     },
   });
-};

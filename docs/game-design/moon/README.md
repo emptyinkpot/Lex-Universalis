@@ -12,6 +12,7 @@ The original `.docx` sources have been harvested into `server/src/data/moon-card
 - `cards/support/` - auxiliary cards and status pieces
 - `lore/setting/` - setting and world notes
 - `rules/` - the main system and rule notes
+- `rules/battle-rules.md` - combat quick reference for the battle UI
 - `drafts/` - loose ideas and temporary design drafts
 - `archive/0.1/` - older draft material from the 0.1 line
 - `archive/needs-repair/` - empty or corrupted documents that still need recovery
