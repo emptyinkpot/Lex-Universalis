@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import Animated from 'react-native-reanimated';
+import { FlashList } from '@shopify/flash-list';
 import * as Haptics from 'expo-haptics';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
@@ -356,21 +357,25 @@ export default function BattleScreen() {
           </Animated.View>
         </BattleSwipeZone>
 
-        <View style={styles.logPanel}>
-          {battleLog.map((entry) => (
-            <View key={entry.id} style={styles.logItem}>
-              <View style={[styles.logAccent, { backgroundColor: entry.accent }]} />
+        <FlashList
+          data={battleLog}
+          numColumns={2}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.logPanel}
+          renderItem={({ item }) => (
+            <View style={styles.logItem}>
+              <View style={[styles.logAccent, { backgroundColor: item.accent }]} />
               <View style={styles.logCopy}>
                 <ThemedText variant="smallMedium" color={theme.textPrimary}>
-                  {entry.title}
+                  {item.title}
                 </ThemedText>
                 <ThemedText variant="caption" color={theme.textSecondary} style={styles.logDetail}>
-                  {entry.detail}
+                  {item.detail}
                 </ThemedText>
               </View>
             </View>
-          ))}
-        </View>
+          )}
+        />
 
         <View style={styles.handContainer}>
           <View style={styles.handInfoRow}>
