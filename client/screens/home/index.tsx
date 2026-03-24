@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, useWindowDimensions } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useSafeRouter } from '@/hooks/useSafeRouter';
 import { useTheme } from '@/hooks/useTheme';
@@ -18,8 +18,10 @@ type MenuItem = {
 
 export default function HomeScreen() {
   const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { width } = useWindowDimensions();
+  const styles = useMemo(() => createStyles(theme, width), [theme, width]);
   const router = useSafeRouter();
+  const isDesktop = width >= 1280;
 
   const menuItems: MenuItem[] = [
     { title: '故事模式', subtitle: '单剧本剧情与战斗', icon: 'scroll', iconColor: '#d6b36a', route: '/campaign' },
@@ -33,7 +35,11 @@ export default function HomeScreen() {
 
   return (
     <Screen backgroundColor="#0b0907" statusBarStyle="light">
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!isDesktop}
+      >
         <View style={styles.heroSection}>
           <View style={styles.heroGlow} />
           <View style={styles.heroDustLeft} />

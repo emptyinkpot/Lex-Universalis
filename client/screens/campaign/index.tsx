@@ -50,9 +50,10 @@ const storyBeats = [
 
 export default function StoryModeScreen() {
   const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
-  const router = useSafeRouter();
   const { width } = useWindowDimensions();
+  const styles = useMemo(() => createStyles(theme, width), [theme, width]);
+  const router = useSafeRouter();
+  const isDesktop = width >= 1280;
 
   const [loading, setLoading] = useState(true);
   const [scenario, setScenario] = useState<Scenario | null>(null);
@@ -103,6 +104,7 @@ export default function StoryModeScreen() {
   const firstChapter = scenario?.chapters?.[0] ?? null;
   const activeChapter = scenario?.chapters?.[activeChapterIndex] ?? firstChapter;
   const firstLevel = activeChapter?.levels?.[0] ?? null;
+  const chapterViewportWidth = isDesktop ? Math.max(420, width / 2 - 56) : width - 32;
 
   const openScenario = () => {
     if (!scenario) return;
@@ -154,7 +156,11 @@ export default function StoryModeScreen() {
 
   return (
     <Screen backgroundColor="#0a0706" statusBarStyle="light">
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={!isDesktop}
+      >
         <View style={styles.heroSection}>
           <View style={styles.heroHalo} />
           <ThemedText variant="caption" color="#d7b26d" style={styles.heroSubtitle}>
@@ -183,7 +189,9 @@ export default function StoryModeScreen() {
           </View>
         </View>
 
-        <View style={styles.storyCard}>
+        <View style={isDesktop ? styles.desktopRow : undefined}>
+          <View style={isDesktop ? styles.desktopColumn : undefined}>
+            <View style={styles.storyCard}>
           <View style={styles.storyCardHeader}>
             <View style={styles.storyYearBadge}>
               <ThemedText variant="smallMedium" color="#24160d">{scenario.year}</ThemedText>
@@ -225,9 +233,11 @@ export default function StoryModeScreen() {
               <ThemedText variant="smallMedium" color="#1f130b">直接进入示例战斗</ThemedText>
             </Pressable>
           </View>
-        </View>
+            </View>
+          </View>
 
-        <View style={styles.chapterPreview}>
+          <View style={isDesktop ? styles.desktopColumn : undefined}>
+            <View style={styles.chapterPreview}>
           <View style={styles.chapterPreviewHeader}>
             <ThemedText variant="h3" color="#f2e4c4">当前展示章节</ThemedText>
             <View style={styles.chapterTag}>
@@ -237,7 +247,7 @@ export default function StoryModeScreen() {
           <ScrollView
             horizontal
             pagingEnabled
-            snapToInterval={width}
+            snapToInterval={chapterViewportWidth}
             decelerationRate="fast"
             showsHorizontalScrollIndicator={false}
             onMomentumScrollEnd={handleChapterSnap}
@@ -246,7 +256,7 @@ export default function StoryModeScreen() {
             {scenario.chapters.map((chapter, index) => {
               const previewLevel = chapter.levels[0];
               return (
-                <View key={chapter.id} style={[styles.chapterSlide, { width: width - 32 }]}>
+                <View key={chapter.id} style={[styles.chapterSlide, { width: chapterViewportWidth }]}>
                   <ThemedText variant="bodyMedium" color="#e6d8b8">{chapter.name}</ThemedText>
                   <ThemedText variant="small" color="#ab9577" style={styles.chapterPreviewText}>
                     {chapter.storyIntro}
@@ -284,6 +294,8 @@ export default function StoryModeScreen() {
                 style={[styles.chapterDot, index === activeChapterIndex && styles.chapterDotActive]}
               />
             ))}
+          </View>
+            </View>
           </View>
         </View>
       </ScrollView>

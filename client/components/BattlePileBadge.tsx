@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { ThemedText } from './ThemedText';
 
@@ -8,13 +8,36 @@ interface BattlePileBadgeProps {
   count: number;
   icon: 'layer-group' | 'box-archive';
   accent: string;
+  onMeasure?: (point: { x: number; y: number }) => void;
 }
 
-export function BattlePileBadge({ label, count, icon, accent }: BattlePileBadgeProps) {
+export function BattlePileBadge({ label, count, icon, accent, onMeasure }: BattlePileBadgeProps) {
+  const wrapRef = useRef<View | null>(null);
   const stack = Math.min(3, Math.max(1, count > 0 ? 3 : 1));
 
+  const measurePosition = useCallback(() => {
+    if (!onMeasure || !wrapRef.current) {
+      return;
+    }
+
+    wrapRef.current.measureInWindow((x, y, width, height) => {
+      onMeasure({
+        x: x + width / 2,
+        y: y + height / 2,
+      });
+    });
+  }, [onMeasure]);
+
+  const handleLayout = (_event: LayoutChangeEvent) => {
+    measurePosition();
+  };
+
+  useEffect(() => {
+    measurePosition();
+  }, [count, measurePosition]);
+
   return (
-    <View style={styles.wrap}>
+    <View ref={wrapRef} style={styles.wrap} onLayout={handleLayout}>
       <View style={styles.stackArea}>
         {Array.from({ length: stack }).map((_, index) => (
           <View

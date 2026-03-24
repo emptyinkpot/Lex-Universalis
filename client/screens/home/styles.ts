@@ -1,16 +1,16 @@
 import { StyleSheet } from 'react-native';
 import { Spacing, BorderRadius, Theme } from '@/constants/theme';
 
-export const createStyles = (_theme: Theme) =>
+export const createStyles = (_theme: Theme, width: number) =>
   StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
       backgroundColor: '#0b0907',
-      paddingBottom: Spacing['5xl'],
+      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['5xl'],
     },
     heroSection: {
       overflow: 'hidden',
-      paddingVertical: 72,
+      paddingVertical: width >= 1280 ? 42 : 72,
       paddingHorizontal: Spacing['2xl'],
       alignItems: 'center',
       backgroundColor: '#120d09',
@@ -51,7 +51,7 @@ export const createStyles = (_theme: Theme) =>
       marginBottom: Spacing.md,
     },
     heroTitle: {
-      fontSize: 50,
+      fontSize: width >= 1280 ? 42 : 50,
       fontWeight: '300',
       textAlign: 'center',
       letterSpacing: 3,
@@ -92,9 +92,13 @@ export const createStyles = (_theme: Theme) =>
       paddingHorizontal: Spacing.xl,
       paddingTop: Spacing.xl,
       gap: Spacing.lg,
+      flexDirection: width >= 1280 ? 'row' : 'column',
+      flexWrap: width >= 1280 ? 'wrap' : 'nowrap',
+      alignContent: width >= 1280 ? 'flex-start' : 'stretch',
     },
     menuItemWrap: {
       borderRadius: BorderRadius.xl,
+      width: width >= 1280 ? '48.5%' : '100%',
     },
     menuItem: {
       overflow: 'hidden',
@@ -142,7 +146,7 @@ export const createStyles = (_theme: Theme) =>
     },
     footer: {
       paddingHorizontal: Spacing.xl,
-      paddingTop: Spacing['2xl'],
+      paddingTop: width >= 1280 ? Spacing.lg : Spacing['2xl'],
       alignItems: 'center',
     },
     footerText: {

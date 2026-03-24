@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
 import { BorderRadius, Spacing, Theme } from '@/constants/theme';
 
-export const createStyles = (_theme: Theme) =>
+export const createStyles = (_theme: Theme, width: number) =>
   StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
-      paddingBottom: Spacing['5xl'],
+      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['5xl'],
       backgroundColor: '#0a0706',
       gap: Spacing.lg,
     },
@@ -21,8 +21,8 @@ export const createStyles = (_theme: Theme) =>
     },
     heroSection: {
       overflow: 'hidden',
-      paddingTop: Spacing['4xl'],
-      paddingBottom: Spacing['3xl'],
+      paddingTop: width >= 1280 ? Spacing['2xl'] : Spacing['4xl'],
+      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['3xl'],
       paddingHorizontal: Spacing.xl,
       backgroundColor: '#130e0a',
       borderBottomWidth: 1,
@@ -46,7 +46,7 @@ export const createStyles = (_theme: Theme) =>
     heroTitle: {
       textAlign: 'center',
       letterSpacing: 2,
-      fontSize: 42,
+      fontSize: width >= 1280 ? 34 : 42,
       fontWeight: '300',
     },
     heroCopy: {
@@ -85,6 +85,15 @@ export const createStyles = (_theme: Theme) =>
       shadowOpacity: 0.26,
       shadowRadius: 24,
       elevation: 10,
+    },
+    desktopRow: {
+      flexDirection: 'row',
+      gap: Spacing.lg,
+      paddingHorizontal: Spacing.lg,
+    },
+    desktopColumn: {
+      flex: 1,
+      minWidth: 0,
     },
     storyCardHeader: {
       flexDirection: 'row',
@@ -172,7 +181,7 @@ export const createStyles = (_theme: Theme) =>
       borderColor: '#f1d39e',
     },
     chapterPreview: {
-      marginHorizontal: Spacing.lg,
+      marginHorizontal: width >= 1280 ? 0 : Spacing.lg,
       padding: Spacing.xl,
       borderRadius: BorderRadius['2xl'],
       backgroundColor: '#130f0c',
@@ -200,7 +209,7 @@ export const createStyles = (_theme: Theme) =>
     },
     chapterSlide: {
       gap: Spacing.md,
-      paddingRight: Spacing.lg,
+      paddingRight: width >= 1280 ? 0 : Spacing.lg,
     },
     chapterSlideFooter: {
       alignItems: 'flex-end',

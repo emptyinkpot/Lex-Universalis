@@ -1,9 +1,7 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Spacing, BorderRadius, Theme } from '@/constants/theme';
 
-const { width } = Dimensions.get('window');
-
-export const createStyles = (_theme: Theme) =>
+export const createStyles = (_theme: Theme, width: number, _height: number) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -54,7 +52,7 @@ export const createStyles = (_theme: Theme) =>
       flexWrap: 'wrap',
       gap: Spacing.sm,
       paddingHorizontal: Spacing.md,
-      paddingVertical: Spacing.sm,
+      paddingVertical: width >= 1360 ? Spacing.xs : Spacing.sm,
       backgroundColor: '#0f0b08',
       borderBottomWidth: 1,
       borderBottomColor: 'rgba(153, 118, 66, 0.14)',
@@ -80,7 +78,7 @@ export const createStyles = (_theme: Theme) =>
     battlefield: {
       flex: 1,
       paddingHorizontal: Spacing.md,
-      paddingTop: Spacing.md,
+      paddingTop: width >= 1360 ? Spacing.sm : Spacing.md,
       paddingBottom: Spacing.sm,
       gap: Spacing.sm,
       backgroundColor: '#0b0907',
@@ -168,7 +166,7 @@ export const createStyles = (_theme: Theme) =>
       flexDirection: 'row',
       gap: Spacing.sm,
       paddingHorizontal: Spacing.md,
-      paddingBottom: Spacing.sm,
+      paddingBottom: width >= 1360 ? 6 : Spacing.sm,
       backgroundColor: '#0f0b08',
       flexWrap: 'wrap',
     },
@@ -200,7 +198,7 @@ export const createStyles = (_theme: Theme) =>
       paddingTop: Spacing.xs,
       paddingBottom: Spacing.sm,
       backgroundColor: '#120d09',
-      height: 316,
+      height: width >= 1360 ? 348 : 316,
       gap: Spacing.xs,
       shadowColor: '#000000',
       shadowOffset: { width: 0, height: -18 },
@@ -211,11 +209,11 @@ export const createStyles = (_theme: Theme) =>
     handInfoRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
+      justifyContent: width >= 1360 ? 'center' : 'space-between',
       paddingHorizontal: Spacing.md,
       marginBottom: 4,
       flexWrap: 'wrap',
-      gap: Spacing.sm,
+      gap: width >= 1360 ? Spacing.lg : Spacing.sm,
     },
     handMetaRow: {
       flexDirection: 'row',
@@ -288,7 +286,7 @@ export const createStyles = (_theme: Theme) =>
     handFanContainer: {
       position: 'relative',
       width: '100%',
-      height: 214,
+      height: width >= 1360 ? 248 : 214,
       alignItems: 'center',
       justifyContent: 'flex-end',
       paddingBottom: 0,
@@ -300,7 +298,7 @@ export const createStyles = (_theme: Theme) =>
       flexDirection: 'row',
       gap: Spacing.sm,
       padding: Spacing.md,
-      paddingTop: Spacing.sm,
+      paddingTop: width >= 1360 ? 8 : Spacing.sm,
       backgroundColor: '#0c0907',
       minHeight: 56,
       alignItems: 'center',

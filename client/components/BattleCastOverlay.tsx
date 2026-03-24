@@ -15,63 +15,67 @@ export type BattleCastEvent = {
   fromY: number;
   toX: number;
   toY: number;
+  kind?: 'attack' | 'draw' | 'discard';
 };
 
 interface BattleCastOverlayProps {
-  event: BattleCastEvent | null;
+  events?: BattleCastEvent[];
   preview?: Omit<BattleCastEvent, 'id'> | null;
 }
 
-export function BattleCastOverlay({ event, preview = null }: BattleCastOverlayProps) {
+function getArcHeight(kind: BattleCastEvent['kind']) {
+  if (kind === 'draw') {
+    return 58;
+  }
+
+  if (kind === 'discard') {
+    return 28;
+  }
+
+  return 44;
+}
+
+function BattleCastMotion({ event }: { event: BattleCastEvent }) {
   const progress = useSharedValue(0);
   const flash = useSharedValue(0);
 
   useEffect(() => {
-    if (!event) {
-      progress.value = 0;
-      flash.value = 0;
-      return;
-    }
-
     progress.value = 0;
     flash.value = 0;
     progress.value = withTiming(1, {
-      duration: 360,
+      duration: event.kind === 'draw' ? 440 : 360,
       easing: Easing.out(Easing.cubic),
     });
-    flash.value = withSequence(
-      withTiming(1, { duration: 120 }),
-      withTiming(0, { duration: 220 }),
-    );
-  }, [event?.id, flash, progress]);
+    flash.value = withSequence(withTiming(1, { duration: 120 }), withTiming(0, { duration: 240 }));
+  }, [event.id, event.kind, flash, progress]);
 
   const projectileStyle = useAnimatedStyle(() => {
-    if (!event) {
-      return { opacity: 0 };
-    }
-
+    const arcHeight = getArcHeight(event.kind);
     const x = event.fromX + (event.toX - event.fromX) * progress.value;
-    const y = event.fromY + (event.toY - event.fromY) * progress.value - Math.sin(progress.value * Math.PI) * 42;
+    const y =
+      event.fromY +
+      (event.toY - event.fromY) * progress.value -
+      Math.sin(progress.value * Math.PI) * arcHeight;
 
     return {
       opacity: 1 - Math.max(0, progress.value - 0.82) * 5,
-      transform: [{ translateX: x - 10 }, { translateY: y - 10 }, { scale: 0.78 + progress.value * 0.5 }],
+      transform: [
+        { translateX: x - 10 },
+        { translateY: y - 10 },
+        { scale: event.kind === 'attack' ? 0.82 + progress.value * 0.56 : 0.72 + progress.value * 0.44 },
+      ],
     };
   });
 
   const trailStyle = useAnimatedStyle(() => {
-    if (!event) {
-      return { opacity: 0 };
-    }
-
     const dx = event.toX - event.fromX;
     const dy = event.toY - event.fromY;
     const distance = Math.sqrt(dx * dx + dy * dy);
     const angle = Math.atan2(dy, dx);
 
     return {
-      opacity: 0.4 * (1 - progress.value * 0.55),
-      width: distance * Math.max(progress.value, 0.14),
+      opacity: event.kind === 'discard' ? 0.28 : 0.42 * (1 - progress.value * 0.5),
+      width: distance * Math.max(progress.value, 0.18),
       transform: [
         { translateX: event.fromX },
         { translateY: event.fromY },
@@ -80,84 +84,82 @@ export function BattleCastOverlay({ event, preview = null }: BattleCastOverlayPr
     };
   });
 
-  const guideEvent = event ?? preview;
+  const flashStyle = useAnimatedStyle(() => ({
+    opacity: flash.value * (event.kind === 'attack' ? 0.72 : 0.5),
+    transform: [{ scale: 0.58 + flash.value * (event.kind === 'attack' ? 1.18 : 0.78) }],
+  }));
 
-  const arcNodes = guideEvent
+  return (
+    <>
+      <Animated.View
+        style={[
+          styles.trail,
+          trailStyle,
+          { backgroundColor: `${event.accent}${event.kind === 'discard' ? '44' : '66'}` },
+        ]}
+      />
+      <Animated.View
+        style={[
+          styles.projectile,
+          projectileStyle,
+          {
+            borderColor: event.kind === 'discard' ? '#f3dfbf' : event.accent,
+            shadowColor: event.accent,
+            backgroundColor: event.kind === 'draw' ? '#f4dec1' : `${event.accent}dd`,
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
+          styles.flash,
+          flashStyle,
+          {
+            left: event.toX - 42,
+            top: event.toY - 42,
+            borderColor: event.kind === 'discard' ? '#c58d63' : event.accent,
+            backgroundColor: `${event.accent}${event.kind === 'attack' ? '22' : '16'}`,
+          },
+        ]}
+      />
+    </>
+  );
+}
+
+export function BattleCastOverlay({ events = [], preview = null }: BattleCastOverlayProps) {
+  const arcNodes = preview
     ? Array.from({ length: 7 }, (_, index) => {
         const t = index / 6;
-        const x = guideEvent.fromX + (guideEvent.toX - guideEvent.fromX) * t;
-        const y = guideEvent.fromY + (guideEvent.toY - guideEvent.fromY) * t - Math.sin(t * Math.PI) * 46;
+        const x = preview.fromX + (preview.toX - preview.fromX) * t;
+        const y = preview.fromY + (preview.toY - preview.fromY) * t - Math.sin(t * Math.PI) * 46;
         return { x, y, index };
       })
     : [];
 
-  const flashStyle = useAnimatedStyle(() => {
-    if (!event) {
-      return { opacity: 0 };
-    }
-
-    return {
-      opacity: flash.value * 0.7,
-      transform: [{ scale: 0.6 + flash.value * 1.2 }],
-    };
-  });
-
-  if (!event && !preview) {
+  if (events.length === 0 && !preview) {
     return null;
   }
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      {event ? (
-        <Animated.View
-          style={[
-            styles.trail,
-            trailStyle,
-            { backgroundColor: `${event.accent}66` },
-          ]}
-        />
-      ) : null}
-      {arcNodes.map((node) => (
-        <View
-          key={`${event?.id ?? 'preview'}-node-${node.index}`}
-          style={[
-            styles.arcNode,
-            {
-              left: node.x - 4,
-              top: node.y - 4,
-              backgroundColor: node.index % 2 === 0 ? '#fff4dc' : `${guideEvent?.accent ?? '#d7b26d'}cc`,
-              opacity: event ? 1 : 0.72,
-            },
-          ]}
-        />
+      {preview
+        ? arcNodes.map((node) => (
+            <View
+              key={`preview-node-${node.index}`}
+              style={[
+                styles.arcNode,
+                {
+                  left: node.x - 4,
+                  top: node.y - 4,
+                  backgroundColor: node.index % 2 === 0 ? '#fff4dc' : `${preview.accent}cc`,
+                  opacity: 0.72,
+                },
+              ]}
+            />
+          ))
+        : null}
+      {events.map((event) => (
+        <BattleCastMotion key={event.id} event={event} />
       ))}
-      {event ? (
-        <>
-          <Animated.View
-            style={[
-              styles.projectile,
-              projectileStyle,
-              {
-                borderColor: event.accent,
-                shadowColor: event.accent,
-                backgroundColor: `${event.accent}dd`,
-              },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.flash,
-              flashStyle,
-              {
-                left: event.toX - 42,
-                top: event.toY - 42,
-                borderColor: event.accent,
-                backgroundColor: `${event.accent}22`,
-              },
-            ]}
-          />
-        </>
-      ) : null}
     </View>
   );
 }

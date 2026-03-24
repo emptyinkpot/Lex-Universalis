@@ -15,6 +15,7 @@ interface BattleHandCardMotionProps {
   targeting: boolean;
   collapsed?: boolean;
   delay?: number;
+  desktop?: boolean;
 }
 
 export function BattleHandCardMotion({
@@ -24,6 +25,7 @@ export function BattleHandCardMotion({
   targeting,
   collapsed = false,
   delay = 0,
+  desktop = false,
 }: BattleHandCardMotionProps) {
   const hoverValue = useSharedValue(0);
   const selectValue = useSharedValue(0);
@@ -89,8 +91,8 @@ export function BattleHandCardMotion({
 
   return (
     <Animated.View style={styles.shell}>
-      <Animated.View style={[styles.aura, auraStyle]} />
-      <Animated.View style={[styles.trail, trailStyle]} />
+      <Animated.View style={[styles.aura, desktop && styles.auraDesktop, auraStyle]} />
+      <Animated.View style={[styles.trail, desktop && styles.trailDesktop, trailStyle]} />
       <Animated.View style={cardStyle}>{children}</Animated.View>
     </Animated.View>
   );
@@ -116,6 +118,11 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 8,
   },
+  auraDesktop: {
+    bottom: 22,
+    width: 186,
+    height: 258,
+  },
   trail: {
     position: 'absolute',
     bottom: 22,
@@ -127,5 +134,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.28,
     shadowRadius: 18,
     elevation: 6,
+  },
+  trailDesktop: {
+    bottom: 26,
+    width: 202,
   },
 });

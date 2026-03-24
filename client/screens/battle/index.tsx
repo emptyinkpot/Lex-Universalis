@@ -18,6 +18,7 @@ import {
 } from '@/components/BattleFeedbackLayer';
 import { BattleCastOverlay, type BattleCastEvent } from '@/components/BattleCastOverlay';
 import { BattleDamageOverlay, type DamageEvent } from '@/components/BattleDamageOverlay';
+import { BattleImpactOverlay, type BattleImpactEvent } from '@/components/BattleImpactOverlay';
 import { BattleHandCardMotion } from '@/components/BattleHandCardMotion';
 import { BattlePileBadge } from '@/components/BattlePileBadge';
 import { BattleSwipeZone } from '@/components/BattleSwipeZone';
@@ -34,6 +35,7 @@ type BattleLogEntry = {
 type BattleFocus = 'enemy-line' | 'player-line';
 
 type BattlefieldRow = 'front' | 'back';
+type Point = { x: number; y: number };
 
 const battleRules = [
   { label: '阶段', value: '声明 → 施行 → 结束' },
@@ -107,15 +109,19 @@ const createInitialBattleSlots = (): BattleSlot[] => [
 
 export default function BattleScreen() {
   const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
   const router = useSafeRouter();
   const { width, height } = useWindowDimensions();
+  const styles = useMemo(() => createStyles(theme, width, height), [height, theme, width]);
   const { shake, animatedStyle: shakeStyle } = useScreenShake();
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const damageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const impactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deathTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const dealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const drawCursorRef = useRef(0);
+  const handRef = useRef<AnyCard[]>([]);
+  const deckAnchorRef = useRef<Point | null>(null);
+  const discardAnchorRef = useRef<Point | null>(null);
 
   const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
   const [selectedHandIndex, setSelectedHandIndex] = useState<number | null>(null);
@@ -128,7 +134,8 @@ export default function BattleScreen() {
   const [isResolving, setIsResolving] = useState(false);
   const [feedbackEvent, setFeedbackEvent] = useState<BattleFeedbackEvent | null>(null);
   const [damageEvent, setDamageEvent] = useState<DamageEvent | null>(null);
-  const [castEvent, setCastEvent] = useState<BattleCastEvent | null>(null);
+  const [castEvents, setCastEvents] = useState<BattleCastEvent[]>([]);
+  const [impactEvent, setImpactEvent] = useState<BattleImpactEvent | null>(null);
   const [discardCount, setDiscardCount] = useState(0);
   const [battleSlots, setBattleSlots] = useState<BattleSlot[]>(() => createInitialBattleSlots());
   const [battleLog, setBattleLog] = useState<BattleLogEntry[]>([
@@ -157,6 +164,10 @@ export default function BattleScreen() {
   );
   const [hand, setHand] = useState<AnyCard[]>([]);
 
+  useEffect(() => {
+    handRef.current = hand;
+  }, [hand]);
+
   useEffect(
     () => () => {
       if (feedbackTimerRef.current) {
@@ -164,6 +175,9 @@ export default function BattleScreen() {
       }
       if (damageTimerRef.current) {
         clearTimeout(damageTimerRef.current);
+      }
+      if (impactTimerRef.current) {
+        clearTimeout(impactTimerRef.current);
       }
       deathTimersRef.current.forEach((timer) => clearTimeout(timer));
       deathTimersRef.current.clear();
@@ -213,12 +227,41 @@ export default function BattleScreen() {
     }, 900);
   };
 
+  const emitImpact = (event: Omit<BattleImpactEvent, 'id'>) => {
+    if (impactTimerRef.current) {
+      clearTimeout(impactTimerRef.current);
+    }
+
+    const nextEvent: BattleImpactEvent = {
+      ...event,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    };
+
+    setImpactEvent(nextEvent);
+    impactTimerRef.current = setTimeout(() => {
+      setImpactEvent(null);
+    }, 700);
+  };
+
+  const queueCastEvent = (event: Omit<BattleCastEvent, 'id'>, duration = 780) => {
+    const nextEvent: BattleCastEvent = {
+      ...event,
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    };
+
+    setCastEvents((current) => [...current, nextEvent]);
+    setTimeout(() => {
+      setCastEvents((current) => current.filter((item) => item.id !== nextEvent.id));
+    }, duration);
+  };
+
   const getHandPoint = (index: number) => {
-    const spread = Math.min(width * 0.12, 86);
+    const desktopSpread = Math.min(152, width * 0.095);
+    const spread = width >= 1360 ? desktopSpread : Math.min(width * 0.12, 86);
     const centerOffset = index - Math.max(0, hand.length - 1) / 2;
     return {
       x: width * 0.5 + centerOffset * spread,
-      y: height - 154,
+      y: height - (width >= 1360 ? 168 : 154),
     };
   };
 
@@ -230,6 +273,24 @@ export default function BattleScreen() {
     const card = battleDeck[drawCursorRef.current];
     drawCursorRef.current += 1;
     const timer = setTimeout(() => {
+      const targetIndex = handRef.current.length;
+      const targetPoint = getHandPoint(targetIndex);
+      const deckAnchor = deckAnchorRef.current ?? {
+        x: width * 0.18,
+        y: height - 126,
+      };
+
+      queueCastEvent(
+        {
+          kind: 'draw',
+          accent: '#d7b26d',
+          fromX: deckAnchor.x,
+          fromY: deckAnchor.y,
+          toX: targetPoint.x,
+          toY: targetPoint.y,
+        },
+        820,
+      );
       setHand((current) => [...current, card]);
       if (reason === 'draw') {
         appendLog({
@@ -254,6 +315,8 @@ export default function BattleScreen() {
 
   useEffect(() => {
     setHand([]);
+    setCastEvents([]);
+    setImpactEvent(null);
     setDiscardCount(0);
     drawCursorRef.current = 0;
     dealTimersRef.current.forEach((timer) => clearTimeout(timer));
@@ -467,8 +530,8 @@ export default function BattleScreen() {
         : '#C9A96E';
     const handPoint = getHandPoint(Math.max(0, currentHandIndex));
 
-    setCastEvent({
-      id: `${Date.now()}-${selectedCard.id}`,
+    queueCastEvent({
+      kind: 'attack',
       accent,
       fromX: handPoint.x,
       fromY: handPoint.y,
@@ -508,6 +571,12 @@ export default function BattleScreen() {
       x: slotPoint.x,
       y: slotPoint.y,
       accent,
+    });
+    emitImpact({
+      x: slotPoint.x,
+      y: slotPoint.y,
+      accent,
+      shatter: nextSlotHealth <= 0 || isCounterHit,
     });
 
     if (isCounterHit) {
@@ -549,6 +618,23 @@ export default function BattleScreen() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
+    const discardAnchor = discardAnchorRef.current ?? {
+      x: width * 0.84,
+      y: height - 126,
+    };
+
+    queueCastEvent(
+      {
+        kind: 'discard',
+        accent: '#8f5234',
+        fromX: handPoint.x,
+        fromY: handPoint.y,
+        toX: discardAnchor.x,
+        toY: discardAnchor.y,
+      },
+      760,
+    );
+
     setHand((current) => current.filter((card) => card.id !== selectedCard.id));
     setDiscardCount((current) => current + 1);
     setSelectedCard(null);
@@ -556,9 +642,6 @@ export default function BattleScreen() {
     setIsTargeting(false);
     setDragPoint(null);
     setBattleFocus('enemy-line');
-    setTimeout(() => {
-      setCastEvent(null);
-    }, 440);
     scheduleDrawCard(420, 'draw');
 
     setTimeout(() => {
@@ -650,10 +733,11 @@ export default function BattleScreen() {
       targeting={isTargeting}
       collapsed={handCollapsed}
       delay={index * 80}
+      desktop={width >= 1360}
     >
       <KardsCard
         card={card}
-        size="medium"
+        size={width >= 1360 ? 'large' : 'medium'}
         showStats
         fanIndex={index}
         totalFanCards={hand.length}
@@ -745,7 +829,8 @@ export default function BattleScreen() {
       <View style={styles.container}>
         <BattleFeedbackLayer event={feedbackEvent} />
         <BattleDamageOverlay event={damageEvent} />
-        <BattleCastOverlay event={castEvent} preview={dragGuidePreview} />
+        <BattleCastOverlay events={castEvents} preview={dragGuidePreview} />
+        <BattleImpactOverlay event={impactEvent} />
 
         <View style={styles.enemyInfoBar}>
           <View style={styles.enemyNameSection}>
@@ -858,6 +943,9 @@ export default function BattleScreen() {
               count={Math.max(0, battleDeck.length - drawCursorRef.current)}
               icon="layer-group"
               accent="#d7b26d"
+              onMeasure={(point) => {
+                deckAnchorRef.current = point;
+              }}
             />
             <ThemedText variant="caption" color={theme.textMuted}>
               {isPlayerTurn ? '你的回合' : '敌方回合'}
@@ -867,6 +955,9 @@ export default function BattleScreen() {
               count={discardCount}
               icon="box-archive"
               accent="#8f5234"
+              onMeasure={(point) => {
+                discardAnchorRef.current = point;
+              }}
             />
           </View>
           <View style={[styles.releaseLane, (isHandDragging || isTargeting) && styles.releaseLaneActive]}>
