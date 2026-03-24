@@ -13,9 +13,10 @@
 
 ## Run
 
-Double-click the packaged desktop build:
+Double-click the packaged desktop build or the launcher:
 
 - [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
+- [`E:\Lex Universalis\start-desktop.bat`](/E:/Lex%20Universalis/start-desktop.bat)
 
 To run the project from source:
 
