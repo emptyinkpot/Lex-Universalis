@@ -1,0 +1,99 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/battle_result_scene.gd" id="1_ahtnq"]
+
+[node name="BattleResultScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ahtnq")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Root" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Hero" type="PanelContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 18
+
+[node name="Title" type="Label" parent="Padding/Root/Hero/Padding"]
+layout_mode = 2
+text = "Victory"
+theme_override_font_sizes/font_size = 34
+
+[node name="Subtitle" type="Label" parent="Padding/Root/Hero/Padding"]
+layout_mode = 2
+position = Vector2(0, 42)
+text = "Story Mode  |  Battle"
+theme_override_font_sizes/font_size = 16
+
+[node name="Body" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 18
+
+[node name="LeftPanel" type="PanelContainer" parent="Padding/Root/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Body/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Summary" type="RichTextLabel" parent="Padding/Root/Body/LeftPanel/Padding"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="RightPanel" type="PanelContainer" parent="Padding/Root/Body"]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Body/RightPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Rewards" type="RichTextLabel" parent="Padding/Root/Body/RightPanel/Padding"]
+layout_mode = 2
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="Footer" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Padding/Root/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ReturnButton" type="Button" parent="Padding/Root/Footer"]
+layout_mode = 2
+text = "Return To Story"

@@ -6,6 +6,7 @@ const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 var story: Dictionary = {}
 var data_loader: RefCounted
+var campaign_scenarios: Array = []
 var selected_chapter_index := 0
 var selected_level_index := 0
 
@@ -20,6 +21,7 @@ var selected_level_index := 0
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	story = data_loader.load_story_showcase()
+	campaign_scenarios = data_loader.load_campaign_scenarios()
 	_apply_theme()
 	launch_button.pressed.connect(_on_launch_button_pressed)
 	_render_story()
@@ -110,9 +112,25 @@ func _on_launch_button_pressed() -> void:
 	if selected_level_index < 0 or selected_level_index >= levels.size():
 		return
 	var level := (levels[selected_level_index] as Dictionary).duplicate(true)
+	var canonical_level := _find_campaign_level(str(level.get("id", "")))
+	if not canonical_level.is_empty():
+		for key in canonical_level.keys():
+			level[key] = canonical_level[key]
 	level["playerFaction"] = str(story.get("recommendedFaction", "ENGLAND"))
 	level["scenarioName"] = str(story.get("name", "Story Mode"))
 	level["scenarioYear"] = int(story.get("year", 0))
 	level["scenarioEra"] = str(story.get("era", ""))
 	level["chapterName"] = str(chapter.get("name", "Chapter"))
 	launch_level.emit(level)
+
+func _find_campaign_level(level_id: String) -> Dictionary:
+	for scenario in campaign_scenarios:
+		if not (scenario is Dictionary):
+			continue
+		for chapter in (scenario as Dictionary).get("chapters", []):
+			if not (chapter is Dictionary):
+				continue
+			for level in (chapter as Dictionary).get("levels", []):
+				if level is Dictionary and str(level.get("id", "")) == level_id:
+					return (level as Dictionary).duplicate(true)
+	return {}

@@ -4,6 +4,8 @@ const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
 const BATTLE_SLOT_SCENE := preload("res://scenes/components/BattleSlot.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
+signal battle_finished(result_data: Dictionary)
+
 var data_loader: RefCounted
 var base_cards: Array = []
 var battle_seed_template: Dictionary = {}
@@ -155,27 +157,19 @@ func _on_slot_pressed(slot_id: String) -> void:
 	var card := hand_cards[selected_hand_index] as Dictionary
 	var slot := battle_slots[slot_index] as Dictionary
 	await _animate_card_play(selected_hand_index, slot_id, card)
-	var damage := _get_card_damage(card)
-	_spawn_damage_text(rendered_slot_nodes.get(slot_id), damage, false)
-	if bool(slot.get("counterArmed", false)):
-		damage = maxi(1, damage - 1)
-		player_state["health"] = maxi(0, int(player_state.get("health", 0)) - 1)
-		slot["counterArmed"] = false
-		_spawn_damage_text(self, 1, true)
-		_append_log("Counter", "%s countered and hit the player for 1." % str(slot.get("title", "Slot")))
-	slot["health"] = maxi(0, int(slot.get("health", 0)) - damage)
-	enemy_state["health"] = maxi(0, int(enemy_state.get("health", 0)) - damage)
-	_append_log("Play", "%s dealt %d to %s." % [str(card.get("name", "Card")), damage, str(slot.get("title", "Slot"))])
-	_apply_enemy_retaliation(slot)
-	discard_pile.append(card)
+	var keep_on_field := false
+	if _is_unit_card(card):
+		keep_on_field = await _deploy_unit_to_player_slot(card, slot)
+	else:
+		await _resolve_spell_attack(card, slot)
+	if not keep_on_field:
+		discard_pile.append(card)
 	hand_cards.remove_at(selected_hand_index)
 	selected_hand_index = -1
-	if int(slot.get("health", 0)) == 0:
-		slot["collapsed"] = true
-		await _play_slot_break(slot_id)
-		_append_log("Break", "%s collapsed." % str(slot.get("title", "Slot")))
 	_draw_card()
 	_render_all()
+	if _check_battle_finished():
+		return
 	is_resolving = false
 
 func _on_card_drag_started(_card_data: Dictionary, index: int) -> void:
@@ -205,9 +199,10 @@ func _on_card_drag_ended(_card_data: Dictionary, global_position: Vector2, index
 
 func _on_end_turn_pressed() -> void:
 	selected_hand_index = -1
-	_process_enemy_turn()
+	await _process_enemy_turn()
 	_append_log("Turn", "Enemy pressure resolved. Queue cleared.")
 	_render_all()
+	_check_battle_finished()
 
 func _find_slot_index(slot_id: String) -> int:
 	for index in range(battle_slots.size()):
@@ -219,6 +214,16 @@ func _get_card_damage(card: Dictionary) -> int:
 	if card.get("attack", null) != null:
 		return int(card.get("attack", 0))
 	return maxi(1, int(card.get("cost", 0)))
+
+func _is_unit_card(card: Dictionary) -> bool:
+	return str(card.get("type", "")).to_upper() == "UNIT"
+
+func _get_card_keywords(card: Dictionary) -> Array[String]:
+	var keywords: Array[String] = []
+	for ability in card.get("abilities", []):
+		if ability is Dictionary:
+			keywords.append(str((ability as Dictionary).get("type", "")).to_upper())
+	return keywords
 
 func _append_log(title: String, detail: String) -> void:
 	var current := log_label.text
@@ -250,6 +255,46 @@ func _animate_card_play(hand_index: int, slot_id: String, card: Dictionary) -> v
 		await rendered_slot_nodes[slot_id].play_hit_feedback()
 	ghost.queue_free()
 
+func _resolve_spell_attack(card: Dictionary, slot: Dictionary) -> void:
+	var slot_id := str(slot.get("id", ""))
+	var damage := _get_effective_damage(card, slot)
+	_spawn_damage_text(rendered_slot_nodes.get(slot_id), damage, false)
+	if bool(slot.get("counterArmed", false)):
+		damage = maxi(1, damage - 1)
+		player_state["health"] = maxi(0, int(player_state.get("health", 0)) - 1)
+		slot["counterArmed"] = false
+		_spawn_damage_text(self, 1, true)
+		_append_log("Counter", "%s countered and hit the player for 1." % str(slot.get("title", "Slot")))
+	slot["health"] = maxi(0, int(slot.get("health", 0)) - damage)
+	enemy_state["health"] = maxi(0, int(enemy_state.get("health", 0)) - damage)
+	_append_log("Play", "%s dealt %d to %s." % [str(card.get("name", "Card")), damage, str(slot.get("title", "Slot"))])
+	await _apply_enemy_retaliation(slot)
+	if int(slot.get("health", 0)) == 0:
+		slot["collapsed"] = true
+		await _play_slot_break(slot_id)
+		_append_log("Break", "%s collapsed." % str(slot.get("title", "Slot")))
+
+func _deploy_unit_to_player_slot(card: Dictionary, enemy_slot: Dictionary) -> bool:
+	var player_slot := _find_matching_player_slot(enemy_slot)
+	if player_slot.is_empty():
+		_append_log("Deploy", "No player lane available for %s." % str(card.get("name", "Unit")))
+		return false
+	if _slot_has_unit(player_slot):
+		_append_log("Deploy", "%s lane is already occupied." % str(player_slot.get("title", "Player Slot")))
+		return false
+	player_slot["occupantCardId"] = str(card.get("id", ""))
+	player_slot["occupantName"] = str(card.get("name", player_slot.get("title", "Unit")))
+	player_slot["occupantCard"] = card.duplicate(true)
+	player_slot["attack"] = int(card.get("attack", max(1, int(card.get("cost", 1)))))
+	player_slot["maxHealth"] = max(1, int(card.get("health", 1)))
+	player_slot["health"] = int(player_slot.get("maxHealth", 1))
+	player_slot["collapsed"] = false
+	player_slot["keywords"] = _get_card_keywords(card)
+	_append_log("Deploy", "%s entered %s." % [str(card.get("name", "Unit")), str(player_slot.get("title", "lane"))])
+	if _card_has_keyword(card, "FIRST_STRIKE") or _card_has_keyword(card, "RANGED"):
+		await _resolve_unit_attack_from_slot(player_slot, enemy_slot)
+	return true
+
 func _reset_battle_state(deck_override: Array = []) -> void:
 	draw_pile = deck_override.duplicate(true) if not deck_override.is_empty() else base_cards.duplicate(true)
 	hand_cards.clear()
@@ -274,6 +319,15 @@ func _reset_battle_state(deck_override: Array = []) -> void:
 	_render_all()
 
 func _build_level_deck(enemy_faction: String) -> Array:
+	var explicit_deck_ids: Array = active_level.get("enemyDeck", []) if _normalize_faction(enemy_faction) == _normalize_faction(str(active_level.get("enemyFaction", enemy_faction))) else []
+	if not explicit_deck_ids.is_empty():
+		var explicit_deck: Array = []
+		for card_id in explicit_deck_ids:
+			var deck_card := _find_base_card_by_id(str(card_id))
+			if not deck_card.is_empty():
+				explicit_deck.append(deck_card)
+		if not explicit_deck.is_empty():
+			return explicit_deck
 	var filtered: Array = []
 	for card in base_cards:
 		if card is Dictionary and _normalize_faction(str(card.get("faction", ""))) == _normalize_faction(enemy_faction):
@@ -399,6 +453,18 @@ func _seed_slot_occupants(slots: Array, deck: Array, faction: String, player_sid
 		unit_cards = deck.duplicate(true)
 	for index in range(slots.size()):
 		var slot := slots[index] as Dictionary
+		if player_side and index > 1:
+			slot["faction"] = faction
+			slot["occupantCardId"] = ""
+			slot["occupantName"] = ""
+			slot["occupantCard"] = {}
+			slot["attack"] = 0
+			slot["health"] = 0
+			slot["maxHealth"] = 0
+			slot["playerSide"] = player_side
+			slot["collapsed"] = false
+			slot["keywords"] = []
+			continue
 		var card := (unit_cards[index % unit_cards.size()] as Dictionary).duplicate(true)
 		slot["faction"] = faction
 		slot["occupantCardId"] = str(card.get("id", ""))
@@ -409,9 +475,10 @@ func _seed_slot_occupants(slots: Array, deck: Array, faction: String, player_sid
 		slot["health"] = int(slot.get("maxHealth", 0))
 		slot["playerSide"] = player_side
 		slot["collapsed"] = false
+		slot["keywords"] = _get_card_keywords(card)
 
 func _apply_enemy_retaliation(enemy_slot: Dictionary) -> void:
-	if bool(enemy_slot.get("collapsed", false)) or int(enemy_slot.get("health", 0)) <= 0:
+	if bool(enemy_slot.get("collapsed", false)) or int(enemy_slot.get("health", 0)) <= 0 or not _slot_has_unit(enemy_slot):
 		return
 	var mirror_slot: Dictionary = _find_player_slot_for_enemy(enemy_slot)
 	var retaliation: int = maxi(0, int(enemy_slot.get("attack", 0)))
@@ -424,6 +491,7 @@ func _apply_enemy_retaliation(enemy_slot: Dictionary) -> void:
 		return
 	var mirror_id := str(mirror_slot.get("id", ""))
 	await _animate_slot_attack(str(enemy_slot.get("id", "")), mirror_id, mirror_slot)
+	retaliation = _get_damage_after_armor(retaliation, mirror_slot)
 	mirror_slot["health"] = maxi(0, int(mirror_slot.get("health", 0)) - retaliation)
 	if rendered_slot_nodes.has(mirror_id):
 		_spawn_damage_text(rendered_slot_nodes[mirror_id], retaliation, true)
@@ -443,13 +511,13 @@ func _find_player_slot_for_enemy(enemy_slot: Dictionary) -> Dictionary:
 	var enemy_index := int(enemy_slot.get("index", -1))
 	if _has_alive_row(player_slots, "front"):
 		for slot in player_slots:
-			if str(slot.get("row", "")) == "front" and int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)):
+			if str(slot.get("row", "")) == "front" and int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)) and _slot_has_unit(slot):
 				return slot
 	for slot in player_slots:
-		if int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)):
+		if int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)) and _slot_has_unit(slot):
 			return slot
 	for slot in player_slots:
-		if not bool(slot.get("collapsed", false)):
+		if not bool(slot.get("collapsed", false)) and _slot_has_unit(slot):
 			return slot
 	return {}
 
@@ -458,7 +526,7 @@ func _process_enemy_turn() -> void:
 		if bool(slot.get("collapsed", false)):
 			continue
 		var attack: int = int(slot.get("attack", 0))
-		if attack <= 0:
+		if attack <= 0 or not _slot_has_unit(slot):
 			continue
 		var target: Dictionary = _find_player_slot_for_enemy(slot)
 		if target.is_empty():
@@ -468,6 +536,7 @@ func _process_enemy_turn() -> void:
 			_append_log("Enemy Turn", "%s attacked the player for %d." % [str(slot.get("occupantName", slot.get("title", "Slot"))), attack])
 			continue
 		await _animate_slot_attack(str(slot.get("id", "")), str(target.get("id", "")), target)
+		attack = _get_damage_after_armor(attack, target)
 		target["health"] = maxi(0, int(target.get("health", 0)) - attack)
 		var target_id := str(target.get("id", ""))
 		if rendered_slot_nodes.has(target_id):
@@ -486,7 +555,7 @@ func _process_enemy_turn() -> void:
 
 func _has_alive_row(slots: Array, row_name: String) -> bool:
 	for slot in slots:
-		if str(slot.get("row", "")) == row_name and not bool(slot.get("collapsed", false)):
+		if str(slot.get("row", "")) == row_name and not bool(slot.get("collapsed", false)) and _slot_has_unit(slot):
 			return true
 	return false
 
@@ -497,7 +566,12 @@ func _can_target_enemy_slot(slot_id: String) -> bool:
 	var slot := battle_slots[slot_index] as Dictionary
 	if bool(slot.get("collapsed", false)):
 		return false
+	if not _slot_has_unit(slot):
+		return false
 	if str(slot.get("row", "front")) == "front":
+		return true
+	var selected_card := hand_cards[selected_hand_index] as Dictionary if selected_hand_index >= 0 and selected_hand_index < hand_cards.size() else {}
+	if not selected_card.is_empty() and _card_has_keyword(selected_card, "RANGED"):
 		return true
 	return not _has_alive_row(battle_slots, "front")
 
@@ -537,6 +611,90 @@ func _find_slot_by_id(slot_id: String) -> Dictionary:
 		if str(slot.get("id", "")) == slot_id:
 			return slot
 	return {}
+
+func _find_matching_player_slot(enemy_slot: Dictionary) -> Dictionary:
+	for slot in player_slots:
+		if str(slot.get("row", "")) == str(enemy_slot.get("row", "")) and int(slot.get("index", -1)) == int(enemy_slot.get("index", -1)):
+			return slot
+	return {}
+
+func _slot_has_unit(slot: Dictionary) -> bool:
+	return str(slot.get("occupantCardId", "")).strip_edges() != "" and int(slot.get("health", 0)) > 0
+
+func _card_has_keyword(card: Dictionary, keyword: String) -> bool:
+	return keyword.to_upper() in _get_card_keywords(card)
+
+func _slot_has_keyword(slot: Dictionary, keyword: String) -> bool:
+	for value in slot.get("keywords", []):
+		if str(value).to_upper() == keyword.to_upper():
+			return true
+	return false
+
+func _get_damage_after_armor(damage: int, target_slot: Dictionary) -> int:
+	if _slot_has_keyword(target_slot, "ARMORED"):
+		return maxi(1, damage - 1)
+	return damage
+
+func _get_effective_damage(card: Dictionary, target_slot: Dictionary) -> int:
+	return _get_damage_after_armor(_get_card_damage(card), target_slot)
+
+func _resolve_unit_attack_from_slot(player_slot: Dictionary, enemy_slot: Dictionary) -> void:
+	if player_slot.is_empty() or enemy_slot.is_empty():
+		return
+	var enemy_slot_id := str(enemy_slot.get("id", ""))
+	await _animate_slot_attack(str(player_slot.get("id", "")), enemy_slot_id, enemy_slot)
+	var damage := _get_damage_after_armor(int(player_slot.get("attack", 0)), enemy_slot)
+	enemy_slot["health"] = maxi(0, int(enemy_slot.get("health", 0)) - damage)
+	enemy_state["health"] = maxi(0, int(enemy_state.get("health", 0)) - damage)
+	if rendered_slot_nodes.has(enemy_slot_id):
+		_spawn_damage_text(rendered_slot_nodes[enemy_slot_id], damage, false)
+		await rendered_slot_nodes[enemy_slot_id].play_hit_feedback()
+	_append_log("Strike", "%s struck %s for %d." % [
+		str(player_slot.get("occupantName", "Unit")),
+		str(enemy_slot.get("occupantName", enemy_slot.get("title", "Slot"))),
+		damage,
+	])
+	if int(enemy_slot.get("health", 0)) == 0:
+		enemy_slot["collapsed"] = true
+		await _play_slot_break(enemy_slot_id)
+		_append_log("Break", "%s collapsed." % str(enemy_slot.get("title", "Slot")))
+
+func _find_base_card_by_id(card_id: String) -> Dictionary:
+	for card in base_cards:
+		if card is Dictionary and str(card.get("id", "")) == card_id:
+			return (card as Dictionary).duplicate(true)
+	return {}
+
+func _check_battle_finished() -> bool:
+	var player_alive := int(player_state.get("health", 0)) > 0 or _has_any_unit(player_slots)
+	if enemy_state.get("health", 0) <= 0 or not _has_any_unit(battle_slots):
+		is_resolving = false
+		battle_finished.emit(_build_result_payload(true))
+		return true
+	if not player_alive:
+		is_resolving = false
+		battle_finished.emit(_build_result_payload(false))
+		return true
+	return false
+
+func _has_any_unit(slots: Array) -> bool:
+	for slot in slots:
+		if _slot_has_unit(slot) and not bool(slot.get("collapsed", false)):
+			return true
+	return false
+
+func _build_result_payload(won: bool) -> Dictionary:
+	var log_summary := log_label.text.replace("[b]", "").replace("[/b]", "")
+	return {
+		"won": won,
+		"scenarioName": str(active_level.get("scenarioName", "Story Mode")),
+		"levelName": str(active_level.get("name", "Battle")),
+		"victoryCondition": str(active_level.get("victoryCondition", "")),
+		"outcomeText": "Objective secured." if won else str(active_level.get("defeatCondition", "The line was broken.")),
+		"rewards": active_level.get("rewards", []),
+		"enemyDeck": active_level.get("enemyDeck", []),
+		"logSummary": log_summary,
+	}
 
 func _build_slot_card_payload(slot: Dictionary) -> Dictionary:
 	if slot.has("occupantCard") and slot.get("occupantCard", null) is Dictionary:
