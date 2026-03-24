@@ -19,9 +19,10 @@ export type BattleCastEvent = {
 
 interface BattleCastOverlayProps {
   event: BattleCastEvent | null;
+  preview?: Omit<BattleCastEvent, 'id'> | null;
 }
 
-export function BattleCastOverlay({ event }: BattleCastOverlayProps) {
+export function BattleCastOverlay({ event, preview = null }: BattleCastOverlayProps) {
   const progress = useSharedValue(0);
   const flash = useSharedValue(0);
 
@@ -79,6 +80,17 @@ export function BattleCastOverlay({ event }: BattleCastOverlayProps) {
     };
   });
 
+  const guideEvent = event ?? preview;
+
+  const arcNodes = guideEvent
+    ? Array.from({ length: 7 }, (_, index) => {
+        const t = index / 6;
+        const x = guideEvent.fromX + (guideEvent.toX - guideEvent.fromX) * t;
+        const y = guideEvent.fromY + (guideEvent.toY - guideEvent.fromY) * t - Math.sin(t * Math.PI) * 46;
+        return { x, y, index };
+      })
+    : [];
+
   const flashStyle = useAnimatedStyle(() => {
     if (!event) {
       return { opacity: 0 };
@@ -90,42 +102,62 @@ export function BattleCastOverlay({ event }: BattleCastOverlayProps) {
     };
   });
 
-  if (!event) {
+  if (!event && !preview) {
     return null;
   }
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Animated.View
-        style={[
-          styles.trail,
-          trailStyle,
-          { backgroundColor: `${event.accent}66` },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.projectile,
-          projectileStyle,
-          {
-            borderColor: event.accent,
-            shadowColor: event.accent,
-            backgroundColor: `${event.accent}dd`,
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.flash,
-          flashStyle,
-          {
-            left: event.toX - 42,
-            top: event.toY - 42,
-            borderColor: event.accent,
-            backgroundColor: `${event.accent}22`,
-          },
-        ]}
-      />
+      {event ? (
+        <Animated.View
+          style={[
+            styles.trail,
+            trailStyle,
+            { backgroundColor: `${event.accent}66` },
+          ]}
+        />
+      ) : null}
+      {arcNodes.map((node) => (
+        <View
+          key={`${event?.id ?? 'preview'}-node-${node.index}`}
+          style={[
+            styles.arcNode,
+            {
+              left: node.x - 4,
+              top: node.y - 4,
+              backgroundColor: node.index % 2 === 0 ? '#fff4dc' : `${guideEvent?.accent ?? '#d7b26d'}cc`,
+              opacity: event ? 1 : 0.72,
+            },
+          ]}
+        />
+      ))}
+      {event ? (
+        <>
+          <Animated.View
+            style={[
+              styles.projectile,
+              projectileStyle,
+              {
+                borderColor: event.accent,
+                shadowColor: event.accent,
+                backgroundColor: `${event.accent}dd`,
+              },
+            ]}
+          />
+          <Animated.View
+            style={[
+              styles.flash,
+              flashStyle,
+              {
+                left: event.toX - 42,
+                top: event.toY - 42,
+                borderColor: event.accent,
+                backgroundColor: `${event.accent}22`,
+              },
+            ]}
+          />
+        </>
+      ) : null}
     </View>
   );
 }
@@ -135,6 +167,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     height: 3,
     borderRadius: 999,
+  },
+  arcNode: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    shadowColor: '#ffffff',
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 3,
   },
   projectile: {
     position: 'absolute',

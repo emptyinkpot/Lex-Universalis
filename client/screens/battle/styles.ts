@@ -214,6 +214,8 @@ export const createStyles = (_theme: Theme) =>
       justifyContent: 'space-between',
       paddingHorizontal: Spacing.md,
       marginBottom: 4,
+      flexWrap: 'wrap',
+      gap: Spacing.sm,
     },
     handMetaRow: {
       flexDirection: 'row',

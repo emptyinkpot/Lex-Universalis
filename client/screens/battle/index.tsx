@@ -19,6 +19,7 @@ import {
 import { BattleCastOverlay, type BattleCastEvent } from '@/components/BattleCastOverlay';
 import { BattleDamageOverlay, type DamageEvent } from '@/components/BattleDamageOverlay';
 import { BattleHandCardMotion } from '@/components/BattleHandCardMotion';
+import { BattlePileBadge } from '@/components/BattlePileBadge';
 import { BattleSwipeZone } from '@/components/BattleSwipeZone';
 import { BattleSlot, BattleTargetSlot } from '@/components/BattleTargetSlot';
 import { createStyles } from './styles';
@@ -128,6 +129,7 @@ export default function BattleScreen() {
   const [feedbackEvent, setFeedbackEvent] = useState<BattleFeedbackEvent | null>(null);
   const [damageEvent, setDamageEvent] = useState<DamageEvent | null>(null);
   const [castEvent, setCastEvent] = useState<BattleCastEvent | null>(null);
+  const [discardCount, setDiscardCount] = useState(0);
   const [battleSlots, setBattleSlots] = useState<BattleSlot[]>(() => createInitialBattleSlots());
   const [battleLog, setBattleLog] = useState<BattleLogEntry[]>([
     {
@@ -252,6 +254,7 @@ export default function BattleScreen() {
 
   useEffect(() => {
     setHand([]);
+    setDiscardCount(0);
     drawCursorRef.current = 0;
     dealTimersRef.current.forEach((timer) => clearTimeout(timer));
     dealTimersRef.current = [];
@@ -302,6 +305,23 @@ export default function BattleScreen() {
   };
 
   const draggedTargetSlotId = getDraggedTargetSlotId();
+  const dragGuidePreview = selectedCard && selectedHandIndex !== null && dragPoint
+    ? {
+        accent: selectedCard.faction === 'FRANCE'
+          ? '#002FA7'
+          : selectedCard.faction === 'ENGLAND'
+            ? '#C8102E'
+            : '#C9A96E',
+        fromX: getHandPoint(selectedHandIndex).x,
+        fromY: getHandPoint(selectedHandIndex).y,
+        toX: draggedTargetSlotId
+          ? getTargetPoint(battleSlots.find((slot) => slot.id === draggedTargetSlotId) ?? battleSlots[0]).x
+          : dragPoint.x,
+        toY: draggedTargetSlotId
+          ? getTargetPoint(battleSlots.find((slot) => slot.id === draggedTargetSlotId) ?? battleSlots[0]).y
+          : dragPoint.y,
+      }
+    : null;
 
   const queueDeathFade = (slotId: string) => {
     if (deathTimersRef.current.has(slotId)) {
@@ -530,6 +550,7 @@ export default function BattleScreen() {
     }
 
     setHand((current) => current.filter((card) => card.id !== selectedCard.id));
+    setDiscardCount((current) => current + 1);
     setSelectedCard(null);
     setSelectedHandIndex(null);
     setIsTargeting(false);
@@ -682,6 +703,7 @@ export default function BattleScreen() {
       key={slot.id}
       slot={slot}
       selected={draggedTargetSlotId === slot.id}
+      hovered={draggedTargetSlotId === slot.id}
       targeting={isTargeting && selectedCard != null}
       accent={selectedCard?.faction === 'FRANCE'
         ? '#002FA7'
@@ -723,7 +745,7 @@ export default function BattleScreen() {
       <View style={styles.container}>
         <BattleFeedbackLayer event={feedbackEvent} />
         <BattleDamageOverlay event={damageEvent} />
-        <BattleCastOverlay event={castEvent} />
+        <BattleCastOverlay event={castEvent} preview={dragGuidePreview} />
 
         <View style={styles.enemyInfoBar}>
           <View style={styles.enemyNameSection}>
@@ -831,9 +853,21 @@ export default function BattleScreen() {
             <ThemedText variant="caption" color={theme.textMuted} style={styles.handLabel}>
               手牌 ({hand.length})
             </ThemedText>
+            <BattlePileBadge
+              label="牌堆"
+              count={Math.max(0, battleDeck.length - drawCursorRef.current)}
+              icon="layer-group"
+              accent="#d7b26d"
+            />
             <ThemedText variant="caption" color={theme.textMuted}>
               {isPlayerTurn ? '你的回合' : '敌方回合'}
             </ThemedText>
+            <BattlePileBadge
+              label="弃牌"
+              count={discardCount}
+              icon="box-archive"
+              accent="#8f5234"
+            />
           </View>
           <View style={[styles.releaseLane, (isHandDragging || isTargeting) && styles.releaseLaneActive]}>
             <View style={styles.releaseLaneGlow} />

@@ -28,6 +28,7 @@ interface BattleTargetSlotProps {
   slot: BattleSlot;
   selected: boolean;
   targeting: boolean;
+  hovered?: boolean;
   accent: string;
   onPress: () => void;
 }
@@ -36,6 +37,7 @@ export function BattleTargetSlot({
   slot,
   selected,
   targeting,
+  hovered = false,
   accent,
   onPress,
 }: BattleTargetSlotProps) {
@@ -57,7 +59,7 @@ export function BattleTargetSlot({
     }
 
     opacity.value = withTiming(1, { duration: 160 });
-    scale.value = withSpring(selected ? 1.02 : 1, { damping: 15, stiffness: 220 });
+    scale.value = withSpring(selected || hovered ? 1.04 : 1, { damping: 15, stiffness: 220 });
   }, [selected, slot.status, opacity, scale]);
 
   useEffect(() => {
@@ -75,6 +77,19 @@ export function BattleTargetSlot({
 
     pulse.value = withTiming(0, { duration: 160 });
   }, [targeting, slot.status, pulse]);
+
+  useEffect(() => {
+    if (hovered && slot.status === 'alive') {
+      pulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 320, easing: Easing.inOut(Easing.quad) }),
+          withTiming(0.2, { duration: 320, easing: Easing.inOut(Easing.quad) }),
+        ),
+        -1,
+        false,
+      );
+    }
+  }, [hovered, pulse, slot.status]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -97,12 +112,13 @@ export function BattleTargetSlot({
           styles.slot,
           animatedStyle,
           selected && styles.selected,
+          hovered && styles.hovered,
           targeting && styles.targeting,
           slot.status === 'dying' && styles.dying,
           slot.status === 'dead' && styles.dead,
           {
-            borderColor: selected || targeting ? accent : 'rgba(120,92,56,0.22)',
-            backgroundColor: targeting ? 'rgba(33, 21, 14, 0.88)' : 'rgba(12, 9, 8, 0.76)',
+            borderColor: selected || hovered || targeting ? accent : 'rgba(120,92,56,0.22)',
+            backgroundColor: selected || hovered || targeting ? 'rgba(33, 21, 14, 0.92)' : 'rgba(12, 9, 8, 0.76)',
           },
         ]}
       >
@@ -169,6 +185,12 @@ const styles = {
     shadowColor: '#00F0FF',
     shadowOpacity: 0.35,
     shadowRadius: 10,
+  },
+  hovered: {
+    borderWidth: 2,
+    shadowColor: '#D7B26D',
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
   },
   targeting: {
     backgroundColor: 'rgba(2, 12, 35, 0.72)',
