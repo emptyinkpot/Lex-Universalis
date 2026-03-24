@@ -360,7 +360,7 @@ const themeId = ThemeConfigManager.generateThemeId('my_theme');
 - [主题类型定义](../client/constants/themeTypes.ts)
 - [默认主题配置](../client/constants/defaultThemes.ts)
 - [主题配置管理器](../client/utils/themeConfigManager.ts)
-- [theme-settings.json 原始文件](../assets/theme-settings.json)
+- [theme-settings.json 原始文件](./config/theme-settings.json)
 
 ---
 

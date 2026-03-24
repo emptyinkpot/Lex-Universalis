@@ -4,7 +4,8 @@
 
 - `client/`: Expo React Native app
 - `server/`: Express API
-- `assets/`: project assets and source documents
+- `docs/`: game design docs and source materials
+- `config/`: standalone config files, including theme settings
 - `.cozeproj/`: local runner scripts used by the workspace
 
 ## Common commands
@@ -33,4 +34,3 @@ pnpm start
 - Keep generated archives out of the repository
 - Keep binary assets as binary files
 - Use LF line endings for text files
-

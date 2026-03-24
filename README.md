@@ -28,7 +28,8 @@
 │   ├── contexts/               # React Context 代码
 │   ├── constants/              # 常量定义（如主题配置）
 │   ├── utils/                  # 工具函数
-│   ├── assets/                 # 静态资源
+│   ├── docs/                   # 游戏资料与说明
+│   ├── config/                 # 主题与运行配置
 |   └── package.json            # Expo 应用 package.json
 ├── package.json
 ├── .cozeproj                   # 预置脚手架脚本（禁止修改）
