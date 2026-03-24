@@ -21,8 +21,16 @@ echo Exporting Windows pack...
 "%GODOT_CONSOLE%" --headless --path "%PROJECT_DIR%" --export-pack "Windows Desktop" "%PACK_PATH%"
 if errorlevel 1 exit /b 1
 
+set GODOT_GUI=C:\Users\ASUS-KL\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.1-stable_win64.exe
+
+if not exist "%GODOT_GUI%" (
+  echo Godot GUI executable not found:
+  echo %GODOT_GUI%
+  exit /b 1
+)
+
 echo Refreshing desktop launcher binary...
-copy /Y "%GODOT_CONSOLE%" "%EXE_PATH%" >nul
+copy /Y "%GODOT_GUI%" "%EXE_PATH%" >nul
 if errorlevel 1 exit /b 1
 
 echo Build complete.
