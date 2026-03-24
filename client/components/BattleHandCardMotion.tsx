@@ -27,6 +27,7 @@ export function BattleHandCardMotion({
   const selectValue = useSharedValue(0);
   const entryOffset = useSharedValue(64);
   const entryOpacity = useSharedValue(0);
+  const auraValue = useSharedValue(0);
 
   useEffect(() => {
     hoverValue.value = withSpring(hovered ? 1 : 0, { damping: 16, stiffness: 180 });
@@ -42,6 +43,10 @@ export function BattleHandCardMotion({
     entryOffset.value = withDelay(delay, withTiming(0, { duration: 420 }));
     entryOpacity.value = withDelay(delay, withTiming(1, { duration: 260 }));
   }, [delay, entryOffset, entryOpacity]);
+
+  useEffect(() => {
+    auraValue.value = withTiming(hovered || selected ? 1 : 0, { duration: 180 });
+  }, [auraValue, hovered, selected]);
 
   const cardStyle = useAnimatedStyle(() => {
     const hoverLift = hovered ? -16 : 0;
@@ -67,8 +72,17 @@ export function BattleHandCardMotion({
     ],
   }));
 
+  const auraStyle = useAnimatedStyle(() => ({
+    opacity: auraValue.value * 0.9,
+    transform: [
+      { scaleX: 0.86 + hoverValue.value * 0.18 + selectValue.value * 0.24 },
+      { scaleY: 0.9 + hoverValue.value * 0.12 + selectValue.value * 0.18 },
+    ],
+  }));
+
   return (
     <Animated.View style={styles.shell}>
+      <Animated.View style={[styles.aura, auraStyle]} />
       <Animated.View style={[styles.trail, trailStyle]} />
       <Animated.View style={cardStyle}>{children}</Animated.View>
     </Animated.View>
@@ -80,6 +94,20 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'flex-end',
+  },
+  aura: {
+    position: 'absolute',
+    bottom: 18,
+    width: 152,
+    height: 204,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(215, 178, 109, 0.4)',
+    backgroundColor: 'rgba(215, 178, 109, 0.08)',
+    shadowColor: '#d7b26d',
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 8,
   },
   trail: {
     position: 'absolute',

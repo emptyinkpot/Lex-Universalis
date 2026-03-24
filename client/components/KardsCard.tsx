@@ -426,6 +426,17 @@ export const KardsCard: React.FC<KardsCardProps> = ({
                         </View>
                       )}
 
+                      {(isHovered || isSelected) && (
+                        <View
+                          style={[
+                            styles.focusOverlay,
+                            {
+                              borderColor: isSelected ? '#D7B26D' : factionColor,
+                              backgroundColor: isSelected ? 'rgba(215, 178, 109, 0.08)' : 'rgba(255, 255, 255, 0.04)',
+                            },
+                          ]}
+                        />
+                      )}
                       {metalShine}
                     </Animated.View>
                   </View>
@@ -434,7 +445,7 @@ export const KardsCard: React.FC<KardsCardProps> = ({
 
               {/* 选中发光效果 */}
               {isSelected && (
-                <Animated.View style={[styles.glowEffect, { borderColor: '#00F0FF' }]} />
+                <Animated.View style={[styles.glowEffect, { borderColor: '#D7B26D' }]} />
               )}
             </Animated.View>
           </Animated.View>
@@ -472,6 +483,11 @@ const styles = StyleSheet.create({
   cardContent: {
     flex: 1,
     position: 'relative',
+  },
+  focusOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 1,
+    borderRadius: 6,
   },
   costBadge: {
     position: 'absolute',
@@ -535,10 +551,10 @@ const styles = StyleSheet.create({
   },
   selectedCard: {
     // 选中效果
-    borderWidth: 4,
-    borderColor: '#00F0FF',
+    borderWidth: 3,
+    borderColor: '#D7B26D',
     // 增强发光
-    shadowColor: '#00F0FF',
+    shadowColor: '#D7B26D',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1.5,  // 增强
     shadowRadius: 30,    // 增大
@@ -552,7 +568,7 @@ const styles = StyleSheet.create({
     bottom: -8,
     borderRadius: 16,
     borderWidth: 4,
-    shadowColor: '#00F0FF',
+    shadowColor: '#D7B26D',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1.5,
     shadowRadius: 30,

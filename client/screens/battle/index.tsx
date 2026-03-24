@@ -119,6 +119,7 @@ export default function BattleScreen() {
   const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
   const [selectedHandIndex, setSelectedHandIndex] = useState<number | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isHandDragging, setIsHandDragging] = useState(false);
   const [battleFocus, setBattleFocus] = useState<BattleFocus>('enemy-line');
   const [isTargeting, setIsTargeting] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -298,6 +299,7 @@ export default function BattleScreen() {
 
   const cancelTargetMode = () => {
     setIsTargeting(false);
+    setIsHandDragging(false);
     setSelectedCard(null);
     setSelectedHandIndex(null);
     emitFeedback({
@@ -320,6 +322,7 @@ export default function BattleScreen() {
   const handleEndTurn = () => {
     setSelectedCard(null);
     setSelectedHandIndex(null);
+    setIsHandDragging(false);
     setIsTargeting(false);
     emitFeedback({
       kind: 'turn',
@@ -338,8 +341,30 @@ export default function BattleScreen() {
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const enterTargetMode = () => {
-    if (!selectedCard) {
+  const stageCardSelection = (card: AnyCard, index: number, source: 'tap' | 'drag' = 'tap') => {
+    setSelectedCard(card);
+    setSelectedHandIndex(index);
+    setIsTargeting(false);
+    setBattleFocus('enemy-line');
+    emitFeedback({
+      kind: 'attack',
+      title: source === 'drag' ? `${card.name} 已抬手` : `${card.name} 已锁定`,
+      detail: source === 'drag' ? '继续上拖进入目标选择，或松手回到手牌区。' : '上滑进入目标选择，或下滑取消。',
+      accent: '#C9A96E',
+      side: 'player',
+      duration: 640,
+    });
+    appendLog({
+      id: `${card.id}-${source}-${Date.now()}`,
+      title: source === 'drag' ? '卡牌抬手' : '卡牌锁定',
+      detail: `${card.name} 已进入待出牌状态。`,
+      accent: '#C9A96E',
+    });
+  };
+
+  const enterTargetMode = (cardOverride?: AnyCard) => {
+    const activeCard = cardOverride ?? selectedCard;
+    if (!activeCard) {
       emitFeedback({
         kind: 'turn',
         title: '尚未选牌',
@@ -351,6 +376,7 @@ export default function BattleScreen() {
       return;
     }
 
+    setIsHandDragging(false);
     setIsTargeting(true);
     emitFeedback({
       kind: 'spell',
@@ -363,7 +389,7 @@ export default function BattleScreen() {
     appendLog({
       id: `target-${Date.now()}`,
       title: '目标选择',
-      detail: `${selectedCard.name} 已进入待结算状态。`,
+      detail: `${activeCard.name} 已进入待结算状态。`,
       accent: '#C9A96E',
     });
     void Haptics.selectionAsync();
@@ -495,6 +521,7 @@ export default function BattleScreen() {
     if (selectedCard?.id === card.id && !isTargeting) {
       setSelectedCard(null);
       setSelectedHandIndex(null);
+      setIsHandDragging(false);
       emitFeedback({
         kind: 'counter',
         title: '取消手牌选择',
@@ -506,24 +533,7 @@ export default function BattleScreen() {
       return;
     }
 
-    setSelectedCard(card);
-    setSelectedHandIndex(index);
-    setIsTargeting(false);
-    setBattleFocus('enemy-line');
-    emitFeedback({
-      kind: 'attack',
-      title: `${card.name} 已锁定`,
-      detail: '上滑进入目标选择，或下滑取消。',
-      accent: '#C9A96E',
-      side: 'player',
-      duration: 640,
-    });
-    appendLog({
-      id: `${card.id}-${Date.now()}`,
-      title: '卡牌锁定',
-      detail: `${card.name} 已进入待出牌状态。`,
-      accent: '#C9A96E',
-    });
+    stageCardSelection(card, index, 'tap');
     void Haptics.selectionAsync();
   };
 
@@ -602,10 +612,25 @@ export default function BattleScreen() {
         onPress={() => handleCardPress(card, index)}
         onPressIn={() => setHoveredIndex(index)}
         onPressOut={() => setHoveredIndex(null)}
+        onDragStart={() => {
+          setIsHandDragging(true);
+          setHoveredIndex(index);
+          stageCardSelection(card, index, 'drag');
+        }}
+        onDragEnd={() => {
+          setIsHandDragging(false);
+          setHoveredIndex(null);
+        }}
+        onDropInZone={() => {
+          setHoveredIndex(null);
+          stageCardSelection(card, index, 'drag');
+          enterTargetMode(card);
+        }}
         onDeselect={() => {
           if (selectedCard?.id === card.id) {
             setSelectedCard(null);
             setSelectedHandIndex(null);
+            setIsHandDragging(false);
             setIsTargeting(false);
           }
         }}
@@ -769,6 +794,12 @@ export default function BattleScreen() {
             </ThemedText>
             <ThemedText variant="caption" color={theme.textMuted}>
               {isPlayerTurn ? '你的回合' : '敌方回合'}
+            </ThemedText>
+          </View>
+          <View style={[styles.releaseLane, (isHandDragging || isTargeting) && styles.releaseLaneActive]}>
+            <View style={styles.releaseLaneGlow} />
+            <ThemedText variant="tiny" color={(isHandDragging || isTargeting) ? '#f4dec1' : '#8f7759'}>
+              {isTargeting ? '点选目标完成出牌' : isHandDragging ? '继续上拖以释放并选择目标' : '拖动卡牌抬手，或点击后上滑出牌'}
             </ThemedText>
           </View>
           {selectedCard ? (
