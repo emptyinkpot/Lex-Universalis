@@ -41,13 +41,13 @@ theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="Padding/Root/Hero/Padding/HeroStack"]
 layout_mode = 2
-text = "Victory"
+text = "胜利"
 theme_override_font_sizes/font_size = 34
 
 [node name="Subtitle" type="Label" parent="Padding/Root/Hero/Padding/HeroStack"]
 layout_mode = 2
 position = Vector2(0, 42)
-text = "Story Mode  |  Battle"
+text = "故事模式  |  战斗"
 theme_override_font_sizes/font_size = 16
 
 [node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Hero/Padding/HeroStack"]
@@ -72,7 +72,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/OutcomeChip/Padding"]
 layout_mode = 2
-text = "Outcome"
+text = "结果"
 theme_override_font_sizes/font_size = 15
 
 [node name="StarsChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
@@ -88,7 +88,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/StarsChip/Padding"]
 layout_mode = 2
-text = "Stars"
+text = "星级"
 theme_override_font_sizes/font_size = 15
 
 [node name="RewardsChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
@@ -104,7 +104,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/RewardsChip/Padding"]
 layout_mode = 2
-text = "Rewards"
+text = "奖励"
 theme_override_font_sizes/font_size = 15
 
 [node name="ProgressChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
@@ -120,7 +120,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/ProgressChip/Padding"]
 layout_mode = 2
-text = "Progress"
+text = "进度"
 theme_override_font_sizes/font_size = 15
 
 [node name="Body" type="HBoxContainer" parent="Padding/Root"]
@@ -173,4 +173,4 @@ size_flags_horizontal = 3
 
 [node name="ReturnButton" type="Button" parent="Padding/Root/Footer"]
 layout_mode = 2
-text = "Return To Story"
+text = "返回故事"

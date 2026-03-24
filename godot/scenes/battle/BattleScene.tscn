@@ -45,6 +45,7 @@ theme_override_constants/separation = 16
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Enemy Fortress"
+text = "敌方要塞"
 theme_override_font_sizes/font_size = 24
 
 [node name="EnemyStats" type="Label" parent="Root/TopBar/TopPadding/TopRow"]
@@ -75,7 +76,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Root/HUDStrip/PhaseChip/Padding"]
 layout_mode = 2
-text = "Phase"
+text = "阶段"
 theme_override_font_sizes/font_size = 15
 
 [node name="HandChip" type="PanelContainer" parent="Root/HUDStrip"]
@@ -91,7 +92,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Root/HUDStrip/HandChip/Padding"]
 layout_mode = 2
-text = "Hand"
+text = "手牌"
 theme_override_font_sizes/font_size = 15
 
 [node name="BoardChip" type="PanelContainer" parent="Root/HUDStrip"]
@@ -107,7 +108,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Root/HUDStrip/BoardChip/Padding"]
 layout_mode = 2
-text = "Board"
+text = "战场"
 theme_override_font_sizes/font_size = 15
 
 [node name="OrderChip" type="PanelContainer" parent="Root/HUDStrip"]
@@ -123,7 +124,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Root/HUDStrip/OrderChip/Padding"]
 layout_mode = 2
-text = "Orders"
+text = "指令"
 theme_override_font_sizes/font_size = 15
 
 [node name="Stage" type="HBoxContainer" parent="Root"]
@@ -149,17 +150,17 @@ theme_override_constants/separation = 12
 
 [node name="FieldHeader" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Fixed PC Battlefield"
+text = "固定 PC 战场"
 theme_override_font_sizes/font_size = 26
 
 [node name="EnemySectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Enemy Formation"
+text = "敌方阵线"
 theme_override_font_sizes/font_size = 19
 
 [node name="FrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Front Line"
+text = "前排"
 theme_override_font_sizes/font_size = 17
 
 [node name="FrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
@@ -173,7 +174,7 @@ theme_override_constants/separation = 10
 
 [node name="BackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Back Line"
+text = "后排"
 theme_override_font_sizes/font_size = 17
 
 [node name="BackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
@@ -187,12 +188,12 @@ theme_override_constants/separation = 10
 
 [node name="PlayerSectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Player Formation"
+text = "我方阵线"
 theme_override_font_sizes/font_size = 19
 
 [node name="PlayerFrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Front Guard"
+text = "前排防线"
 theme_override_font_sizes/font_size = 17
 
 [node name="PlayerFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
@@ -201,7 +202,7 @@ theme_override_constants/separation = 10
 
 [node name="PlayerBackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "Rear Guard"
+text = "后排支援"
 theme_override_font_sizes/font_size = 17
 
 [node name="PlayerBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
@@ -230,7 +231,7 @@ theme_override_constants/separation = 10
 
 [node name="RulesHeader" type="Label" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
 layout_mode = 2
-text = "Rules"
+text = "规则"
 theme_override_font_sizes/font_size = 20
 
 [node name="RulesText" type="RichTextLabel" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
@@ -257,7 +258,7 @@ theme_override_constants/separation = 10
 
 [node name="LogHeader" type="Label" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
 layout_mode = 2
-text = "Log"
+text = "日志"
 theme_override_font_sizes/font_size = 20
 
 [node name="LogText" type="RichTextLabel" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
@@ -289,7 +290,7 @@ theme_override_constants/separation = 12
 [node name="DockTitle" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Hand Dock"
+text = "手牌区"
 theme_override_font_sizes/font_size = 22
 
 [node name="PlayerStats" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
@@ -324,4 +325,4 @@ size_flags_horizontal = 3
 
 [node name="EndTurnButton" type="Button" parent="Root/BottomDock/DockPadding/DockBody/ActionRow"]
 layout_mode = 2
-text = "End Turn"
+text = "结束回合"

@@ -53,7 +53,7 @@ theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
 layout_mode = 2
-text = "Deck Builder"
+text = "卡组构筑"
 theme_override_font_sizes/font_size = 28
 
 [node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
@@ -89,7 +89,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PoolChip/Padding"]
 layout_mode = 2
-text = "Pool"
+text = "卡池"
 theme_override_font_sizes/font_size = 15
 
 [node name="DeckChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -105,7 +105,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DeckChip/Padding"]
 layout_mode = 2
-text = "Deck"
+text = "卡组"
 theme_override_font_sizes/font_size = 15
 
 [node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -121,7 +121,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding"]
 layout_mode = 2
-text = "Selected"
+text = "已选"
 theme_override_font_sizes/font_size = 15
 
 [node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -137,7 +137,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding"]
 layout_mode = 2
-text = "Storage"
+text = "本地保存"
 theme_override_font_sizes/font_size = 15
 
 [node name="Content" type="HBoxContainer" parent="Padding/Root"]
@@ -163,7 +163,7 @@ theme_override_constants/separation = 10
 
 [node name="PoolHeader" type="Label" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
 layout_mode = 2
-text = "Available Cards"
+text = "可用卡牌"
 theme_override_font_sizes/font_size = 18
 
 [node name="PoolList" type="ItemList" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
@@ -188,7 +188,7 @@ theme_override_constants/separation = 10
 
 [node name="DeckHeader" type="Label" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
 layout_mode = 2
-text = "Current Deck"
+text = "当前卡组"
 theme_override_font_sizes/font_size = 18
 
 [node name="DeckList" type="ItemList" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
@@ -213,7 +213,7 @@ theme_override_constants/separation = 10
 
 [node name="DetailTitle" type="Label" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody"]
 layout_mode = 2
-text = "Deck Detail"
+text = "卡组详情"
 theme_override_font_sizes/font_size = 18
 
 [node name="CardPreview" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody" instance=ExtResource("2_0m3x7")]
@@ -226,15 +226,15 @@ theme_override_constants/separation = 10
 
 [node name="AddButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
 layout_mode = 2
-text = "Add to Deck"
+text = "加入卡组"
 
 [node name="RemoveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
 layout_mode = 2
-text = "Remove from Deck"
+text = "移出卡组"
 
 [node name="SaveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
 layout_mode = 2
-text = "Save Deck"
+text = "保存卡组"
 
 [node name="ResetButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
 layout_mode = 2

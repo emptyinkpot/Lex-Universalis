@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
 const BATTLE_SLOT_SCENE := preload("res://scenes/components/BattleSlot.tscn")

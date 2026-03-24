@@ -97,19 +97,19 @@ size_flags_horizontal = 3
 
 [node name="Title" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock"]
 layout_mode = 2
-text = "LEX UNIVERSALIS"
+text = "我即真理 Lex Universalis"
 theme_override_font_sizes/font_size = 36
 
 [node name="Subtitle" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock"]
 layout_mode = 2
-text = "Godot desktop migration workspace"
+text = "Godot 桌面版工作台"
 theme_override_font_sizes/font_size = 16
 
 [node name="TopStats" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow"]
 layout_mode = 2
 horizontal_alignment = 2
 size_flags_horizontal = 3
-text = "Loading datasets..."
+text = "加载数据中..."
 theme_override_font_sizes/font_size = 16
 
 [node name="Modes" type="TabContainer" parent="Margin/Root"]
@@ -156,6 +156,12 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="SettingsTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="Footer" type="PanelContainer" parent="Margin/Root"]
 layout_mode = 2
 
@@ -168,6 +174,6 @@ theme_override_constants/margin_bottom = 12
 
 [node name="FooterLabel" type="Label" parent="Margin/Root/Footer/FooterPadding"]
 layout_mode = 2
-text = "Single-window desktop target: story, battle, and cards all move into Godot-native fixed-viewport scenes."
+text = "固定单窗口桌面版：故事、战斗、卡牌编辑与卡组构筑都在 Godot 原生视口中运行。"
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 14

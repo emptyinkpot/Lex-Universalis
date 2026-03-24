@@ -27,7 +27,8 @@ var selected_index := -1
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	working_cards = data_loader.load_working_cards()
-	summary_label.text = "Working cards %d   Base + Moon drafts are editable and stored locally." % working_cards.size()
+	_apply_language_texts()
+	summary_label.text = data_loader.t("card_editor_summary") % working_cards.size()
 	_refresh_list()
 	_select_card(0)
 	_refresh_header_chips()
@@ -61,7 +62,11 @@ func _update_preview(card: Dictionary) -> void:
 		preview_card.call("setup", card)
 	if preview_card.has_method("set_selected"):
 		preview_card.call("set_selected", true)
-	preview_notes.text = "Source id: [b]%s[/b]\nEditable locally through `user://card-drafts.save.json`.\nThis is the Godot-side card editor entry." % str(card.get("id", ""))
+	preview_notes.text = "%s: [b]%s[/b]\n本地草稿将保存到 `user://card-drafts.save.json`。\n%s" % [
+		data_loader.t("card_editor_source"),
+		str(card.get("id", "")),
+		data_loader.t("card_editor_subtitle"),
+	]
 
 func _read_form() -> Dictionary:
 	var source: Dictionary = working_cards[selected_index].duplicate(true)
@@ -92,7 +97,7 @@ func _on_save_pressed() -> void:
 		return
 	working_cards[selected_index] = _read_form()
 	data_loader.save_working_cards(working_cards)
-	status_label.text = "Saved working card drafts locally."
+	status_label.text = data_loader.t("card_editor_saved")
 	_refresh_header_chips()
 
 func _on_reset_pressed() -> void:
@@ -101,16 +106,39 @@ func _on_reset_pressed() -> void:
 	_select_card(maxi(selected_index, 0))
 	_refresh_header_chips()
 
+func _apply_language_texts() -> void:
+	summary_label.text = data_loader.t("card_editor_summary") % working_cards.size()
+	get_node("Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock/Title").text = data_loader.t("card_editor_title")
+	get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DraftChip/Padding/Label").text = data_loader.t("card_editor_drafts")
+	get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding/Label").text = data_loader.t("card_editor_selected")
+	get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding/Label").text = data_loader.t("card_editor_storage")
+	get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PreviewChip/Padding/Label").text = data_loader.t("card_editor_preview")
+	get_node("Padding/Root/Content/CardListPanel/CardListPadding/CardListBody/CardListHeader").text = data_loader.t("card_editor_list")
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/FormHeader").text = data_loader.t("card_editor_form")
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/NameField").placeholder_text = "名称" if data_loader.get_language() != "en" else "Name"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/TypeField").placeholder_text = "类型" if data_loader.get_language() != "en" else "Type"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/FactionField").placeholder_text = "阵营" if data_loader.get_language() != "en" else "Faction"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/DescriptionField").placeholder_text = "描述" if data_loader.get_language() != "en" else "Description"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/FlavorField").placeholder_text = "风味文本" if data_loader.get_language() != "en" else "Flavor text"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/SaveButton").text = "保存草稿" if data_loader.get_language() != "en" else "Save Draft"
+	get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/ResetButton").text = "重载" if data_loader.get_language() != "en" else "Reset"
+	get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewHeader").text = "预览" if data_loader.get_language() != "en" else "Preview"
+
 func _refresh_header_chips() -> void:
-	draft_chip.text = "Drafts %d" % working_cards.size()
+	draft_chip.text = "%s %d" % [data_loader.t("card_editor_drafts"), working_cards.size()]
 	if selected_index >= 0 and selected_index < working_cards.size():
 		var card: Dictionary = working_cards[selected_index]
-		selected_chip.text = "Selected %s" % str(card.get("name", "Card"))
+		selected_chip.text = "%s %s" % [data_loader.t("card_editor_selected"), str(card.get("name", "Card"))]
 		preview_chip.text = "%s / %s" % [
 			str(card.get("type", "CARD")),
 			str(card.get("faction", "NEUTRAL")),
 		]
 	else:
-		selected_chip.text = "Selected None"
-		preview_chip.text = "Preview Ready"
-	storage_chip.text = "Saved Locally"
+		selected_chip.text = "%s %s" % [data_loader.t("card_editor_selected"), "无"]
+		preview_chip.text = "预览就绪" if data_loader.get_language() != "en" else "Preview Ready"
+	storage_chip.text = data_loader.t("card_editor_storage")
+
+func refresh_language() -> void:
+	_apply_language_texts()
+	_refresh_list()
+	_select_card(maxi(selected_index, 0))

@@ -53,7 +53,7 @@ theme_override_constants/separation = 6
 
 [node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
 layout_mode = 2
-text = "Card Editor"
+text = "卡牌编辑器"
 theme_override_font_sizes/font_size = 28
 
 [node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
@@ -89,7 +89,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DraftChip/Padding"]
 layout_mode = 2
-text = "Drafts"
+text = "草稿"
 theme_override_font_sizes/font_size = 15
 
 [node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -105,7 +105,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding"]
 layout_mode = 2
-text = "Selected"
+text = "已选"
 theme_override_font_sizes/font_size = 15
 
 [node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -121,7 +121,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding"]
 layout_mode = 2
-text = "Storage"
+text = "本地保存"
 theme_override_font_sizes/font_size = 15
 
 [node name="PreviewChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
@@ -137,7 +137,7 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PreviewChip/Padding"]
 layout_mode = 2
-text = "Preview"
+text = "预览"
 theme_override_font_sizes/font_size = 15
 
 [node name="Content" type="HBoxContainer" parent="Padding/Root"]
@@ -163,7 +163,7 @@ theme_override_constants/separation = 10
 
 [node name="CardListHeader" type="Label" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
 layout_mode = 2
-text = "Working Cards"
+text = "可编辑卡牌"
 theme_override_font_sizes/font_size = 18
 
 [node name="CardList" type="ItemList" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
@@ -188,12 +188,12 @@ theme_override_constants/separation = 10
 
 [node name="FormHeader" type="Label" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
-text = "Edit Card"
+text = "编辑卡牌"
 theme_override_font_sizes/font_size = 18
 
 [node name="NameField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
-placeholder_text = "Name"
+placeholder_text = "名称"
 
 [node name="TypeRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
@@ -202,12 +202,12 @@ theme_override_constants/separation = 10
 [node name="TypeField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Type"
+placeholder_text = "类型"
 
 [node name="FactionField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Faction"
+placeholder_text = "阵营"
 
 [node name="StatRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
@@ -234,12 +234,12 @@ step = 1.0
 [node name="DescriptionField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 140)
-placeholder_text = "Description"
+placeholder_text = "描述"
 
 [node name="FlavorField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 90)
-placeholder_text = "Flavor text"
+placeholder_text = "风味文本"
 
 [node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
 layout_mode = 2
@@ -247,11 +247,11 @@ theme_override_constants/separation = 10
 
 [node name="SaveButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
 layout_mode = 2
-text = "Save Draft"
+text = "保存草稿"
 
 [node name="ResetButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
 layout_mode = 2
-text = "Reset"
+text = "重载"
 
 [node name="PreviewPanel" type="PanelContainer" parent="Padding/Root/Content"]
 layout_mode = 2
@@ -271,7 +271,7 @@ theme_override_constants/separation = 10
 
 [node name="PreviewHeader" type="Label" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody"]
 layout_mode = 2
-text = "Preview"
+text = "预览"
 theme_override_font_sizes/font_size = 18
 
 [node name="PreviewCard" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody" instance=ExtResource("2_9v2h1")]

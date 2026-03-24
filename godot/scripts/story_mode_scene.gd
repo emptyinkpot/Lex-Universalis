@@ -31,6 +31,7 @@ func _ready() -> void:
 	story = data_loader.load_story_showcase()
 	campaign_scenarios = data_loader.load_campaign_scenarios()
 	progress = data_loader.load_story_progress()
+	_apply_language_labels()
 	_apply_theme()
 	launch_button.pressed.connect(_on_launch_button_pressed)
 	_render_story()
@@ -49,20 +50,21 @@ func _render_story() -> void:
 	for chapter in chapters:
 		if chapter is Dictionary:
 			total_levels += (chapter as Dictionary).get("levels", []).size()
-	scenario_title.text = str(story.get("name", "Story Mode"))
-	scenario_meta.text = "%s  |  %s  |  Factions: %s" % [
+	scenario_title.text = str(story.get("name", data_loader.t("story_title")))
+	scenario_meta.text = "%s  |  %s  |  %s: %s" % [
 		str(story.get("year", "")),
 		str(story.get("era", "")),
+		data_loader.t("story_factions"),
 		", ".join(factions),
 	]
-	background_label.text = "[b]Historical Background[/b]\n%s" % str(story.get("historicalBackground", ""))
+	background_label.text = "[b]%s[/b]\n%s" % [data_loader.t("story_background"), str(story.get("historicalBackground", ""))]
 	chapter_list.clear()
 	for chapter in chapters:
 		if chapter is Dictionary:
 			chapter_list.add_item(str(chapter.get("name", "Unnamed Chapter")))
-	chapter_chip.text = "Chapters %d" % chapters.size()
-	level_chip.text = "Levels %d" % total_levels
-	progress_chip.text = "Stars %d" % int(progress.get("totalStars", 0))
+	chapter_chip.text = "%s %d" % [data_loader.t("story_chapters"), chapters.size()]
+	level_chip.text = "%s %d" % [data_loader.t("story_levels"), total_levels]
+	progress_chip.text = "%s %d" % [data_loader.t("story_stars"), int(progress.get("totalStars", 0))]
 	if chapters.size() > 0:
 		chapter_list.select(0)
 		selected_chapter_index = 0
@@ -82,7 +84,7 @@ func _render_levels_for_chapter(index: int) -> void:
 			level_list.add_item("%s  |  %s  |  %s" % [
 				str(level.get("name", "Unnamed Level")),
 				str(level.get("difficulty", "NORMAL")),
-				("%d star" % stars) if stars == 1 else ("%d stars" % stars),
+				("%d %s" % [stars, data_loader.t("story_stars")]),
 			])
 	if levels.size() > 0:
 		level_list.select(0)
@@ -102,12 +104,15 @@ func _render_level_detail(chapter_index: int, level_index: int) -> void:
 	for reward in level.get("rewards", []):
 		if reward is Dictionary:
 			reward_lines.append("- %s" % str(reward.get("description", "")))
-	level_detail.text = "[b]%s[/b]\n%s\n\n[i]%s[/i]\n\n[b]Victory[/b]\n%s\n\n[b]Defeat[/b]\n%s\n\n[b]Rewards[/b]\n%s" % [
+	level_detail.text = "[b]%s[/b]\n%s\n\n[i]%s[/i]\n\n[b]%s[/b]\n%s\n\n[b]%s[/b]\n%s\n\n[b]%s[/b]\n%s" % [
 		str(level.get("name", "")),
 		str(level.get("description", "")),
 		str(level.get("storyText", "")),
-		str(level.get("victoryCondition", "")),
-		str(level.get("defeatCondition", "")),
+		data_loader.t("story_victory"),
+		"%s" % str(level.get("victoryCondition", "")),
+		data_loader.t("story_defeat"),
+		"%s" % str(level.get("defeatCondition", "")),
+		data_loader.t("story_rewards"),
 		"\n".join(reward_lines),
 	]
 
@@ -177,3 +182,17 @@ func _play_intro() -> void:
 	tween.tween_property(middle_panel, "scale", Vector2.ONE, 0.5).set_delay(0.1)
 	tween.tween_property(right_panel, "modulate", Color(1, 1, 1, 1), 0.54).set_delay(0.14)
 	tween.tween_property(right_panel, "scale", Vector2.ONE, 0.54).set_delay(0.14)
+
+func _apply_language_labels() -> void:
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock/Title").text = data_loader.t("story_title")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock/Meta").text = data_loader.t("story_subtitle")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ChapterChip/Padding/Label").text = data_loader.t("story_chapters")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/LevelChip/Padding/Label").text = data_loader.t("story_levels")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ProgressChip/Padding/Label").text = data_loader.t("story_stars")
+	get_node("Padding/Root/Content/LeftPanel/Padding/Body/Header").text = data_loader.t("story_chapters")
+	get_node("Padding/Root/Content/MiddlePanel/Padding/Body/Header").text = data_loader.t("story_levels")
+	launch_button.text = data_loader.t("story_launch")
+
+func refresh_language() -> void:
+	_apply_language_labels()
+	_render_story()

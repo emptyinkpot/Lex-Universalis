@@ -7,9 +7,13 @@ const DECK_BUILDER_SCENE := preload("res://scenes/deck/DeckBuilderScene.tscn")
 const CARD_SCENE := preload("res://scenes/cards/CardGalleryScene.tscn")
 const RESULT_SCENE := preload("res://scenes/results/BattleResultScene.tscn")
 const HOME_SCENE := preload("res://scenes/home/HomeScene.tscn")
+const SETTINGS_SCENE := preload("res://scenes/settings/SettingsScene.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 @onready var top_stats: Label = get_node("Margin/Root/TopBar/TopBarPadding/TopBarRow/TopStats")
+@onready var app_title: Label = get_node("Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock/Title")
+@onready var app_subtitle: Label = get_node("Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock/Subtitle")
+@onready var footer_label: Label = get_node("Margin/Root/Footer/FooterPadding/FooterLabel")
 @onready var tab_container: TabContainer = get_node("Margin/Root/Modes")
 var data_loader: RefCounted
 var home_view: Control
@@ -19,6 +23,7 @@ var card_editor_view: Control
 var deck_builder_view: Control
 var card_view: Control
 var result_view: Control
+var settings_view: Control
 var ui_theme: Theme
 
 func _ready() -> void:
@@ -26,6 +31,7 @@ func _ready() -> void:
 	ui_theme = _build_desktop_theme()
 	theme = ui_theme
 	top_stats.add_theme_color_override("font_color", Color("f1e2bf"))
+	_apply_language_texts()
 	_render_stats()
 	home_view = _mount_scene("HomeTab", HOME_SCENE)
 	story_view = _mount_scene("StoryTab", STORY_SCENE)
@@ -34,6 +40,7 @@ func _ready() -> void:
 	deck_builder_view = _mount_scene("DeckBuilderTab", DECK_BUILDER_SCENE)
 	card_view = _mount_scene("CardsTab", CARD_SCENE)
 	result_view = _mount_scene("ResultsTab", RESULT_SCENE)
+	settings_view = _mount_scene("SettingsTab", SETTINGS_SCENE)
 	if home_view.has_signal("open_page"):
 		home_view.open_page.connect(_on_home_open_page)
 	if story_view.has_signal("launch_level"):
@@ -42,6 +49,12 @@ func _ready() -> void:
 		battle_view.battle_finished.connect(_on_battle_finished)
 	if result_view.has_signal("return_to_story"):
 		result_view.return_to_story.connect(_on_return_to_story)
+	if settings_view.has_signal("language_changed"):
+		settings_view.language_changed.connect(_on_language_changed)
+	if settings_view.has_signal("return_home"):
+		settings_view.return_home.connect(_on_return_home)
+	_apply_tab_titles()
+	_refresh_views_language()
 
 func _render_stats() -> void:
 	var manifest: Dictionary = data_loader.load_manifest()
@@ -54,7 +67,40 @@ func _render_stats() -> void:
 				summary.append(str(dataset.get("id", "dataset")))
 			else:
 				summary.append("%s %s" % [str(dataset.get("id", "dataset")), str(count)])
-	top_stats.text = "Loaded datasets: %s" % "   |   ".join(summary)
+	top_stats.text = "%s: %s" % [data_loader.t("home_datasets"), "   |   ".join(summary)]
+
+func _apply_language_texts() -> void:
+	app_title.text = data_loader.t("app_title")
+	app_subtitle.text = data_loader.t("app_subtitle")
+	footer_label.text = data_loader.t("app_footer")
+
+func _apply_tab_titles() -> void:
+	tab_container.set_tab_title(0, data_loader.t("home_modes_title"))
+	tab_container.set_tab_title(1, data_loader.t("story_title"))
+	tab_container.set_tab_title(2, data_loader.t("battle_title"))
+	tab_container.set_tab_title(3, data_loader.t("card_editor_title"))
+	tab_container.set_tab_title(4, data_loader.t("deck_builder_title"))
+	tab_container.set_tab_title(5, data_loader.t("cards_title"))
+	tab_container.set_tab_title(6, data_loader.t("result_tab_title"))
+	tab_container.set_tab_title(7, data_loader.t("settings_title"))
+
+func _refresh_views_language() -> void:
+	if home_view.has_method("refresh_language"):
+		home_view.refresh_language()
+	if story_view.has_method("refresh_language"):
+		story_view.refresh_language()
+	if battle_view.has_method("refresh_language"):
+		battle_view.refresh_language()
+	if card_editor_view.has_method("refresh_language"):
+		card_editor_view.refresh_language()
+	if deck_builder_view.has_method("refresh_language"):
+		deck_builder_view.refresh_language()
+	if card_view.has_method("refresh_language"):
+		card_view.refresh_language()
+	if result_view.has_method("refresh_language"):
+		result_view.refresh_language()
+	if settings_view.has_method("refresh_language"):
+		settings_view.refresh_language()
 
 func _mount_scene(tab_name: String, scene: PackedScene) -> Control:
 	var host := tab_container.get_node(tab_name) as Control
@@ -85,6 +131,9 @@ func _on_return_to_story() -> void:
 	if story_view.has_method("refresh_progress"):
 		story_view.refresh_progress()
 
+func _on_return_home() -> void:
+	tab_container.current_tab = 0
+
 func _on_home_open_page(page_id: String) -> void:
 	match page_id:
 		"story":
@@ -99,8 +148,24 @@ func _on_home_open_page(page_id: String) -> void:
 			tab_container.current_tab = 5
 		"results":
 			tab_container.current_tab = 6
+		"settings":
+			tab_container.current_tab = 7
 		_:
 			tab_container.current_tab = 0
+
+func _on_language_changed(language: String) -> void:
+	data_loader.set_language(language)
+	_apply_language_texts()
+	_apply_tab_titles()
+	_refresh_views_language()
+	if home_view.has_method("refresh_home"):
+		home_view.refresh_home()
+	if story_view.has_method("refresh_progress"):
+		story_view.refresh_progress()
+	if battle_view.has_method("refresh_language"):
+		battle_view.refresh_language()
+	if result_view.has_method("refresh_language"):
+		result_view.refresh_language()
 
 func _build_desktop_theme() -> Theme:
 	var theme := Theme.new()

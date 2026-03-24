@@ -22,50 +22,60 @@ var selected_mode_id := "story"
 var mode_entries := [
 	{
 		"id": "story",
-		"title": "Story Mode",
-		"summary": "Play the campaign showcase and launch battles from a single desktop viewport.",
-		"action": "Open Story Mode",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 	{
 		"id": "battle",
-		"title": "Battle Demo",
-		"summary": "Jump straight into the mirrored battlefield and test combat flow.",
-		"action": "Open Battle Scene",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 	{
 		"id": "card_editor",
-		"title": "Card Editor",
-		"summary": "Edit harvested Moon cards, tweak drafts, and save local working copies.",
-		"action": "Open Card Editor",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 	{
 		"id": "deck_builder",
-		"title": "Deck Builder",
-		"summary": "Assemble a local deck from the current card pool and save it to disk.",
-		"action": "Open Deck Builder",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 	{
 		"id": "cards",
-		"title": "Card Gallery",
-		"summary": "Browse the card library, inspect card frames, and review the harvested Moon archive cards.",
-		"action": "Open Card Gallery",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 	{
 		"id": "results",
-		"title": "Results Screen",
-		"summary": "Inspect battle rewards, stars, and story progress feedback.",
-		"action": "Open Result View",
+		"title": "",
+		"summary": "",
+		"action": "",
+	},
+	{
+		"id": "settings",
+		"title": "",
+		"summary": "",
+		"action": "",
 	},
 ]
 
 func _ready() -> void:
 	data_loader = preload("res://scripts/data_loader.gd").new()
-	refresh_home()
+	_apply_language_texts()
+	_refresh_progress_stats()
 	_populate_modes()
 	_select_mode(0)
 	_play_intro()
 
 func refresh_home() -> void:
+	_refresh_progress_stats()
+
+func _refresh_progress_stats() -> void:
 	story_progress = data_loader.load_story_progress()
 	var completed_levels: Array = story_progress.get("completed_levels", [])
 	var total_stars := int(story_progress.get("totalStars", 0))
@@ -73,22 +83,54 @@ func refresh_home() -> void:
 	var deck_cards: Array = data_loader.load_deck_list()
 	var manifest: Dictionary = data_loader.load_manifest()
 	var datasets: Array = manifest.get("datasets", [])
-	hero_stats.text = "Story progress: %s completed | %s stars | %s drafts | %s deck cards | %s datasets" % [
+	hero_stats.text = "%s %s | %s %s | %s %s | %s %s | %s %s" % [
+		data_loader.t("home_progress"),
 		str(completed_levels.size()),
+		data_loader.t("home_total_stars"),
 		str(total_stars),
+		data_loader.t("home_drafts"),
 		str(working_cards.size()),
+		data_loader.t("home_deck_cards"),
 		str(deck_cards.size()),
+		data_loader.t("home_datasets"),
 		str(datasets.size()),
 	]
-	story_chip.text = "Story %s" % str(completed_levels.size())
-	editor_chip.text = "Drafts %s" % str(working_cards.size())
-	deck_chip.text = "Deck %s" % str(deck_cards.size())
-	build_chip.text = "Desktop Pack"
+	story_chip.text = "%s %s" % [data_loader.t("story_chapters"), str(completed_levels.size())]
+	editor_chip.text = "%s %s" % [data_loader.t("card_editor_drafts"), str(working_cards.size())]
+	deck_chip.text = "%s %s" % [data_loader.t("deck_builder_deck"), str(deck_cards.size())]
+	build_chip.text = "%s %s" % [data_loader.t("home_language"), ("中文" if data_loader.get_language() != "en" else "EN")]
 
 func _populate_modes() -> void:
 	mode_list.clear()
 	for entry in mode_entries:
 		mode_list.add_item(str(entry.get("title", "Mode")))
+
+func _apply_language_texts() -> void:
+	mode_entries[0]["title"] = data_loader.t("home_story_title")
+	mode_entries[0]["summary"] = data_loader.t("home_story_summary")
+	mode_entries[0]["action"] = data_loader.t("home_story_action")
+	mode_entries[1]["title"] = data_loader.t("home_battle_title")
+	mode_entries[1]["summary"] = data_loader.t("home_battle_summary")
+	mode_entries[1]["action"] = data_loader.t("home_battle_action")
+	mode_entries[2]["title"] = data_loader.t("home_card_editor_title")
+	mode_entries[2]["summary"] = data_loader.t("home_card_editor_summary")
+	mode_entries[2]["action"] = data_loader.t("home_card_editor_action")
+	mode_entries[3]["title"] = data_loader.t("home_deck_builder_title")
+	mode_entries[3]["summary"] = data_loader.t("home_deck_builder_summary")
+	mode_entries[3]["action"] = data_loader.t("home_deck_builder_action")
+	mode_entries[4]["title"] = data_loader.t("home_cards_title")
+	mode_entries[4]["summary"] = data_loader.t("home_cards_summary")
+	mode_entries[4]["action"] = data_loader.t("home_cards_action")
+	mode_entries[5]["title"] = data_loader.t("home_results_title")
+	mode_entries[5]["summary"] = data_loader.t("home_results_summary")
+	mode_entries[5]["action"] = data_loader.t("home_results_action")
+	mode_entries[6]["title"] = data_loader.t("home_settings_title")
+	mode_entries[6]["summary"] = data_loader.t("home_settings_summary")
+	mode_entries[6]["action"] = data_loader.t("home_settings_action")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/HeroBody/HeroText/Title").text = data_loader.t("app_title")
+	get_node("Padding/Root/Hero/HeroPadding/HeroStack/HeroBody/HeroText/Subtitle").text = data_loader.t("app_subtitle")
+	get_node("Padding/Root/Content/ModePanel/ModePadding/ModeBody/ModeHeader").text = data_loader.t("home_modes_title")
+	_populate_modes()
 
 func _select_mode(index: int) -> void:
 	if index < 0 or index >= mode_entries.size():
@@ -96,9 +138,13 @@ func _select_mode(index: int) -> void:
 	var entry: Dictionary = mode_entries[index]
 	selected_mode_id = str(entry.get("id", "story"))
 	detail_title.text = str(entry.get("title", "Mode"))
-	detail_text.text = "[b]%s[/b]\n\n%s\n\nThis is the desktop launcher-style entry for the current Godot build." % [str(entry.get("title", "Mode")), str(entry.get("summary", ""))]
-	launch_button.text = str(entry.get("action", "Launch"))
-	secondary_button.text = "Select"
+	detail_text.text = "[b]%s[/b]\n\n%s\n\n%s" % [
+		str(entry.get("title", "Mode")),
+		str(entry.get("summary", "")),
+		data_loader.t("app_footer"),
+	]
+	launch_button.text = str(entry.get("action", data_loader.t("home_story_action")))
+	secondary_button.text = data_loader.t("settings_back") if selected_mode_id == "settings" else data_loader.t("home_settings_action")
 
 func _on_mode_selected(index: int) -> void:
 	_select_mode(index)
@@ -124,3 +170,10 @@ func _play_intro() -> void:
 	tween.tween_property(mode_panel, "scale", Vector2.ONE, 0.46).set_delay(0.08)
 	tween.tween_property(detail_panel, "modulate", Color(1, 1, 1, 1), 0.5).set_delay(0.12)
 	tween.tween_property(detail_panel, "scale", Vector2.ONE, 0.5).set_delay(0.12)
+
+func refresh_language() -> void:
+	_apply_language_texts()
+	refresh_home()
+	var selected_items := mode_list.get_selected_items()
+	var selected_index := selected_items[0] if selected_items.size() > 0 else 0
+	_select_mode(selected_index)
