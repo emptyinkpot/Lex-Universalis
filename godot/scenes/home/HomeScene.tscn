@@ -71,6 +71,11 @@ theme_override_font_sizes/font_size = 15
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="AccentBar" type="ColorRect" parent="Padding/Root/Hero/HeroPadding/HeroStack"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.843137, 0.72549, 0.447059, 0.95)
+
 [node name="StoryChip" type="PanelContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
