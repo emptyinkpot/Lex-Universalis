@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "lex-universalis-server",
   "private": true,
   "type": "module",
   "scripts": {
