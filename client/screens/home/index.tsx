@@ -43,7 +43,7 @@ export default function HomeScreen() {
     },
     {
       title: '涓婚璁剧疆',
-      subtitle: '鑷畾涔夋父鎴忓瑙?,
+      subtitle: '自定义游戏外观',
       icon: 'palette',
       iconColor: '#9333EA',
       route: '/theme-settings',

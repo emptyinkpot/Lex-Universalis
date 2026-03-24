@@ -9,7 +9,7 @@ import { ColorSchemeProvider } from '@/hooks/useColorScheme';
 
 LogBox.ignoreLogs([
   "TurboModuleRegistry.getEnforcing(...): 'RNMapsAirModule' could not be found",
-  // 添加其它想暂时忽略的错误或警告信息
+  // Add other noisy logs here if needed.
 ]);
 
 export default function RootLayout() {
@@ -19,11 +19,11 @@ export default function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <StatusBar style="dark"></StatusBar>
           <Stack screenOptions={{
-            // 设置所有页面的切换动画为从右侧滑入，适用于iOS 和 Android
+            // 设置所有页面的切换动画为从右侧滑入，适用于iOS �?Android
             animation: 'slide_from_right',
             gestureEnabled: true,
             gestureDirection: 'horizontal',
-            // 隐藏自带的头部
+            // Hide the built-in header
             headerShown: false
           }}>
             <Stack.Screen name="index" options={{ title: "" }} />
@@ -33,7 +33,7 @@ export default function RootLayout() {
             <Stack.Screen name="deck-builder" options={{ title: "卡组编辑" }} />
             <Stack.Screen name="battle" options={{ title: "战斗" }} />
             <Stack.Screen name="theme-settings" options={{ title: "主题设置" }} />
-            <Stack.Screen name="card-editor" options={{ title: "卡牌编辑器" }} />
+            <Stack.Screen name="card-editor" options={{ title: "���Ʊ༭��" }} />
           </Stack>
           <Toast />
         </GestureHandlerRootView>
