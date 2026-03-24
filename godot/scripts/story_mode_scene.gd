@@ -1,9 +1,13 @@
 extends Control
 
+signal launch_level(level_data: Dictionary)
+
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 var story: Dictionary = {}
 var data_loader: RefCounted
+var selected_chapter_index := 0
+var selected_level_index := 0
 
 @onready var scenario_title: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Title")
 @onready var scenario_meta: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Meta")
@@ -11,11 +15,13 @@ var data_loader: RefCounted
 @onready var chapter_list: ItemList = get_node("Padding/Root/Content/LeftPanel/Padding/Body/ChapterList")
 @onready var level_list: ItemList = get_node("Padding/Root/Content/MiddlePanel/Padding/Body/LevelList")
 @onready var level_detail: RichTextLabel = get_node("Padding/Root/Content/RightPanel/Padding/Body/LevelDetail")
+@onready var launch_button: Button = get_node("Padding/Root/Content/RightPanel/Padding/Body/LaunchButton")
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	story = data_loader.load_story_showcase()
 	_apply_theme()
+	launch_button.pressed.connect(_on_launch_button_pressed)
 	_render_story()
 
 func _apply_theme() -> void:
@@ -40,6 +46,7 @@ func _render_story() -> void:
 			chapter_list.add_item(str(chapter.get("name", "Unnamed Chapter")))
 	if chapters.size() > 0:
 		chapter_list.select(0)
+		selected_chapter_index = 0
 		_render_levels_for_chapter(0)
 
 func _render_levels_for_chapter(index: int) -> void:
@@ -58,6 +65,7 @@ func _render_levels_for_chapter(index: int) -> void:
 			])
 	if levels.size() > 0:
 		level_list.select(0)
+		selected_level_index = 0
 		_render_level_detail(index, 0)
 
 func _render_level_detail(chapter_index: int, level_index: int) -> void:
@@ -83,9 +91,23 @@ func _render_level_detail(chapter_index: int, level_index: int) -> void:
 	]
 
 func _on_chapter_list_item_selected(index: int) -> void:
+	selected_chapter_index = index
 	_render_levels_for_chapter(index)
 
 func _on_level_list_item_selected(index: int) -> void:
 	var selected := chapter_list.get_selected_items()
 	var chapter_index := selected[0] if selected.size() > 0 else 0
+	selected_chapter_index = chapter_index
+	selected_level_index = index
 	_render_level_detail(chapter_index, index)
+
+func _on_launch_button_pressed() -> void:
+	var chapters: Array = story.get("chapters", [])
+	if selected_chapter_index < 0 or selected_chapter_index >= chapters.size():
+		return
+	var chapter := chapters[selected_chapter_index] as Dictionary
+	var levels: Array = chapter.get("levels", [])
+	if selected_level_index < 0 or selected_level_index >= levels.size():
+		return
+	var level := levels[selected_level_index] as Dictionary
+	launch_level.emit(level)

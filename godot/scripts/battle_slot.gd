@@ -3,12 +3,17 @@ extends PanelContainer
 signal slot_pressed(slot_id: String)
 
 var slot_id := ""
+var is_armed := false
+var is_hovered := false
 
 func _ready() -> void:
 	gui_input.connect(_on_gui_input)
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
 
 func setup(slot: Dictionary, armed: bool) -> void:
 	slot_id = str(slot.get("id", ""))
+	is_armed = armed
 	var title_label: Label = get_node("Padding/Body/Title")
 	var stats_label: Label = get_node("Padding/Body/Stats")
 	title_label.text = str(slot.get("title", "Slot"))
@@ -34,10 +39,18 @@ func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		slot_pressed.emit(slot_id)
 
+func _on_mouse_entered() -> void:
+	is_hovered = true
+	_apply_style(is_armed)
+
+func _on_mouse_exited() -> void:
+	is_hovered = false
+	_apply_style(is_armed)
+
 func _apply_style(armed: bool) -> void:
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color("19120d")
-	style.border_color = Color("d0b06e") if armed else Color("8f6c45")
+	style.border_color = Color("f0cf84") if is_hovered and armed else (Color("d0b06e") if armed else Color("8f6c45"))
 	style.border_width_left = 2
 	style.border_width_top = 2
 	style.border_width_right = 2
@@ -46,6 +59,6 @@ func _apply_style(armed: bool) -> void:
 	style.corner_radius_top_right = 16
 	style.corner_radius_bottom_right = 16
 	style.corner_radius_bottom_left = 16
-	style.shadow_size = 12 if armed else 6
-	style.shadow_color = Color("d0b06e", 0.28) if armed else Color(0, 0, 0, 0.18)
+	style.shadow_size = 18 if is_hovered and armed else (12 if armed else 6)
+	style.shadow_color = Color("f0cf84", 0.36) if is_hovered and armed else (Color("d0b06e", 0.28) if armed else Color(0, 0, 0, 0.18))
 	add_theme_stylebox_override("panel", style)

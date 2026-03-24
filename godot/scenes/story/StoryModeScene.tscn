@@ -136,5 +136,9 @@ bbcode_enabled = true
 fit_content = false
 scroll_active = false
 
+[node name="LaunchButton" type="Button" parent="Padding/Root/Content/RightPanel/Padding/Body"]
+layout_mode = 2
+text = "Launch Battle"
+
 [connection signal="item_selected" from="Padding/Root/Content/LeftPanel/Padding/Body/ChapterList" to="." method="_on_chapter_list_item_selected"]
 [connection signal="item_selected" from="Padding/Root/Content/MiddlePanel/Padding/Body/LevelList" to="." method="_on_level_list_item_selected"]

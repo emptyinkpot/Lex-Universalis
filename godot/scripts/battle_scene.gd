@@ -13,6 +13,7 @@ var selected_hand_index := -1
 var is_resolving := false
 var player_state: Dictionary = {}
 var enemy_state: Dictionary = {}
+var active_level: Dictionary = {}
 var rendered_hand_nodes: Array = []
 var rendered_slot_nodes: Dictionary = {}
 
@@ -41,6 +42,19 @@ func _ready() -> void:
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	for _index in range(int(player_state.get("handSize", 5))):
 		_draw_card()
+	_render_all()
+
+func start_level(level_data: Dictionary) -> void:
+	active_level = level_data.duplicate(true)
+	var level_name := str(active_level.get("name", "Scenario Battle"))
+	var enemy_faction := str(active_level.get("enemyFaction", enemy_label.text))
+	enemy_label.text = level_name
+	rules_label.text = "[b]Battle Rules[/b]\n- Click a hand card to arm it.\n- Click a front or back slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn.\n\n[b]Scenario[/b]\nEnemy faction: %s" % enemy_faction
+	log_label.text = "[b]Scenario Loaded[/b]\n- %s\n- %s\n\n%s" % [
+		level_name,
+		str(active_level.get("storyText", "")),
+		log_label.text,
+	]
 	_render_all()
 
 func _render_all() -> void:
