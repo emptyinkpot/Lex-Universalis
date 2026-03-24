@@ -289,11 +289,14 @@ export default function CardEditorScreen() {
   const [typeFilter, setTypeFilter] = useState<'ALL' | CardType>('ALL');
   const [rarityFilter, setRarityFilter] = useState<'ALL' | CardRarity>('ALL');
   const [editorVisible, setEditorVisible] = useState(false);
-  const [editorMode, setEditorMode] = useState<'create' | 'edit'>('create');
+  const [editorMode, setEditorMode] = useState<'create' | 'edit' | 'template'>('create');
   const [draft, setDraft] = useState<EditorCard>(emptyCard());
   const [templates, setTemplates] = useState<CardTemplate[]>([]);
   const [templateVisible, setTemplateVisible] = useState(false);
   const [templateName, setTemplateName] = useState('');
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [renamingTemplateId, setRenamingTemplateId] = useState<string | null>(null);
+  const [renamingTemplateName, setRenamingTemplateName] = useState('');
   const [importVisible, setImportVisible] = useState(false);
   const [exportVisible, setExportVisible] = useState(false);
   const [importText, setImportText] = useState('');
@@ -389,6 +392,7 @@ export default function CardEditorScreen() {
     setEditorMode('create');
     setDraft(emptyCard(type));
     setTemplateName('');
+    setEditingTemplateId(null);
     setEditorVisible(true);
   };
 
@@ -396,6 +400,7 @@ export default function CardEditorScreen() {
     setEditorMode('edit');
     setDraft({ ...card, abilities: card.abilities.map((item) => ({ ...item })) });
     setTemplateName(card.name);
+    setEditingTemplateId(null);
     setEditorVisible(true);
   };
 
@@ -403,6 +408,9 @@ export default function CardEditorScreen() {
     const name = templateName.trim() || `${draft.name || '未命名'} 模板`;
     const nextTemplate = templateFromCard(draft, name);
     setTemplates((current) => {
+      if (editorMode === 'template' && editingTemplateId) {
+        return current.map((item) => (item.id === editingTemplateId ? { ...item, ...nextTemplate, id: item.id, name } : item));
+      }
       const existingIndex = current.findIndex((item) => item.name === name);
       if (existingIndex === -1) return [nextTemplate, ...current];
       const next = [...current];
@@ -410,7 +418,51 @@ export default function CardEditorScreen() {
       return next;
     });
     setTemplateName(name);
+    setEditingTemplateId(null);
+    if (editorMode === 'template') {
+      setEditorVisible(false);
+    }
     Alert.alert('模板已保存', `模板「${name}」已加入模板库。`);
+  };
+
+  const openTemplateEditor = (template: CardTemplate) => {
+    setEditorMode('template');
+    setDraft(mergeTemplateIntoCard(emptyCard(template.defaults.type ?? CardType.UNIT), template));
+    setTemplateName(template.name);
+    setEditingTemplateId(template.id);
+    setEditorVisible(true);
+  };
+
+  const openTemplateRename = (template: CardTemplate) => {
+    setRenamingTemplateId(template.id);
+    setRenamingTemplateName(template.name);
+  };
+
+  const saveTemplateRename = () => {
+    const nextName = renamingTemplateName.trim();
+    if (!nextName) {
+      Alert.alert('名称不能为空', '请输入一个模板名称。');
+      return;
+    }
+    if (!renamingTemplateId) return;
+    setTemplates((current) => current.map((item) => (item.id === renamingTemplateId ? { ...item, name: nextName, updatedAt: Date.now() } : item)));
+    setRenamingTemplateId(null);
+    setRenamingTemplateName('');
+  };
+
+  const exportTemplate = async (template: CardTemplate) => {
+    const payload = JSON.stringify(template, null, 2);
+    try {
+      if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(payload);
+      } else {
+        await Share.share({ message: payload });
+      }
+      Alert.alert('已导出', `模板「${template.name}」的 JSON 已复制/分享。`);
+    } catch (error) {
+      console.error('导出模板失败:', error);
+      Alert.alert('导出失败', '模板 JSON 无法复制到剪贴板。');
+    }
   };
 
   const applyTemplateToDraft = (templateId: string) => {
@@ -640,109 +692,110 @@ export default function CardEditorScreen() {
 
     return (
       <ThemedView level="default" style={styles.cardFrame}>
-        <View style={[styles.cardBackdrop, { backgroundColor: withAlpha(factionColor, 0.14) }]} />
+        <View style={[styles.cardBackdrop, { backgroundColor: withAlpha(factionColor, 0.12) }]} />
         <View style={[styles.cardRim, { borderColor: rarityColor }]} />
 
-        <View style={styles.cardTopBar}>
-          <View style={[styles.cardCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
-            <ThemedText variant="h4" color={theme.textPrimary}>{card.cost}</ThemedText>
-            <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
+        <View style={styles.cardContent}>
+          <View style={styles.cardTopBar}>
+            <View style={[styles.cardCostOrb, { borderColor: rarityColor, backgroundColor: withAlpha(factionColor, 0.16) }]}>
+              <ThemedText variant="h4" color={theme.textPrimary}>{card.cost}</ThemedText>
+              <ThemedText variant="tiny" color={theme.textMuted}>费用</ThemedText>
+            </View>
+            <View style={styles.cardTopMeta}>
+              <EditorBadge color={factionColor} label={card.faction} />
+              <EditorBadge color={rarityColor} label={card.rarity} />
+            </View>
           </View>
-          <View style={styles.cardTopMeta}>
-            <EditorBadge color={factionColor} label={card.faction} />
-            <EditorBadge color={rarityColor} label={card.rarity} />
-          </View>
-        </View>
 
-        <View style={[styles.cardArtwork, { borderColor: factionColor }]}>
-          {card.imageUrl ? (
-            <Image source={{ uri: card.imageUrl }} style={styles.cardArtworkImage} resizeMode="cover" />
-          ) : (
-            <View style={[styles.cardArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
-              <FactionIcon faction={card.faction} size={72} />
-              <ThemedText variant="smallMedium" color={theme.textMuted} style={{ marginTop: 8 }}>
-                未设置图片
+          <View style={[styles.cardArtwork, { borderColor: factionColor }]}>
+            {card.imageUrl ? (
+              <Image source={{ uri: card.imageUrl }} style={styles.cardArtworkImage} resizeMode="cover" />
+            ) : (
+              <View style={[styles.cardArtworkPlaceholder, { backgroundColor: withAlpha(factionColor, 0.08) }]}>
+                <FactionIcon faction={card.faction} size={64} />
+                <ThemedText variant="smallMedium" color={theme.textMuted} style={{ marginTop: 8 }}>
+                  未设置图片
+                </ThemedText>
+              </View>
+            )}
+            <View style={[styles.cardTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.9) }]}>
+              <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
+              <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
+            </View>
+          </View>
+
+          <View style={styles.cardTitleBlock}>
+            <ThemedText variant="h4" color={theme.textPrimary} style={styles.cardTitle} numberOfLines={2}>
+              {card.name || '未命名卡牌'}
+            </ThemedText>
+            <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
+              {card.description || '暂无描述'}
+            </ThemedText>
+            {card.flavorText ? (
+              <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText} numberOfLines={2}>
+                {card.flavorText}
               </ThemedText>
+            ) : null}
+          </View>
+
+          {card.type === CardType.UNIT && (
+            <View style={styles.cardStatGrid}>
+              <ThemedView level="tertiary" style={styles.cardStatPill}>
+                <FontAwesome6 name="crosshairs" size={13} color={theme.error} />
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
+              </ThemedView>
+              <ThemedView level="tertiary" style={styles.cardStatPill}>
+                <FontAwesome6 name="heart" size={13} color={theme.success} />
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
+              </ThemedView>
+              <ThemedView level="tertiary" style={styles.cardStatPill}>
+                <FontAwesome6 name="person-walking" size={13} color={theme.primary} />
+                <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
+              </ThemedView>
             </View>
           )}
-          <View style={[styles.cardTypeRibbon, { backgroundColor: withAlpha(factionColor, 0.88) }]}>
-            <FontAwesome6 name={typeIcon as any} size={12} color="#FFFFFF" />
-            <ThemedText variant="tiny" color="#FFFFFF">{card.type}</ThemedText>
-          </View>
-        </View>
 
-        <View style={styles.cardTitleBlock}>
-          <ThemedText variant="h4" color={theme.textPrimary} style={styles.cardTitle} numberOfLines={2}>
-            {card.name || '未命名卡牌'}
-          </ThemedText>
-          <ThemedText variant="small" color={theme.textMuted}>
-            {card.description || '暂无描述'}
-          </ThemedText>
-          {card.flavorText ? (
-            <ThemedText variant="small" color={theme.textMuted} style={styles.cardFlavorText}>
-              {card.flavorText}
-            </ThemedText>
+          {card.type === CardType.BUILDING && (
+            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>
+                耐久 {card.durability ?? 0}
+              </ThemedText>
+              <ThemedText variant="small" color={theme.textMuted} numberOfLines={3}>
+                {card.effect || '暂无建筑效果'}
+              </ThemedText>
+            </ThemedView>
+          )}
+
+          {card.type === CardType.TACTIC && (
+            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+              <ThemedText variant="smallMedium" color={theme.textPrimary} numberOfLines={4}>
+                {card.effect || '暂无战术效果'}
+              </ThemedText>
+              {card.duration !== null ? (
+                <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText>
+              ) : null}
+            </ThemedView>
+          )}
+
+          {card.type === CardType.UNIT && card.abilities.length > 0 && (
+            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>
+              {card.abilities.slice(0, 3).map((ability, index) => (
+                <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>
+                  • {ability.description || ability.type}
+                </Text>
+              ))}
+            </ThemedView>
+          )}
+
+          {card.notes ? (
+            <ThemedView level="tertiary" style={styles.cardAbilityBox}>
+              <ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText>
+              <ThemedText variant="small" color={theme.textMuted} numberOfLines={2}>{card.notes}</ThemedText>
+            </ThemedView>
           ) : null}
-        </View>
 
-        {card.type === CardType.UNIT && (
-          <View style={styles.cardStatGrid}>
-            <ThemedView level="tertiary" style={styles.cardStatPill}>
-              <FontAwesome6 name="crosshairs" size={13} color={theme.error} />
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.attack ?? 0}</ThemedText>
-            </ThemedView>
-            <ThemedView level="tertiary" style={styles.cardStatPill}>
-              <FontAwesome6 name="heart" size={13} color={theme.success} />
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.health ?? 0}</ThemedText>
-            </ThemedView>
-            <ThemedView level="tertiary" style={styles.cardStatPill}>
-              <FontAwesome6 name="person-walking" size={13} color={theme.primary} />
-              <ThemedText variant="smallMedium" color={theme.textPrimary}>{card.movement ?? 0}</ThemedText>
-            </ThemedView>
-          </View>
-        )}
-
-        {card.type === CardType.BUILDING && (
-          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-            <ThemedText variant="smallMedium" color={theme.textPrimary}>
-              耐久 {card.durability ?? 0}
-            </ThemedText>
-            <ThemedText variant="small" color={theme.textMuted}>
-              {card.effect || '暂无建筑效果'}
-            </ThemedText>
-          </ThemedView>
-        )}
-
-        {card.type === CardType.TACTIC && (
-          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-            <ThemedText variant="smallMedium" color={theme.textPrimary}>
-              {card.effect || '暂无战术效果'}
-            </ThemedText>
-            {card.duration !== null ? (
-              <ThemedText variant="tiny" color={theme.textMuted}>持续 {card.duration} 回合</ThemedText>
-            ) : null}
-          </ThemedView>
-        )}
-
-        {card.type === CardType.UNIT && card.abilities.length > 0 && (
-          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-            <ThemedText variant="smallMedium" color={theme.textPrimary}>能力</ThemedText>
-            {card.abilities.map((ability, index) => (
-              <Text key={`${ability.type}-${index}`} style={{ color: theme.textSecondary, marginTop: 4 }}>
-                • {ability.description || ability.type}
-              </Text>
-            ))}
-          </ThemedView>
-        )}
-
-        {card.notes ? (
-          <ThemedView level="tertiary" style={styles.cardAbilityBox}>
-            <ThemedText variant="smallMedium" color={theme.textPrimary}>备注</ThemedText>
-            <ThemedText variant="small" color={theme.textMuted}>{card.notes}</ThemedText>
-          </ThemedView>
-        ) : null}
-
-        <View style={styles.previewActions}>
+          <View style={styles.previewActions}>
           <Pressable onPress={() => openEdit(card)} style={[styles.previewAction, { backgroundColor: theme.primary }]}>
             <FontAwesome6 name="pen-to-square" size={14} color="#FFFFFF" />
             <ThemedText variant="smallMedium" color="#FFFFFF">编辑</ThemedText>
@@ -751,6 +804,7 @@ export default function CardEditorScreen() {
             <FontAwesome6 name="clone" size={14} color={theme.textPrimary} />
             <ThemedText variant="smallMedium" color={theme.textPrimary}>复制</ThemedText>
           </Pressable>
+          </View>
         </View>
       </ThemedView>
     );
@@ -819,7 +873,36 @@ export default function CardEditorScreen() {
 
                 <View style={styles.formSection}><ThemedText variant="h4" color={theme.textPrimary}>备注</ThemedText><TextInput value={draft.notes} onChangeText={(value) => updateDraft('notes', value)} multiline placeholder="编辑器备注，不会影响对局" placeholderTextColor={theme.textMuted} style={[styles.fieldTextarea, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /><ThemedText variant="small" color={theme.textMuted}>模板名称（可选）</ThemedText><TextInput value={templateName} onChangeText={setTemplateName} placeholder="比如：帝国步兵模板" placeholderTextColor={theme.textMuted} style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]} /></View>
               </ScrollView>
-              <View style={styles.modalFooter}><Pressable onPress={() => setEditorVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText></Pressable><Pressable onPress={saveTemplate} style={[styles.footerButton, styles.footerGhostButton]}><FontAwesome6 name="bookmark" size={14} color={theme.textPrimary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>保存模板</ThemedText></Pressable><Pressable onPress={saveCard} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}><FontAwesome6 name="floppy-disk" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText></Pressable></View>
+              <View style={styles.modalFooter}>
+                <Pressable onPress={() => setEditorVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText>
+                </Pressable>
+                <Pressable onPress={saveTemplate} style={[styles.footerButton, styles.footerGhostButton]}>
+                  <FontAwesome6 name="bookmark" size={14} color={theme.textPrimary} />
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>保存模板</ThemedText>
+                </Pressable>
+                {editorMode !== 'template' ? (
+                  <Pressable onPress={saveCard} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}>
+                    <FontAwesome6 name="floppy-disk" size={14} color="#FFFFFF" />
+                    <ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText>
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    onPress={async () => {
+                      const currentTemplate = editingTemplateId ? templates.find((item) => item.id === editingTemplateId) : null;
+                      await exportTemplate(
+                        currentTemplate
+                          ? { ...currentTemplate, name: templateName.trim() || currentTemplate.name, defaults: draft, updatedAt: Date.now() }
+                          : templateFromCard(draft, templateName.trim() || `${draft.name || '未命名'} 模板`),
+                      );
+                    }}
+                    style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.success }]}
+                  >
+                    <FontAwesome6 name="download" size={14} color="#FFFFFF" />
+                    <ThemedText variant="smallMedium" color="#FFFFFF">导出模板</ThemedText>
+                  </Pressable>
+                )}
+              </View>
             </Pressable>
           </Pressable>
         </KeyboardAvoidingView>
@@ -891,6 +974,9 @@ export default function CardEditorScreen() {
                       </View>
                       <View style={styles.templateActions}>
                         <Pressable onPress={() => createCardFromTemplate(template)} style={[styles.footerButton, { backgroundColor: theme.primary, flex: 1 }]}><ThemedText variant="smallMedium" color="#FFFFFF">应用到新卡</ThemedText></Pressable>
+                        <Pressable onPress={() => openTemplateEditor(template)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>编辑</ThemedText></Pressable>
+                        <Pressable onPress={() => openTemplateRename(template)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>重命名</ThemedText></Pressable>
+                        <Pressable onPress={() => exportTemplate(template)} style={[styles.footerButton, styles.footerGhostButton]}><FontAwesome6 name="download" size={14} color={theme.textPrimary} /><ThemedText variant="smallMedium" color={theme.textPrimary}>导出模板</ThemedText></Pressable>
                         <Pressable onPress={() => deleteTemplate(template.id)} style={[styles.footerButton, styles.footerGhostButton]}><ThemedText variant="smallMedium" color={theme.textPrimary}>删除</ThemedText></Pressable>
                       </View>
                     </ThemedView>
@@ -906,6 +992,42 @@ export default function CardEditorScreen() {
               <View style={styles.modalFooter}>
                 <Pressable onPress={() => setTemplateVisible(false)} style={[styles.footerButton, styles.footerGhostButton]}>
                   <ThemedText variant="smallMedium" color={theme.textPrimary}>关闭</ThemedText>
+                </Pressable>
+              </View>
+            </Pressable>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      <Modal visible={renamingTemplateId !== null} transparent animationType="fade">
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setRenamingTemplateId(null)}>
+            <Pressable style={styles.modalCard} onPress={() => undefined}>
+              <View style={styles.modalHeader}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText variant="h3" color={theme.textPrimary}>重命名模板</ThemedText>
+                  <ThemedText variant="small" color={theme.textMuted}>修改模板在模板库中的显示名称。</ThemedText>
+                </View>
+                <Pressable onPress={() => setRenamingTemplateId(null)} style={styles.iconButton}>
+                  <FontAwesome6 name="xmark" size={14} color={theme.textPrimary} />
+                </Pressable>
+              </View>
+              <View style={styles.modalContent}>
+                <ThemedText variant="small" color={theme.textMuted}>模板名称</ThemedText>
+                <TextInput
+                  value={renamingTemplateName}
+                  onChangeText={setRenamingTemplateName}
+                  placeholder="输入新的模板名称"
+                  placeholderTextColor={theme.textMuted}
+                  style={[styles.fieldInput, { color: theme.textPrimary, backgroundColor: theme.backgroundTertiary, borderColor: theme.borderLight }]}
+                />
+              </View>
+              <View style={styles.modalFooter}>
+                <Pressable onPress={() => setRenamingTemplateId(null)} style={[styles.footerButton, styles.footerGhostButton]}>
+                  <ThemedText variant="smallMedium" color={theme.textPrimary}>取消</ThemedText>
+                </Pressable>
+                <Pressable onPress={saveTemplateRename} style={[styles.footerButton, styles.footerPrimaryButton, { backgroundColor: theme.primary }]}>
+                  <ThemedText variant="smallMedium" color="#FFFFFF">保存</ThemedText>
                 </Pressable>
               </View>
             </Pressable>
