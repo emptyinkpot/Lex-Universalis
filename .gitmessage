@@ -1,0 +1,23 @@
+# type(scope): subject
+#
+# Types:
+# - feat: new feature
+# - fix: bug fix
+# - docs: documentation only
+# - refactor: code change without behavior change
+# - chore: maintenance, cleanup, build, config
+# - test: tests only
+# - perf: performance improvement
+#
+# Subject rules:
+# - Use imperative mood
+# - Keep it short and specific
+# - No period at the end
+#
+# Body:
+# - Explain what changed and why
+# - Mention any behavior, compatibility, or migration notes
+#
+# Footer:
+# - Add issue refs, breaking-change notes, or follow-up items
+
