@@ -47,6 +47,11 @@ var active_drag_pointer := Vector2.ZERO
 @onready var pile_label: Label = get_node("Root/BottomDock/DockPadding/DockBody/PileLabel")
 @onready var end_turn_button: Button = get_node("Root/BottomDock/DockPadding/DockBody/ActionRow/EndTurnButton")
 @onready var overlay_layer: Control = get_node("Overlay")
+@onready var top_bar: PanelContainer = get_node("Root/TopBar")
+@onready var hud_strip: HBoxContainer = get_node("Root/HUDStrip")
+@onready var battlefield_panel: PanelContainer = get_node("Root/Stage/Battlefield")
+@onready var side_rail: VBoxContainer = get_node("Root/Stage/SideRail")
+@onready var bottom_dock: PanelContainer = get_node("Root/BottomDock")
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
@@ -56,6 +61,7 @@ func _ready() -> void:
 	rules_label.text = "[b]Battle Rules[/b]\n- Click or drag a hand card to arm it.\n- Release over an enemy slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn."
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	_reset_battle_state()
+	_play_intro()
 
 func start_level(level_data: Dictionary) -> void:
 	active_level = level_data.duplicate(true)
@@ -100,6 +106,30 @@ func _render_hud() -> void:
 	hand_chip.text = "Hand %d | Draw %d" % [hand_cards.size(), draw_pile.size()]
 	board_chip.text = "Board %d v %d" % [live_player_units, live_enemy_units]
 	order_chip.text = "Order %s" % _build_selection_label()
+
+func _play_intro() -> void:
+	top_bar.modulate = Color(1, 1, 1, 0)
+	top_bar.scale = Vector2(0.99, 0.99)
+	hud_strip.modulate = Color(1, 1, 1, 0)
+	hud_strip.scale = Vector2(0.98, 0.98)
+	battlefield_panel.modulate = Color(1, 1, 1, 0)
+	battlefield_panel.scale = Vector2(0.98, 0.98)
+	side_rail.modulate = Color(1, 1, 1, 0)
+	side_rail.scale = Vector2(0.98, 0.98)
+	bottom_dock.modulate = Color(1, 1, 1, 0)
+	bottom_dock.scale = Vector2(0.98, 0.98)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(top_bar, "modulate", Color(1, 1, 1, 1), 0.3)
+	tween.tween_property(top_bar, "scale", Vector2.ONE, 0.34)
+	tween.tween_property(hud_strip, "modulate", Color(1, 1, 1, 1), 0.34).set_delay(0.05)
+	tween.tween_property(hud_strip, "scale", Vector2.ONE, 0.34).set_delay(0.05)
+	tween.tween_property(battlefield_panel, "modulate", Color(1, 1, 1, 1), 0.38).set_delay(0.1)
+	tween.tween_property(battlefield_panel, "scale", Vector2.ONE, 0.38).set_delay(0.1)
+	tween.tween_property(side_rail, "modulate", Color(1, 1, 1, 1), 0.4).set_delay(0.14)
+	tween.tween_property(side_rail, "scale", Vector2.ONE, 0.4).set_delay(0.14)
+	tween.tween_property(bottom_dock, "modulate", Color(1, 1, 1, 1), 0.44).set_delay(0.18)
+	tween.tween_property(bottom_dock, "scale", Vector2.ONE, 0.44).set_delay(0.18)
 
 func _render_slots() -> void:
 	rendered_slot_nodes.clear()

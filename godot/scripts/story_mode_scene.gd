@@ -21,6 +21,10 @@ var selected_level_index := 0
 @onready var chapter_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ChapterChip/Padding/Label")
 @onready var level_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/LevelChip/Padding/Label")
 @onready var progress_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ProgressChip/Padding/Label")
+@onready var hero_panel: PanelContainer = get_node("Padding/Root/Hero")
+@onready var left_panel: PanelContainer = get_node("Padding/Root/Content/LeftPanel")
+@onready var middle_panel: PanelContainer = get_node("Padding/Root/Content/MiddlePanel")
+@onready var right_panel: PanelContainer = get_node("Padding/Root/Content/RightPanel")
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
@@ -30,6 +34,7 @@ func _ready() -> void:
 	_apply_theme()
 	launch_button.pressed.connect(_on_launch_button_pressed)
 	_render_story()
+	_play_intro()
 
 func _apply_theme() -> void:
 	scenario_title.add_theme_color_override("font_color", Color("f1e2bf"))
@@ -152,3 +157,23 @@ func _find_campaign_level(level_id: String) -> Dictionary:
 func refresh_progress() -> void:
 	progress = data_loader.load_story_progress()
 	_render_story()
+
+func _play_intro() -> void:
+	hero_panel.modulate = Color(1, 1, 1, 0)
+	hero_panel.scale = Vector2(0.985, 0.985)
+	left_panel.modulate = Color(1, 1, 1, 0)
+	left_panel.scale = Vector2(0.96, 0.96)
+	middle_panel.modulate = Color(1, 1, 1, 0)
+	middle_panel.scale = Vector2(0.96, 0.96)
+	right_panel.modulate = Color(1, 1, 1, 0)
+	right_panel.scale = Vector2(0.96, 0.96)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(hero_panel, "modulate", Color(1, 1, 1, 1), 0.38)
+	tween.tween_property(hero_panel, "scale", Vector2.ONE, 0.42)
+	tween.tween_property(left_panel, "modulate", Color(1, 1, 1, 1), 0.46).set_delay(0.06)
+	tween.tween_property(left_panel, "scale", Vector2.ONE, 0.46).set_delay(0.06)
+	tween.tween_property(middle_panel, "modulate", Color(1, 1, 1, 1), 0.5).set_delay(0.1)
+	tween.tween_property(middle_panel, "scale", Vector2.ONE, 0.5).set_delay(0.1)
+	tween.tween_property(right_panel, "modulate", Color(1, 1, 1, 1), 0.54).set_delay(0.14)
+	tween.tween_property(right_panel, "scale", Vector2.ONE, 0.54).set_delay(0.14)

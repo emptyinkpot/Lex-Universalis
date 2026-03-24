@@ -12,6 +12,9 @@ signal open_page(page_id: String)
 @onready var editor_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/EditorChip/Padding/Label")
 @onready var deck_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/DeckChip/Padding/Label")
 @onready var build_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/BuildChip/Padding/Label")
+@onready var hero_panel: PanelContainer = get_node("Padding/Root/Hero")
+@onready var mode_panel: PanelContainer = get_node("Padding/Root/Content/ModePanel")
+@onready var detail_panel: PanelContainer = get_node("Padding/Root/Content/DetailPanel")
 
 var data_loader: RefCounted
 var story_progress: Dictionary = {}
@@ -60,6 +63,7 @@ func _ready() -> void:
 	refresh_home()
 	_populate_modes()
 	_select_mode(0)
+	_play_intro()
 
 func refresh_home() -> void:
 	story_progress = data_loader.load_story_progress()
@@ -104,3 +108,19 @@ func _on_launch_pressed() -> void:
 
 func _on_secondary_pressed() -> void:
 	open_page.emit(selected_mode_id)
+
+func _play_intro() -> void:
+	hero_panel.modulate = Color(1, 1, 1, 0)
+	hero_panel.scale = Vector2(0.985, 0.985)
+	mode_panel.modulate = Color(1, 1, 1, 0)
+	mode_panel.scale = Vector2(0.96, 0.96)
+	detail_panel.modulate = Color(1, 1, 1, 0)
+	detail_panel.scale = Vector2(0.96, 0.96)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(hero_panel, "modulate", Color(1, 1, 1, 1), 0.38)
+	tween.tween_property(hero_panel, "scale", Vector2.ONE, 0.42)
+	tween.tween_property(mode_panel, "modulate", Color(1, 1, 1, 1), 0.46).set_delay(0.08)
+	tween.tween_property(mode_panel, "scale", Vector2.ONE, 0.46).set_delay(0.08)
+	tween.tween_property(detail_panel, "modulate", Color(1, 1, 1, 1), 0.5).set_delay(0.12)
+	tween.tween_property(detail_panel, "scale", Vector2.ONE, 0.5).set_delay(0.12)
