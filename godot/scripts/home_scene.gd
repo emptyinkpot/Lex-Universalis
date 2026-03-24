@@ -2,12 +2,16 @@ extends Control
 
 signal open_page(page_id: String)
 
-@onready var hero_stats: Label = get_node("Padding/Root/Hero/HeroPadding/HeroBody/HeroStats")
+@onready var hero_stats: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/HeroBody/HeroStats")
 @onready var mode_list: ItemList = get_node("Padding/Root/Content/ModePanel/ModePadding/ModeBody/ModeList")
 @onready var detail_title: Label = get_node("Padding/Root/Content/DetailPanel/DetailPadding/DetailBody/DetailTitle")
 @onready var detail_text: RichTextLabel = get_node("Padding/Root/Content/DetailPanel/DetailPadding/DetailBody/DetailText")
 @onready var launch_button: Button = get_node("Padding/Root/Content/DetailPanel/DetailPadding/DetailBody/ActionRow/LaunchButton")
 @onready var secondary_button: Button = get_node("Padding/Root/Content/DetailPanel/DetailPadding/DetailBody/ActionRow/SecondaryButton")
+@onready var story_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/StoryChip/Padding/Label")
+@onready var editor_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/EditorChip/Padding/Label")
+@onready var deck_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/DeckChip/Padding/Label")
+@onready var build_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/BuildChip/Padding/Label")
 
 var data_loader: RefCounted
 var story_progress: Dictionary = {}
@@ -61,7 +65,21 @@ func refresh_home() -> void:
 	story_progress = data_loader.load_story_progress()
 	var completed_levels: Array = story_progress.get("completed_levels", [])
 	var total_stars := int(story_progress.get("totalStars", 0))
-	hero_stats.text = "Story progress: %s completed | %s stars" % [str(completed_levels.size()), str(total_stars)]
+	var working_cards: Array = data_loader.load_working_cards()
+	var deck_cards: Array = data_loader.load_deck_list()
+	var manifest: Dictionary = data_loader.load_manifest()
+	var datasets: Array = manifest.get("datasets", [])
+	hero_stats.text = "Story progress: %s completed | %s stars | %s drafts | %s deck cards | %s datasets" % [
+		str(completed_levels.size()),
+		str(total_stars),
+		str(working_cards.size()),
+		str(deck_cards.size()),
+		str(datasets.size()),
+	]
+	story_chip.text = "Story %s" % str(completed_levels.size())
+	editor_chip.text = "Drafts %s" % str(working_cards.size())
+	deck_chip.text = "Deck %s" % str(deck_cards.size())
+	build_chip.text = "Desktop Pack"
 
 func _populate_modes() -> void:
 	mode_list.clear()

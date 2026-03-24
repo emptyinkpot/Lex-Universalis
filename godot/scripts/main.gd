@@ -125,9 +125,17 @@ func _build_desktop_theme() -> Theme:
 	theme.set_color("font_selected_color", "ItemList", Color("20140f"))
 	theme.set_color("font_hover_color", "ItemList", text_main)
 	theme.set_color("selected_font_color", "ItemList", Color("20140f"))
+	theme.set_color("font_color", "LineEdit", text_main)
+	theme.set_color("font_selected_color", "LineEdit", Color("20140f"))
+	theme.set_color("font_color", "TextEdit", text_main)
+	theme.set_color("font_selected_color", "TextEdit", Color("20140f"))
+	theme.set_color("font_color", "SpinBox", text_main)
 	theme.set_font_size("font_size", "Label", 16)
 	theme.set_font_size("font_size", "Button", 16)
 	theme.set_font_size("font_size", "ItemList", 14)
+	theme.set_font_size("font_size", "LineEdit", 15)
+	theme.set_font_size("font_size", "TextEdit", 15)
+	theme.set_font_size("font_size", "SpinBox", 15)
 	theme.set_font_size("normal_font_size", "RichTextLabel", 14)
 	theme.set_font_size("font_size", "TabBar", 16)
 
@@ -146,6 +154,12 @@ func _build_desktop_theme() -> Theme:
 	theme.set_stylebox("tab_selected", "TabBar", _make_button_style(Color("312116"), panel_border_strong, 12, 2))
 	theme.set_stylebox("tab_unselected", "TabBar", _make_button_style(Color("1e1711"), panel_border, 12, 1))
 	theme.set_stylebox("panel", "TabBar", _make_panel_style(panel_bg, panel_border, 10, 1))
+	theme.set_stylebox("normal", "LineEdit", _make_input_style(panel_bg_alt, panel_border, 12))
+	theme.set_stylebox("focus", "LineEdit", _make_input_style(Color("2d2017"), panel_border_strong, 12))
+	theme.set_stylebox("normal", "TextEdit", _make_input_style(panel_bg_alt, panel_border, 12))
+	theme.set_stylebox("focus", "TextEdit", _make_input_style(Color("2d2017"), panel_border_strong, 12))
+	theme.set_stylebox("normal", "SpinBox", _make_input_style(panel_bg_alt, panel_border, 12))
+	theme.set_stylebox("focus", "SpinBox", _make_input_style(Color("2d2017"), panel_border_strong, 12))
 	return theme
 
 func _make_panel_style(bg_color: Color, border_color: Color, shadow_size: int, border_width: int) -> StyleBoxFlat:
@@ -178,4 +192,20 @@ func _make_button_style(bg_color: Color, border_color: Color, radius: int, borde
 	style.corner_radius_bottom_right = radius
 	style.shadow_size = 8
 	style.shadow_color = Color(0, 0, 0, 0.28)
+	return style
+
+func _make_input_style(bg_color: Color, border_color: Color, radius: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.shadow_size = 6
+	style.shadow_color = Color(0, 0, 0, 0.22)
 	return style

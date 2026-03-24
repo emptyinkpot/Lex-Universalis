@@ -26,6 +26,10 @@ To use the packaged desktop build:
 
 - [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
 
+To rebuild the packaged desktop build from source:
+
+- [`E:\Lex Universalis\publish-desktop.bat`](/E:/Lex%20Universalis/publish-desktop.bat)
+
 ## Data
 
 Generated runtime data lives in:

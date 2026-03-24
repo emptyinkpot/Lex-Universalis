@@ -53,6 +53,74 @@ horizontal_alignment = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
 
+[node name="HUDStrip" type="HBoxContainer" parent="Root"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PhaseChip" type="PanelContainer" parent="Root/HUDStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/HUDStrip/PhaseChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Root/HUDStrip/PhaseChip/Padding"]
+layout_mode = 2
+text = "Phase"
+theme_override_font_sizes/font_size = 15
+
+[node name="HandChip" type="PanelContainer" parent="Root/HUDStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/HUDStrip/HandChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Root/HUDStrip/HandChip/Padding"]
+layout_mode = 2
+text = "Hand"
+theme_override_font_sizes/font_size = 15
+
+[node name="BoardChip" type="PanelContainer" parent="Root/HUDStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/HUDStrip/BoardChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Root/HUDStrip/BoardChip/Padding"]
+layout_mode = 2
+text = "Board"
+theme_override_font_sizes/font_size = 15
+
+[node name="OrderChip" type="PanelContainer" parent="Root/HUDStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/HUDStrip/OrderChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Root/HUDStrip/OrderChip/Padding"]
+layout_mode = 2
+text = "Orders"
+theme_override_font_sizes/font_size = 15
+
 [node name="Stage" type="HBoxContainer" parent="Root"]
 layout_mode = 2
 size_flags_vertical = 3

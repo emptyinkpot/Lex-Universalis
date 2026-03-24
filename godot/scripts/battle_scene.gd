@@ -29,6 +29,10 @@ var active_drag_pointer := Vector2.ZERO
 
 @onready var enemy_label: Label = get_node("Root/TopBar/TopPadding/TopRow/EnemyLabel")
 @onready var enemy_stats: Label = get_node("Root/TopBar/TopPadding/TopRow/EnemyStats")
+@onready var phase_chip: Label = get_node("Root/HUDStrip/PhaseChip/Padding/Label")
+@onready var hand_chip: Label = get_node("Root/HUDStrip/HandChip/Padding/Label")
+@onready var board_chip: Label = get_node("Root/HUDStrip/BoardChip/Padding/Label")
+@onready var order_chip: Label = get_node("Root/HUDStrip/OrderChip/Padding/Label")
 @onready var rules_label: RichTextLabel = get_node("Root/Stage/SideRail/RulesPanel/Padding/Body/RulesText")
 @onready var log_label: RichTextLabel = get_node("Root/Stage/SideRail/LogPanel/Padding/Body/LogText")
 @onready var enemy_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/EnemyFrontRow")
@@ -84,8 +88,18 @@ func _render_all() -> void:
 	]
 	pile_label.text = "Draw %d   Discard %d" % [draw_pile.size(), discard_pile.size()]
 	queue_label.text = "Selected: %s" % _build_selection_label()
+	_render_hud()
 	_render_slots()
 	_render_hand()
+
+func _render_hud() -> void:
+	var phase := "Resolving" if is_resolving else ("Orders" if selected_hand_index >= 0 or not selected_player_slot_id.is_empty() else "Ready")
+	var live_enemy_units := _count_live_units(battle_slots)
+	var live_player_units := _count_live_units(player_slots)
+	phase_chip.text = "Phase %s" % phase
+	hand_chip.text = "Hand %d | Draw %d" % [hand_cards.size(), draw_pile.size()]
+	board_chip.text = "Board %d v %d" % [live_player_units, live_enemy_units]
+	order_chip.text = "Order %s" % _build_selection_label()
 
 func _render_slots() -> void:
 	rendered_slot_nodes.clear()
@@ -785,6 +799,13 @@ func _check_battle_finished() -> bool:
 		battle_finished.emit(_build_result_payload(false))
 		return true
 	return false
+
+func _count_live_units(slots: Array) -> int:
+	var total := 0
+	for slot in slots:
+		if _slot_has_unit(slot) and not bool(slot.get("collapsed", false)):
+			total += 1
+	return total
 
 func _has_any_unit(slots: Array) -> bool:
 	for slot in slots:

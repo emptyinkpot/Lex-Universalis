@@ -18,6 +18,10 @@ Double-click the packaged desktop build or the launcher:
 - [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
 - [`E:\Lex Universalis\start-desktop.bat`](/E:/Lex%20Universalis/start-desktop.bat)
 
+To rebuild the Windows package from source:
+
+- [`E:\Lex Universalis\publish-desktop.bat`](/E:/Lex%20Universalis/publish-desktop.bat)
+
 To run the project from source:
 
 - [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)

@@ -37,18 +37,74 @@ theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 18
 
-[node name="TitleBlock" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding"]
+[node name="HeroStack" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleBlock" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="Padding/Root/Hero/HeroPadding/TitleBlock"]
+[node name="Title" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock"]
 layout_mode = 2
 text = "Story Mode"
 theme_override_font_sizes/font_size = 32
 
-[node name="Meta" type="Label" parent="Padding/Root/Hero/HeroPadding/TitleBlock"]
+[node name="Meta" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock"]
 layout_mode = 2
 text = ""
+theme_override_font_sizes/font_size = 15
+
+[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ChapterChip" type="PanelContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ChapterChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ChapterChip/Padding"]
+layout_mode = 2
+text = "Chapters"
+theme_override_font_sizes/font_size = 15
+
+[node name="LevelChip" type="PanelContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/LevelChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/LevelChip/Padding"]
+layout_mode = 2
+text = "Levels"
+theme_override_font_sizes/font_size = 15
+
+[node name="ProgressChip" type="PanelContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ProgressChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ProgressChip/Padding"]
+layout_mode = 2
+text = "Progress"
 theme_override_font_sizes/font_size = 15
 
 [node name="Content" type="HBoxContainer" parent="Padding/Root"]

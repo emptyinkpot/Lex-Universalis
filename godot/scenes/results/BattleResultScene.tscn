@@ -35,16 +35,88 @@ theme_override_constants/margin_top = 18
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 18
 
-[node name="Title" type="Label" parent="Padding/Root/Hero/Padding"]
+[node name="HeroStack" type="VBoxContainer" parent="Padding/Root/Hero/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Padding/Root/Hero/Padding/HeroStack"]
 layout_mode = 2
 text = "Victory"
 theme_override_font_sizes/font_size = 34
 
-[node name="Subtitle" type="Label" parent="Padding/Root/Hero/Padding"]
+[node name="Subtitle" type="Label" parent="Padding/Root/Hero/Padding/HeroStack"]
 layout_mode = 2
 position = Vector2(0, 42)
 text = "Story Mode  |  Battle"
 theme_override_font_sizes/font_size = 16
+
+[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Hero/Padding/HeroStack"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="OutcomeChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/OutcomeChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/OutcomeChip/Padding"]
+layout_mode = 2
+text = "Outcome"
+theme_override_font_sizes/font_size = 15
+
+[node name="StarsChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/StarsChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/StarsChip/Padding"]
+layout_mode = 2
+text = "Stars"
+theme_override_font_sizes/font_size = 15
+
+[node name="RewardsChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/RewardsChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/RewardsChip/Padding"]
+layout_mode = 2
+text = "Rewards"
+theme_override_font_sizes/font_size = 15
+
+[node name="ProgressChip" type="PanelContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/ProgressChip"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Label" type="Label" parent="Padding/Root/Hero/Padding/HeroStack/InfoStrip/ProgressChip/Padding"]
+layout_mode = 2
+text = "Progress"
+theme_override_font_sizes/font_size = 15
 
 [node name="Body" type="HBoxContainer" parent="Padding/Root"]
 layout_mode = 2

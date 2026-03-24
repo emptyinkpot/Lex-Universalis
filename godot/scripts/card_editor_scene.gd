@@ -2,8 +2,8 @@ extends Control
 
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
-@onready var summary_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderBody/TextBlock/Summary")
-@onready var status_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderBody/Status")
+@onready var summary_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock/Summary")
+@onready var status_label: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/Status")
 @onready var card_list: ItemList = get_node("Padding/Root/Content/CardListPanel/CardListPadding/CardListBody/CardList")
 @onready var name_field: LineEdit = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/NameField")
 @onready var type_field: LineEdit = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/TypeField")
@@ -15,6 +15,10 @@ const DATA_LOADER = preload("res://scripts/data_loader.gd")
 @onready var flavor_field: TextEdit = get_node("Padding/Root/Content/FormPanel/FormPadding/FormBody/FlavorField")
 @onready var preview_card: Control = get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewCard")
 @onready var preview_notes: RichTextLabel = get_node("Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody/PreviewNotes")
+@onready var draft_chip: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DraftChip/Padding/Label")
+@onready var selected_chip: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding/Label")
+@onready var storage_chip: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding/Label")
+@onready var preview_chip: Label = get_node("Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PreviewChip/Padding/Label")
 
 var data_loader: RefCounted
 var working_cards: Array = []
@@ -26,6 +30,7 @@ func _ready() -> void:
 	summary_label.text = "Working cards %d   Base + Moon drafts are editable and stored locally." % working_cards.size()
 	_refresh_list()
 	_select_card(0)
+	_refresh_header_chips()
 
 func _refresh_list() -> void:
 	card_list.clear()
@@ -49,6 +54,7 @@ func _select_card(index: int) -> void:
 	_update_preview(card)
 	status_label.text = "%s  |  %s" % [str(card.get("id", "")), str(card.get("rarity", "BASE"))]
 	card_list.select(index)
+	_refresh_header_chips()
 
 func _update_preview(card: Dictionary) -> void:
 	if preview_card.has_method("setup"):
@@ -79,6 +85,7 @@ func _on_field_changed(_value = null) -> void:
 	working_cards[selected_index] = draft
 	_update_preview(draft)
 	card_list.set_item_text(selected_index, "%s  [%s]" % [str(draft.get("name", "Unknown")), str(draft.get("type", "CARD"))])
+	_refresh_header_chips()
 
 func _on_save_pressed() -> void:
 	if selected_index < 0:
@@ -86,8 +93,24 @@ func _on_save_pressed() -> void:
 	working_cards[selected_index] = _read_form()
 	data_loader.save_working_cards(working_cards)
 	status_label.text = "Saved working card drafts locally."
+	_refresh_header_chips()
 
 func _on_reset_pressed() -> void:
 	working_cards = data_loader.load_working_cards()
 	_refresh_list()
 	_select_card(maxi(selected_index, 0))
+	_refresh_header_chips()
+
+func _refresh_header_chips() -> void:
+	draft_chip.text = "Drafts %d" % working_cards.size()
+	if selected_index >= 0 and selected_index < working_cards.size():
+		var card: Dictionary = working_cards[selected_index]
+		selected_chip.text = "Selected %s" % str(card.get("name", "Card"))
+		preview_chip.text = "%s / %s" % [
+			str(card.get("type", "CARD")),
+			str(card.get("faction", "NEUTRAL")),
+		]
+	else:
+		selected_chip.text = "Selected None"
+		preview_chip.text = "Preview Ready"
+	storage_chip.text = "Saved Locally"

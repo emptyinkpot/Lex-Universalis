@@ -11,13 +11,16 @@ var progress: Dictionary = {}
 var selected_chapter_index := 0
 var selected_level_index := 0
 
-@onready var scenario_title: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Title")
-@onready var scenario_meta: Label = get_node("Padding/Root/Hero/HeroPadding/TitleBlock/Meta")
+@onready var scenario_title: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock/Title")
+@onready var scenario_meta: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/TitleBlock/Meta")
 @onready var background_label: RichTextLabel = get_node("Padding/Root/Content/RightPanel/Padding/Body/Background")
 @onready var chapter_list: ItemList = get_node("Padding/Root/Content/LeftPanel/Padding/Body/ChapterList")
 @onready var level_list: ItemList = get_node("Padding/Root/Content/MiddlePanel/Padding/Body/LevelList")
 @onready var level_detail: RichTextLabel = get_node("Padding/Root/Content/RightPanel/Padding/Body/LevelDetail")
 @onready var launch_button: Button = get_node("Padding/Root/Content/RightPanel/Padding/Body/LaunchButton")
+@onready var chapter_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ChapterChip/Padding/Label")
+@onready var level_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/LevelChip/Padding/Label")
+@onready var progress_chip: Label = get_node("Padding/Root/Hero/HeroPadding/HeroStack/InfoStrip/ProgressChip/Padding/Label")
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
@@ -36,6 +39,11 @@ func _apply_theme() -> void:
 
 func _render_story() -> void:
 	var factions: Array = story.get("playerFactions", [])
+	var chapters: Array = story.get("chapters", [])
+	var total_levels := 0
+	for chapter in chapters:
+		if chapter is Dictionary:
+			total_levels += (chapter as Dictionary).get("levels", []).size()
 	scenario_title.text = str(story.get("name", "Story Mode"))
 	scenario_meta.text = "%s  |  %s  |  Factions: %s" % [
 		str(story.get("year", "")),
@@ -44,10 +52,12 @@ func _render_story() -> void:
 	]
 	background_label.text = "[b]Historical Background[/b]\n%s" % str(story.get("historicalBackground", ""))
 	chapter_list.clear()
-	var chapters: Array = story.get("chapters", [])
 	for chapter in chapters:
 		if chapter is Dictionary:
 			chapter_list.add_item(str(chapter.get("name", "Unnamed Chapter")))
+	chapter_chip.text = "Chapters %d" % chapters.size()
+	level_chip.text = "Levels %d" % total_levels
+	progress_chip.text = "Stars %d" % int(progress.get("totalStars", 0))
 	if chapters.size() > 0:
 		chapter_list.select(0)
 		selected_chapter_index = 0
