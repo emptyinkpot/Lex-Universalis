@@ -1,6 +1,7 @@
 extends Control
 
 const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
+const BATTLE_SLOT_SCENE := preload("res://scenes/components/BattleSlot.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 var data_loader: RefCounted
@@ -9,8 +10,11 @@ var hand_cards: Array = []
 var discard_pile: Array = []
 var battle_slots: Array = []
 var selected_hand_index := -1
+var is_resolving := false
 var player_state: Dictionary = {}
 var enemy_state: Dictionary = {}
+var rendered_hand_nodes: Array = []
+var rendered_slot_nodes: Dictionary = {}
 
 @onready var enemy_label: Label = get_node("Root/TopBar/TopPadding/TopRow/EnemyLabel")
 @onready var enemy_stats: Label = get_node("Root/TopBar/TopPadding/TopRow/EnemyStats")
@@ -23,6 +27,7 @@ var enemy_state: Dictionary = {}
 @onready var queue_label: Label = get_node("Root/BottomDock/DockPadding/DockBody/QueueLabel")
 @onready var pile_label: Label = get_node("Root/BottomDock/DockPadding/DockBody/PileLabel")
 @onready var end_turn_button: Button = get_node("Root/BottomDock/DockPadding/DockBody/ActionRow/EndTurnButton")
+@onready var overlay_layer: Control = get_node("Overlay")
 
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
@@ -56,6 +61,7 @@ func _render_all() -> void:
 	_render_hand()
 
 func _render_slots() -> void:
+	rendered_slot_nodes.clear()
 	_render_slot_row(front_row, "front")
 	_render_slot_row(back_row, "back")
 
@@ -65,39 +71,14 @@ func _render_slot_row(row_node: HBoxContainer, row_name: String) -> void:
 	for slot in battle_slots:
 		if str(slot.get("row", "")) != row_name:
 			continue
-		var button := Button.new()
-		button.custom_minimum_size = Vector2(0, 148)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.text = "%s\nHP %d / %d\nCounter %s" % [
-			str(slot.get("title", "Slot")),
-			int(slot.get("health", 0)),
-			int(slot.get("maxHealth", 0)),
-			"On" if bool(slot.get("counterArmed", false)) else "Off",
-		]
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
-		button.focus_mode = Control.FOCUS_NONE
-		button.clip_text = false
-		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.add_theme_font_size_override("font_size", 16)
-		var style := StyleBoxFlat.new()
-		style.bg_color = Color("19120d")
-		style.border_color = Color("d0b06e") if selected_hand_index >= 0 else Color("8f6c45")
-		style.border_width_left = 2
-		style.border_width_top = 2
-		style.border_width_right = 2
-		style.border_width_bottom = 2
-		style.corner_radius_top_left = 16
-		style.corner_radius_top_right = 16
-		style.corner_radius_bottom_right = 16
-		style.corner_radius_bottom_left = 16
-		button.add_theme_stylebox_override("normal", style)
-		button.add_theme_stylebox_override("hover", style)
-		button.add_theme_stylebox_override("pressed", style)
-		button.pressed.connect(_on_slot_pressed.bind(str(slot.get("id", ""))))
-		row_node.add_child(button)
+		var slot_node := BATTLE_SLOT_SCENE.instantiate()
+		slot_node.call("setup", slot, selected_hand_index >= 0)
+		slot_node.slot_pressed.connect(_on_slot_pressed)
+		row_node.add_child(slot_node)
+		rendered_slot_nodes[str(slot.get("id", ""))] = slot_node
 
 func _render_hand() -> void:
+	rendered_hand_nodes.clear()
 	for child in hand_row.get_children():
 		child.queue_free()
 	for index in range(hand_cards.size()):
@@ -109,6 +90,7 @@ func _render_hand() -> void:
 		card_node.call("set_selected", index == selected_hand_index)
 		card_node.card_pressed.connect(_on_card_pressed.bind(index))
 		hand_row.add_child(card_node)
+		rendered_hand_nodes.append(card_node)
 
 func _draw_card() -> void:
 	if draw_pile.is_empty():
@@ -121,14 +103,17 @@ func _on_card_pressed(_card_data: Dictionary, index: int) -> void:
 	_render_all()
 
 func _on_slot_pressed(slot_id: String) -> void:
-	if selected_hand_index < 0:
+	if selected_hand_index < 0 or is_resolving:
 		_append_log("Battle", "Select a card first.")
 		return
+	is_resolving = true
 	var slot_index := _find_slot_index(slot_id)
 	if slot_index < 0:
+		is_resolving = false
 		return
 	var card := hand_cards[selected_hand_index] as Dictionary
 	var slot := battle_slots[slot_index] as Dictionary
+	await _animate_card_play(selected_hand_index, slot_id, card)
 	var damage := _get_card_damage(card)
 	if bool(slot.get("counterArmed", false)):
 		damage = maxi(1, damage - 1)
@@ -145,6 +130,7 @@ func _on_slot_pressed(slot_id: String) -> void:
 		_append_log("Break", "%s collapsed." % str(slot.get("title", "Slot")))
 	_draw_card()
 	_render_all()
+	is_resolving = false
 
 func _on_end_turn_pressed() -> void:
 	selected_hand_index = -1
@@ -165,3 +151,29 @@ func _get_card_damage(card: Dictionary) -> int:
 func _append_log(title: String, detail: String) -> void:
 	var current := log_label.text
 	log_label.text = "[b]%s[/b]\n- %s\n\n%s" % [title, detail, current]
+
+func _animate_card_play(hand_index: int, slot_id: String, card: Dictionary) -> void:
+	if hand_index < 0 or hand_index >= rendered_hand_nodes.size():
+		return
+	if not rendered_slot_nodes.has(slot_id):
+		return
+	var source: Control = rendered_hand_nodes[hand_index]
+	var target: Control = rendered_slot_nodes[slot_id]
+	var ghost := CARD_NODE_SCENE.instantiate()
+	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.custom_minimum_size = Vector2(184, 258)
+	overlay_layer.add_child(ghost)
+	ghost.call("setup", card)
+	ghost.global_position = source.global_position
+	ghost.size = source.size
+	ghost.scale = Vector2.ONE
+	var target_position := target.global_position + Vector2(target.size.x * 0.5 - ghost.size.x * 0.5, target.size.y * 0.5 - ghost.size.y * 0.5)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ghost, "global_position", target_position, 0.24)
+	tween.tween_property(ghost, "scale", Vector2.ONE * 0.82, 0.24)
+	tween.tween_property(ghost, "modulate", Color(1, 1, 1, 0.82), 0.24)
+	await tween.finished
+	if rendered_slot_nodes.has(slot_id):
+		await rendered_slot_nodes[slot_id].play_hit_feedback()
+	ghost.queue_free()
