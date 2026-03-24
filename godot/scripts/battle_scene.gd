@@ -142,6 +142,9 @@ func _on_slot_pressed(slot_id: String) -> void:
 	if selected_hand_index < 0 or is_resolving:
 		_append_log("Battle", "Select a card first.")
 		return
+	if not _can_target_enemy_slot(slot_id):
+		_append_log("Battle", "Front line must be broken before attacking the back line.")
+		return
 	_clear_drag_preview()
 	_clear_drag_target_highlight()
 	is_resolving = true
@@ -193,6 +196,9 @@ func _on_card_drag_ended(_card_data: Dictionary, global_position: Vector2, index
 	_clear_drag_preview()
 	_clear_drag_target_highlight()
 	if slot_id.is_empty():
+		return
+	if not _can_target_enemy_slot(slot_id):
+		_append_log("Battle", "Front line must be broken before attacking the back line.")
 		return
 	selected_hand_index = index
 	_on_slot_pressed(slot_id)
@@ -397,6 +403,7 @@ func _seed_slot_occupants(slots: Array, deck: Array, faction: String, player_sid
 		slot["faction"] = faction
 		slot["occupantCardId"] = str(card.get("id", ""))
 		slot["occupantName"] = str(card.get("name", slot.get("title", "Slot")))
+		slot["occupantCard"] = card
 		slot["attack"] = int(card.get("attack", max(1, int(card.get("cost", 1)))))
 		slot["maxHealth"] = max(int(slot.get("maxHealth", 0)), int(card.get("health", slot.get("health", 0))))
 		slot["health"] = int(slot.get("maxHealth", 0))
@@ -416,6 +423,7 @@ func _apply_enemy_retaliation(enemy_slot: Dictionary) -> void:
 		_append_log("Retaliation", "%s struck the player directly for %d." % [str(enemy_slot.get("occupantName", enemy_slot.get("title", "Slot"))), retaliation])
 		return
 	var mirror_id := str(mirror_slot.get("id", ""))
+	await _animate_slot_attack(str(enemy_slot.get("id", "")), mirror_id, mirror_slot)
 	mirror_slot["health"] = maxi(0, int(mirror_slot.get("health", 0)) - retaliation)
 	if rendered_slot_nodes.has(mirror_id):
 		_spawn_damage_text(rendered_slot_nodes[mirror_id], retaliation, true)
@@ -432,10 +440,16 @@ func _apply_enemy_retaliation(enemy_slot: Dictionary) -> void:
 		_append_log("Loss", "%s was destroyed." % str(mirror_slot.get("occupantName", mirror_slot.get("title", "Slot"))))
 
 func _find_player_slot_for_enemy(enemy_slot: Dictionary) -> Dictionary:
-	var enemy_row := str(enemy_slot.get("row", "front"))
 	var enemy_index := int(enemy_slot.get("index", -1))
+	if _has_alive_row(player_slots, "front"):
+		for slot in player_slots:
+			if str(slot.get("row", "")) == "front" and int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)):
+				return slot
 	for slot in player_slots:
-		if str(slot.get("row", "")) == enemy_row and int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)):
+		if int(slot.get("index", -1)) == enemy_index and not bool(slot.get("collapsed", false)):
+			return slot
+	for slot in player_slots:
+		if not bool(slot.get("collapsed", false)):
 			return slot
 	return {}
 
@@ -448,14 +462,17 @@ func _process_enemy_turn() -> void:
 			continue
 		var target: Dictionary = _find_player_slot_for_enemy(slot)
 		if target.is_empty():
+			await _animate_slot_attack(str(slot.get("id", "")), "", {})
 			player_state["health"] = maxi(0, int(player_state.get("health", 0)) - attack)
 			_spawn_damage_text(self, attack, true)
 			_append_log("Enemy Turn", "%s attacked the player for %d." % [str(slot.get("occupantName", slot.get("title", "Slot"))), attack])
 			continue
+		await _animate_slot_attack(str(slot.get("id", "")), str(target.get("id", "")), target)
 		target["health"] = maxi(0, int(target.get("health", 0)) - attack)
 		var target_id := str(target.get("id", ""))
 		if rendered_slot_nodes.has(target_id):
 			_spawn_damage_text(rendered_slot_nodes[target_id], attack, true)
+			await rendered_slot_nodes[target_id].play_hit_feedback()
 		_append_log("Enemy Turn", "%s attacked %s for %d." % [
 			str(slot.get("occupantName", slot.get("title", "Slot"))),
 			str(target.get("occupantName", target.get("title", "Slot"))),
@@ -466,6 +483,73 @@ func _process_enemy_turn() -> void:
 			if rendered_slot_nodes.has(target_id):
 				await _play_slot_break(target_id)
 			_append_log("Loss", "%s was destroyed." % str(target.get("occupantName", target.get("title", "Slot"))))
+
+func _has_alive_row(slots: Array, row_name: String) -> bool:
+	for slot in slots:
+		if str(slot.get("row", "")) == row_name and not bool(slot.get("collapsed", false)):
+			return true
+	return false
+
+func _can_target_enemy_slot(slot_id: String) -> bool:
+	var slot_index := _find_slot_index(slot_id)
+	if slot_index < 0:
+		return false
+	var slot := battle_slots[slot_index] as Dictionary
+	if bool(slot.get("collapsed", false)):
+		return false
+	if str(slot.get("row", "front")) == "front":
+		return true
+	return not _has_alive_row(battle_slots, "front")
+
+func _animate_slot_attack(attacker_slot_id: String, target_slot_id: String, target_slot: Dictionary) -> void:
+	if not rendered_slot_nodes.has(attacker_slot_id):
+		return
+	var attacker_slot := rendered_slot_nodes[attacker_slot_id] as Control
+	if attacker_slot == null:
+		return
+	var ghost := CARD_NODE_SCENE.instantiate()
+	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ghost.custom_minimum_size = Vector2(170, 238)
+	overlay_layer.add_child(ghost)
+	var source_slot := _find_slot_by_id(attacker_slot_id)
+	ghost.call("setup", _build_slot_card_payload(source_slot))
+	ghost.scale = Vector2.ONE * 0.72
+	ghost.global_position = attacker_slot.global_position + Vector2(attacker_slot.size.x * 0.1, -8)
+	var destination := global_position + Vector2(size.x * 0.5 - 90, size.y - 260)
+	if not target_slot_id.is_empty() and rendered_slot_nodes.has(target_slot_id):
+		var target_control := rendered_slot_nodes[target_slot_id] as Control
+		destination = target_control.global_position + Vector2(target_control.size.x * 0.1, -8)
+	elif not target_slot.is_empty():
+		destination = Vector2(size.x * 0.45, size.y - 220)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ghost, "global_position", destination, 0.26)
+	tween.tween_property(ghost, "scale", Vector2.ONE * 0.66, 0.26)
+	tween.tween_property(ghost, "rotation", -0.08 if destination.x > ghost.global_position.x else 0.08, 0.2)
+	await tween.finished
+	ghost.queue_free()
+
+func _find_slot_by_id(slot_id: String) -> Dictionary:
+	for slot in battle_slots:
+		if str(slot.get("id", "")) == slot_id:
+			return slot
+	for slot in player_slots:
+		if str(slot.get("id", "")) == slot_id:
+			return slot
+	return {}
+
+func _build_slot_card_payload(slot: Dictionary) -> Dictionary:
+	if slot.has("occupantCard") and slot.get("occupantCard", null) is Dictionary:
+		return (slot.get("occupantCard", {}) as Dictionary).duplicate(true)
+	return {
+		"name": str(slot.get("occupantName", slot.get("title", "Unit"))),
+		"type": "UNIT",
+		"faction": str(slot.get("faction", "NEUTRAL")),
+		"cost": 0,
+		"attack": int(slot.get("attack", 0)),
+		"health": int(slot.get("health", 0)),
+		"description": "Battlefield unit",
+	}
 
 func _spawn_damage_text(target_node: Control, amount: int, counter: bool) -> void:
 	if target_node == null:
@@ -498,4 +582,6 @@ func _play_slot_break(slot_id: String) -> void:
 	tween.tween_property(slot_node, "scale", Vector2.ONE * 0.92, 0.16)
 	tween.tween_property(slot_node, "modulate", Color(0.65, 0.55, 0.5, 0.0), 0.32)
 	tween.tween_property(crack, "modulate", Color(1, 1, 1, 0), 0.26)
+	if slot_node.has_method("play_death_feedback"):
+		slot_node.call("play_death_feedback")
 	await tween.finished

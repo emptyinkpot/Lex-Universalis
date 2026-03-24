@@ -2,9 +2,12 @@ extends PanelContainer
 
 signal slot_pressed(slot_id: String)
 
+const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
+
 var slot_id := ""
 var is_armed := false
 var is_hovered := false
+var occupant_card_node: Control
 
 func _ready() -> void:
 	gui_input.connect(_on_gui_input)
@@ -16,14 +19,26 @@ func setup(slot: Dictionary, armed: bool) -> void:
 	is_armed = armed
 	var title_label: Label = get_node("Padding/Body/Title")
 	var stats_label: Label = get_node("Padding/Body/Stats")
+	var occupant_anchor: Control = get_node("Padding/Body/OccupantWrap/OccupantAnchor")
 	var occupant_name := str(slot.get("occupantName", ""))
 	title_label.text = occupant_name if not occupant_name.is_empty() else str(slot.get("title", "Slot"))
-	stats_label.text = "ATK %d   HP %d / %d   Counter %s" % [
+	stats_label.text = "%s   ATK %d   HP %d / %d   Counter %s" % [
+		"Front" if str(slot.get("row", "front")) == "front" else "Back",
 		int(slot.get("attack", 0)),
 		int(slot.get("health", 0)),
 		int(slot.get("maxHealth", 0)),
 		"On" if bool(slot.get("counterArmed", false)) else "Off",
 	]
+	for child in occupant_anchor.get_children():
+		child.queue_free()
+	if slot.has("occupantCard"):
+		occupant_card_node = CARD_NODE_SCENE.instantiate()
+		occupant_card_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		occupant_card_node.custom_minimum_size = occupant_anchor.custom_minimum_size
+		occupant_card_node.scale = Vector2.ONE * 0.68
+		occupant_anchor.add_child(occupant_card_node)
+		occupant_card_node.position = Vector2(occupant_anchor.custom_minimum_size.x * 0.16, 0)
+		occupant_card_node.call("setup", slot.get("occupantCard", {}))
 	_apply_style(armed)
 
 func play_hit_feedback() -> void:
@@ -31,11 +46,25 @@ func play_hit_feedback() -> void:
 	tween.set_parallel(true)
 	tween.tween_property(self, "scale", Vector2.ONE * 1.04, 0.08)
 	tween.tween_property(self, "modulate", Color("ffd7a1"), 0.08)
+	if occupant_card_node != null:
+		tween.tween_property(occupant_card_node, "rotation", 0.06, 0.08)
 	await tween.finished
 	var settle := create_tween()
 	settle.set_parallel(true)
 	settle.tween_property(self, "scale", Vector2.ONE, 0.14)
 	settle.tween_property(self, "modulate", Color.WHITE, 0.14)
+	if occupant_card_node != null:
+		settle.tween_property(occupant_card_node, "rotation", 0.0, 0.14)
+
+func play_death_feedback() -> void:
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(self, "modulate", Color(0.65, 0.55, 0.5, 0.0), 0.28)
+	tween.tween_property(self, "scale", Vector2.ONE * 0.9, 0.28)
+	if occupant_card_node != null:
+		tween.tween_property(occupant_card_node, "rotation", -0.12, 0.2)
+		tween.tween_property(occupant_card_node, "modulate", Color(1, 1, 1, 0), 0.24)
+	await tween.finished
 
 func _on_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

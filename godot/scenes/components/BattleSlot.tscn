@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dgjiq0hhj0kam"]
+[gd_scene load_steps=3 format=3 uid="uid://dgjiq0hhj0kam"]
 
 [ext_resource type="Script" path="res://scripts/battle_slot.gd" id="1_1tq1m"]
+[ext_resource type="PackedScene" path="res://scenes/components/CardNode.tscn" id="2_7f4xk"]
 
 [node name="BattleSlot" type="PanelContainer"]
 custom_minimum_size = Vector2(0, 148)
@@ -22,6 +23,17 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="Padding/Body"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+
+[node name="OccupantWrap" type="CenterContainer" parent="Padding/Body"]
+custom_minimum_size = Vector2(0, 170)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OccupantAnchor" type="Control" parent="Padding/Body/OccupantWrap"]
+custom_minimum_size = Vector2(150, 210)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 
 [node name="Stats" type="Label" parent="Padding/Body"]
 layout_mode = 2
