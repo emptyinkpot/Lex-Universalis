@@ -321,7 +321,7 @@ export default function CardEditorScreen() {
   const { width, height } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
   const router = useSafeRouter();
-  const isDesktop = width >= 1360;
+  const isDesktop = width >= 1100;
 
   const [cards, setCards] = useState<EditorCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1055,7 +1055,9 @@ export default function CardEditorScreen() {
               <View style={styles.toolbarFooter}><ThemedText variant="small" color={theme.textMuted}>当前显示 {filteredCards.length} 张</ThemedText><Pressable onPress={syncPending} disabled={syncingAll || stats.pending === 0} style={[styles.primaryButton, { backgroundColor: stats.pending === 0 ? theme.borderLight : theme.primary, opacity: syncingAll ? 0.75 : 1 }]}><FontAwesome6 name="cloud-arrow-up" size={14} color="#FFFFFF" /><ThemedText variant="smallMedium" color="#FFFFFF">{syncingAll ? '同步中...' : `同步待处理(${stats.pending})`}</ThemedText></Pressable></View>
             </ThemedView>
 
-            <View style={styles.cardsGrid}>{filteredCards.length > 0 ? filteredCards.map(renderCardTile) : <ThemedView level="tertiary" style={styles.emptyState}><FontAwesome6 name="magnifying-glass" size={40} color={theme.textMuted} /><ThemedText variant="bodyMedium" color={theme.textPrimary}>没有匹配的卡牌</ThemedText><ThemedText variant="small" color={theme.textMuted}>试着调整筛选条件，或者直接新建一张卡牌。</ThemedText></ThemedView>}</View>
+            <ScrollView style={styles.cardsPanelScroll} contentContainerStyle={styles.cardsGrid} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+              {filteredCards.length > 0 ? filteredCards.map(renderCardTile) : <ThemedView level="tertiary" style={styles.emptyState}><FontAwesome6 name="magnifying-glass" size={40} color={theme.textMuted} /><ThemedText variant="bodyMedium" color={theme.textPrimary}>没有匹配的卡牌</ThemedText><ThemedText variant="small" color={theme.textMuted}>试着调整筛选条件，或者直接新建一张卡牌。</ThemedText></ThemedView>}
+            </ScrollView>
           </View>
 
           <View style={styles.rightPane}>{renderPreview(selectedCard)}<ThemedView level="default" style={styles.quickHint}><FontAwesome6 name="circle-info" size={16} color={theme.textMuted} /><ThemedText variant="small" color={theme.textMuted} style={{ flex: 1 }}>点击卡牌查看详情，使用右上角按钮可以导入、导出或者刷新数据。</ThemedText></ThemedView></View>

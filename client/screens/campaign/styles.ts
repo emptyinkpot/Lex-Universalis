@@ -5,7 +5,7 @@ export const createStyles = (_theme: Theme, width: number) =>
   StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
-      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['5xl'],
+      paddingBottom: width >= 1100 ? Spacing.md : Spacing['5xl'],
       backgroundColor: '#0a0706',
       gap: Spacing.lg,
     },
@@ -21,8 +21,8 @@ export const createStyles = (_theme: Theme, width: number) =>
     },
     heroSection: {
       overflow: 'hidden',
-      paddingTop: width >= 1280 ? Spacing['2xl'] : Spacing['4xl'],
-      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['3xl'],
+      paddingTop: width >= 1100 ? Spacing.lg : Spacing['4xl'],
+      paddingBottom: width >= 1100 ? Spacing.md : Spacing['3xl'],
       paddingHorizontal: Spacing.xl,
       backgroundColor: '#130e0a',
       borderBottomWidth: 1,
@@ -46,7 +46,7 @@ export const createStyles = (_theme: Theme, width: number) =>
     heroTitle: {
       textAlign: 'center',
       letterSpacing: 2,
-      fontSize: width >= 1280 ? 34 : 42,
+      fontSize: width >= 1100 ? 30 : 42,
       fontWeight: '300',
     },
     heroCopy: {
@@ -181,7 +181,7 @@ export const createStyles = (_theme: Theme, width: number) =>
       borderColor: '#f1d39e',
     },
     chapterPreview: {
-      marginHorizontal: width >= 1280 ? 0 : Spacing.lg,
+      marginHorizontal: width >= 1100 ? 0 : Spacing.lg,
       padding: Spacing.xl,
       borderRadius: BorderRadius['2xl'],
       backgroundColor: '#130f0c',
@@ -209,7 +209,7 @@ export const createStyles = (_theme: Theme, width: number) =>
     },
     chapterSlide: {
       gap: Spacing.md,
-      paddingRight: width >= 1280 ? 0 : Spacing.lg,
+      paddingRight: width >= 1100 ? 0 : Spacing.lg,
     },
     chapterSlideFooter: {
       alignItems: 'flex-end',

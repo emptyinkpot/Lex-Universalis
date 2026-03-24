@@ -14,7 +14,7 @@ export default function DeckBuilderScreen() {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width), [theme, width]);
   const router = useSafeRouter();
-  const isDesktop = width >= 1280;
+  const isDesktop = width >= 1100;
 
   const [selectedFaction, setSelectedFaction] = useState<Faction>(Faction.ENGLAND);
   const [deck, setDeck] = useState<AnyCard[]>([]);
@@ -144,9 +144,14 @@ export default function DeckBuilderScreen() {
                 <ThemedText variant="h4" color={theme.textPrimary}>可选卡牌</ThemedText>
                 <ThemedText variant="small" color={theme.textMuted}>{factionCards.length} 张</ThemedText>
               </View>
-              <View style={styles.cardGrid}>
+              <ScrollView
+                style={styles.panelScroll}
+                contentContainerStyle={styles.cardGrid}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled
+              >
                 {factionCards.map(renderPoolCard)}
-              </View>
+              </ScrollView>
             </View>
           </View>
 
@@ -157,9 +162,14 @@ export default function DeckBuilderScreen() {
                 <ThemedText variant="small" color={theme.textMuted}>点击卡牌可移除</ThemedText>
               </View>
               {deck.length > 0 ? (
-                <View style={styles.cardGrid}>
+                <ScrollView
+                  style={styles.panelScroll}
+                  contentContainerStyle={styles.cardGrid}
+                  showsVerticalScrollIndicator={false}
+                  nestedScrollEnabled
+                >
                   {deck.map(renderDeckCard)}
-                </View>
+                </ScrollView>
               ) : (
                 <View style={styles.emptyDeck}>
                   <FontAwesome6 name="clone" size={44} color={theme.textMuted} />

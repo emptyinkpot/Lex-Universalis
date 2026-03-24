@@ -53,7 +53,7 @@ export default function StoryModeScreen() {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width), [theme, width]);
   const router = useSafeRouter();
-  const isDesktop = width >= 1280;
+  const isDesktop = width >= 1100;
 
   const [loading, setLoading] = useState(true);
   const [scenario, setScenario] = useState<Scenario | null>(null);

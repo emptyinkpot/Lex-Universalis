@@ -6,11 +6,11 @@ export const createStyles = (_theme: Theme, width: number) =>
     scrollContent: {
       flexGrow: 1,
       backgroundColor: '#0b0907',
-      paddingBottom: width >= 1280 ? Spacing.xl : Spacing['5xl'],
+      paddingBottom: width >= 1100 ? Spacing.md : Spacing['5xl'],
     },
     heroSection: {
       overflow: 'hidden',
-      paddingVertical: width >= 1280 ? 42 : 72,
+      paddingVertical: width >= 1100 ? 28 : 72,
       paddingHorizontal: Spacing['2xl'],
       alignItems: 'center',
       backgroundColor: '#120d09',
@@ -51,13 +51,13 @@ export const createStyles = (_theme: Theme, width: number) =>
       marginBottom: Spacing.md,
     },
     heroTitle: {
-      fontSize: width >= 1280 ? 42 : 50,
+      fontSize: width >= 1100 ? 34 : 50,
       fontWeight: '300',
       textAlign: 'center',
       letterSpacing: 3,
     },
     heroDescription: {
-      marginTop: Spacing.lg,
+      marginTop: width >= 1100 ? Spacing.sm : Spacing.lg,
       maxWidth: 420,
       textAlign: 'center',
       lineHeight: 22,
@@ -90,15 +90,15 @@ export const createStyles = (_theme: Theme, width: number) =>
     },
     menuContainer: {
       paddingHorizontal: Spacing.xl,
-      paddingTop: Spacing.xl,
+      paddingTop: width >= 1100 ? Spacing.lg : Spacing.xl,
       gap: Spacing.lg,
-      flexDirection: width >= 1280 ? 'row' : 'column',
-      flexWrap: width >= 1280 ? 'wrap' : 'nowrap',
-      alignContent: width >= 1280 ? 'flex-start' : 'stretch',
+      flexDirection: width >= 1100 ? 'row' : 'column',
+      flexWrap: width >= 1100 ? 'wrap' : 'nowrap',
+      alignContent: width >= 1100 ? 'flex-start' : 'stretch',
     },
     menuItemWrap: {
       borderRadius: BorderRadius.xl,
-      width: width >= 1280 ? '48.5%' : '100%',
+      width: width >= 1500 ? '31.8%' : width >= 1100 ? '48.5%' : '100%',
     },
     menuItem: {
       overflow: 'hidden',
@@ -106,7 +106,7 @@ export const createStyles = (_theme: Theme, width: number) =>
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: Spacing.xl,
-      paddingVertical: Spacing.lg,
+      paddingVertical: width >= 1100 ? Spacing.md : Spacing.lg,
       borderWidth: 1,
       borderColor: 'rgba(155, 124, 73, 0.34)',
       borderRadius: BorderRadius.xl,
@@ -146,7 +146,7 @@ export const createStyles = (_theme: Theme, width: number) =>
     },
     footer: {
       paddingHorizontal: Spacing.xl,
-      paddingTop: width >= 1280 ? Spacing.lg : Spacing['2xl'],
+      paddingTop: width >= 1100 ? Spacing.md : Spacing['2xl'],
       alignItems: 'center',
     },
     footerText: {

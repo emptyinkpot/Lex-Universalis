@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const styles = useMemo(() => createStyles(theme, width), [theme, width]);
   const router = useSafeRouter();
-  const isDesktop = width >= 1280;
+  const isDesktop = width >= 1100;
 
   const menuItems: MenuItem[] = [
     { title: '故事模式', subtitle: '单剧本剧情与战斗', icon: 'scroll', iconColor: '#d6b36a', route: '/campaign' },

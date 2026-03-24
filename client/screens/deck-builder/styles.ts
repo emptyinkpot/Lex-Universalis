@@ -7,7 +7,7 @@ export const createStyles = (theme: Theme, width: number) =>
       flexGrow: 1,
       paddingHorizontal: Spacing.lg,
       paddingTop: Spacing.lg,
-      paddingBottom: width >= 1280 ? Spacing.lg : Spacing['4xl'],
+      paddingBottom: width >= 1100 ? Spacing.md : Spacing['4xl'],
       gap: Spacing.lg,
       backgroundColor: theme.backgroundRoot,
     },
@@ -88,7 +88,7 @@ export const createStyles = (theme: Theme, width: number) =>
       borderColor: '#C9A96E',
     },
     workspace: {
-      flexDirection: width >= 1280 ? 'row' : 'column',
+      flexDirection: width >= 1100 ? 'row' : 'column',
       gap: Spacing.lg,
       alignItems: 'flex-start',
     },
@@ -103,7 +103,11 @@ export const createStyles = (theme: Theme, width: number) =>
       borderWidth: 1,
       borderColor: 'rgba(168, 129, 77, 0.18)',
       backgroundColor: '#15100c',
-      minHeight: width >= 1280 ? 720 : undefined,
+      minHeight: width >= 1100 ? 0 : undefined,
+      maxHeight: width >= 1100 ? 640 : undefined,
+    },
+    panelScroll: {
+      maxHeight: width >= 1100 ? 540 : undefined,
     },
     sectionHeader: {
       flexDirection: 'row',
@@ -117,8 +121,8 @@ export const createStyles = (theme: Theme, width: number) =>
       gap: Spacing.md,
     },
     cardSlot: {
-      width: width >= 1280 ? 124 : 84,
-      height: width >= 1280 ? 176 : 120,
+      width: width >= 1100 ? 124 : 84,
+      height: width >= 1100 ? 176 : 120,
       alignItems: 'center',
       justifyContent: 'center',
     },
