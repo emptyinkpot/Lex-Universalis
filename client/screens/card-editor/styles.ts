@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { BorderRadius, Spacing, Theme } from '@/constants/theme';
 
-export const createStyles = (_theme: Theme) =>
+export const createStyles = (_theme: Theme, width: number, height: number) =>
   StyleSheet.create({
     page: {
+      flexGrow: 1,
       paddingHorizontal: Spacing.lg,
       paddingTop: Spacing.lg,
-      paddingBottom: Spacing['5xl'],
+      paddingBottom: width >= 1360 ? Spacing.lg : Spacing['5xl'],
       gap: Spacing.lg,
       backgroundColor: '#0c0907',
     },
@@ -60,9 +61,22 @@ export const createStyles = (_theme: Theme) =>
       gap: Spacing.xs,
       backgroundColor: '#100c09',
     },
-    bodyGrid: { flexDirection: 'row', gap: Spacing.lg, alignItems: 'flex-start' },
-    leftPane: { flex: 1.15, gap: Spacing.lg },
-    rightPane: { flex: 0.85, gap: Spacing.lg },
+    bodyGrid: {
+      flexDirection: width >= 1360 ? 'row' : 'column',
+      gap: Spacing.lg,
+      alignItems: 'flex-start',
+      minHeight: width >= 1360 ? height - 240 : undefined,
+    },
+    leftPane: {
+      flex: 1.15,
+      gap: Spacing.lg,
+      width: width >= 1360 ? undefined : '100%',
+    },
+    rightPane: {
+      flex: 0.85,
+      gap: Spacing.lg,
+      width: width >= 1360 ? undefined : '100%',
+    },
     toolbarCard: {
       borderRadius: BorderRadius['2xl'],
       padding: Spacing.lg,
@@ -93,8 +107,14 @@ export const createStyles = (_theme: Theme) =>
     },
     chipActive: {},
     toolbarFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, flexWrap: 'wrap' },
-    cardsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md },
-    cardTile: { width: '48.2%', minWidth: 240, gap: Spacing.sm },
+    cardsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.md,
+      maxHeight: width >= 1360 ? Math.max(320, height - 380) : undefined,
+      overflow: 'hidden',
+    },
+    cardTile: { width: width >= 1600 ? '31.8%' : '48.2%', minWidth: width >= 1360 ? 260 : 240, gap: Spacing.sm },
     cardTileSurface: { borderRadius: BorderRadius['3xl'] },
     cardTileFace: {
       aspectRatio: 5 / 7,
@@ -203,6 +223,7 @@ export const createStyles = (_theme: Theme) =>
       shadowOpacity: 0.3,
       shadowRadius: 30,
       elevation: 12,
+      minHeight: width >= 1360 ? Math.max(420, height - 420) : undefined,
     },
     previewHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: Spacing.sm },
     previewArtWrap: { borderRadius: BorderRadius['2xl'], overflow: 'hidden' },
@@ -388,7 +409,10 @@ export const createStyles = (_theme: Theme) =>
     },
     modalBackdrop: { flex: 1, backgroundColor: 'rgba(2, 1, 1, 0.76)', justifyContent: 'center', padding: Spacing.md },
     modalCard: {
-      maxHeight: '92%',
+      maxHeight: width >= 1360 ? '88%' : '92%',
+      width: width >= 1360 ? '86%' : '100%',
+      maxWidth: 1360,
+      alignSelf: 'center',
       borderRadius: BorderRadius['2xl'],
       backgroundColor: '#15100c',
       overflow: 'hidden',

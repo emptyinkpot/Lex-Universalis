@@ -1,5 +1,5 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, Share, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, RefreshControl, ScrollView, Share, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome6 } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -318,8 +318,10 @@ function mergeMoonDraftsIntoCards(cards: EditorCard[]) {
 }
 export default function CardEditorScreen() {
   const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { width, height } = useWindowDimensions();
+  const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
   const router = useSafeRouter();
+  const isDesktop = width >= 1360;
 
   const [cards, setCards] = useState<EditorCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1014,7 +1016,12 @@ export default function CardEditorScreen() {
   };
   return (
     <Screen backgroundColor={theme.backgroundRoot} statusBarStyle="dark">
-      <ScrollView contentContainerStyle={styles.page} refreshControl={<RefreshControl refreshing={loading} onRefresh={loadCards} />}>
+      <ScrollView
+        contentContainerStyle={styles.page}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={loadCards} />}
+        scrollEnabled={!isDesktop}
+        showsVerticalScrollIndicator={!isDesktop}
+      >
         <ThemedView level="root" style={styles.headerCard}>
           <View style={styles.headerRow}>
             <Pressable onPress={() => router.back()} style={styles.iconButton}><FontAwesome6 name="arrow-left" size={14} color={theme.textPrimary} /></Pressable>

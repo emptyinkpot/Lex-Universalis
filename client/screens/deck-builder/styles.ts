@@ -1,98 +1,136 @@
 import { StyleSheet } from 'react-native';
 import { Spacing, BorderRadius, Theme } from '@/constants/theme';
 
-export const createStyles = (theme: Theme) => {
-  return StyleSheet.create({
-    container: {
-      flex: 1,
+export const createStyles = (theme: Theme, width: number) =>
+  StyleSheet.create({
+    page: {
+      flexGrow: 1,
+      paddingHorizontal: Spacing.lg,
+      paddingTop: Spacing.lg,
+      paddingBottom: width >= 1280 ? Spacing.lg : Spacing['4xl'],
+      gap: Spacing.lg,
       backgroundColor: theme.backgroundRoot,
     },
-    header: {
+    headerCard: {
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      gap: Spacing.lg,
+      borderWidth: 1,
+      borderColor: 'rgba(170, 133, 82, 0.24)',
+      backgroundColor: '#15100c',
+    },
+    headerRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: Spacing.lg,
-      paddingVertical: Spacing.lg,
-      borderBottomWidth: 0.5,
-      borderBottomColor: 'rgba(0,47,167,0.15)',
+      gap: Spacing.md,
+      flexWrap: 'wrap',
     },
-    factionSelector: {
+    titleBlock: {
+      flex: 1,
+      minWidth: 220,
+      gap: Spacing.xs,
+    },
+    iconButton: {
+      width: 42,
+      height: 42,
+      borderRadius: BorderRadius.full,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: 'rgba(168, 129, 77, 0.22)',
+      backgroundColor: '#0e0a08',
+    },
+    primaryButton: {
       flexDirection: 'row',
-      padding: Spacing.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: Spacing.xs,
+      paddingHorizontal: Spacing.lg,
+      paddingVertical: Spacing.sm,
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#8f5234',
+    },
+    primaryButtonDisabled: {
+      opacity: 0.45,
+    },
+    statsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: Spacing.sm,
+    },
+    statCard: {
+      flex: 1,
+      minWidth: 160,
+      borderRadius: BorderRadius.xl,
+      padding: Spacing.md,
+      gap: 4,
+      backgroundColor: '#0f0b08',
+      borderWidth: 1,
+      borderColor: 'rgba(163, 128, 80, 0.18)',
+    },
+    factionRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
       gap: Spacing.sm,
     },
     factionButton: {
-      flex: 1,
+      minWidth: 120,
+      paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.sm,
       alignItems: 'center',
-      backgroundColor: theme.backgroundTertiary,
-      borderWidth: 0.5,
-      borderColor: 'rgba(0,47,167,0.15)',
+      borderRadius: BorderRadius.full,
+      backgroundColor: '#0f0b08',
+      borderWidth: 1,
+      borderColor: 'rgba(168, 129, 77, 0.18)',
     },
     factionButtonActive: {
       backgroundColor: '#002FA7',
       borderColor: '#C9A96E',
     },
-    deckStats: {
+    workspace: {
+      flexDirection: width >= 1280 ? 'row' : 'column',
+      gap: Spacing.lg,
+      alignItems: 'flex-start',
+    },
+    column: {
+      flex: 1,
+      width: '100%',
+    },
+    sectionCard: {
+      borderRadius: BorderRadius['2xl'],
+      padding: Spacing.lg,
+      gap: Spacing.md,
+      borderWidth: 1,
+      borderColor: 'rgba(168, 129, 77, 0.18)',
+      backgroundColor: '#15100c',
+      minHeight: width >= 1280 ? 720 : undefined,
+    },
+    sectionHeader: {
       flexDirection: 'row',
-      paddingHorizontal: Spacing.xl,
-      paddingVertical: Spacing.lg,
-      borderBottomWidth: 0.5,
-      borderBottomColor: 'rgba(0,47,167,0.15)',
-      gap: Spacing.xl,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: Spacing.md,
     },
-    statItem: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-    },
-    statValue: {
-      fontSize: 32,
-      fontWeight: '200' as const,
-    },
-    statLabel: {
-      marginLeft: 4,
-    },
-    section: {
-      marginTop: Spacing.xl,
-    },
-    sectionTitle: {
-      paddingHorizontal: Spacing.xl,
-      marginBottom: Spacing.md,
-      letterSpacing: 2,
-      textTransform: 'uppercase' as const,
-    },
-    cardsGrid: {
+    cardGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      paddingHorizontal: Spacing.md,
-      justifyContent: 'center',
-      gap: Spacing.sm,
+      gap: Spacing.md,
     },
-    gridCard: {
-      margin: Spacing.xs,
+    cardSlot: {
+      width: width >= 1280 ? 124 : 84,
+      height: width >= 1280 ? 176 : 120,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     emptyDeck: {
+      minHeight: 280,
+      borderRadius: BorderRadius.xl,
       alignItems: 'center',
-      paddingVertical: Spacing["4xl"],
-      paddingHorizontal: Spacing.xl,
-    },
-    emptyText: {
-      marginTop: Spacing.md,
-      textAlign: 'center',
-    },
-    saveButton: {
-      margin: Spacing.xl,
-      marginTop: Spacing["2xl"],
-      backgroundColor: '#002FA7',
-      paddingVertical: Spacing.lg,
-      alignItems: 'center',
-      borderWidth: 0.5,
-      borderColor: '#C9A96E',
-      shadowColor: '#002FA7',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.15,
-      shadowRadius: 16,
-      elevation: 4,
+      justifyContent: 'center',
+      gap: Spacing.sm,
+      padding: Spacing.xl,
+      borderWidth: 1,
+      borderColor: 'rgba(168, 129, 77, 0.16)',
+      backgroundColor: '#0f0b08',
     },
   });
-};

@@ -125,6 +125,7 @@ export default function BattleScreen() {
 
   const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
   const [selectedHandIndex, setSelectedHandIndex] = useState<number | null>(null);
+  const [selectedQueueIds, setSelectedQueueIds] = useState<string[]>([]);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isHandDragging, setIsHandDragging] = useState(false);
   const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null);
@@ -163,6 +164,13 @@ export default function BattleScreen() {
     []
   );
   const [hand, setHand] = useState<AnyCard[]>([]);
+  const selectedQueue = useMemo(
+    () =>
+      selectedQueueIds
+        .map((id) => hand.find((card) => card.id === id))
+        .filter((card): card is AnyCard => Boolean(card)),
+    [hand, selectedQueueIds],
+  );
 
   useEffect(() => {
     handRef.current = hand;
@@ -318,6 +326,7 @@ export default function BattleScreen() {
     setCastEvents([]);
     setImpactEvent(null);
     setDiscardCount(0);
+    setSelectedQueueIds([]);
     drawCursorRef.current = 0;
     dealTimersRef.current.forEach((timer) => clearTimeout(timer));
     dealTimersRef.current = [];
@@ -409,6 +418,7 @@ export default function BattleScreen() {
     setDragPoint(null);
     setSelectedCard(null);
     setSelectedHandIndex(null);
+    setSelectedQueueIds([]);
     emitFeedback({
       kind: 'counter',
       title: '取消目标选择',
@@ -429,6 +439,7 @@ export default function BattleScreen() {
   const handleEndTurn = () => {
     setSelectedCard(null);
     setSelectedHandIndex(null);
+    setSelectedQueueIds([]);
     setIsHandDragging(false);
     setDragPoint(null);
     setHandCollapsed(true);
@@ -454,6 +465,7 @@ export default function BattleScreen() {
   const stageCardSelection = (card: AnyCard, index: number, source: 'tap' | 'drag' = 'tap') => {
     setSelectedCard(card);
     setSelectedHandIndex(index);
+    setSelectedQueueIds((current) => (current.includes(card.id) ? current : [...current, card.id]));
     setIsTargeting(false);
     setBattleFocus('enemy-line');
     emitFeedback({
@@ -506,7 +518,7 @@ export default function BattleScreen() {
   };
 
   const resolveTargetSelection = (slotId: string) => {
-    if (!selectedCard || !isTargeting || isResolving) {
+    if (!selectedCard || !isTargeting || isResolving || selectedQueue.length === 0) {
       return;
     }
 
@@ -516,27 +528,67 @@ export default function BattleScreen() {
     }
 
     setIsResolving(true);
-    const currentHandIndex = selectedHandIndex ?? hand.findIndex((card) => card.id === selectedCard.id);
-    const baseDamage = getCardDamage(selectedCard);
-    const isCounterHit = targetSlot.counterArmed && selectedCard.type === CardType.UNIT;
-    const rowPenalty = targetSlot.row === 'back' && selectedCard.type === CardType.UNIT ? 1 : 0;
-    const finalDamage = Math.max(0, baseDamage - rowPenalty - (isCounterHit ? 1 : 0));
-    const nextSlotHealth = Math.max(0, targetSlot.health - finalDamage);
+    let nextSlotHealth = targetSlot.health;
+    let counterArmed = targetSlot.counterArmed;
+    let totalDamage = 0;
+    let counterHits = 0;
+    const queuedCards = [...selectedQueue];
     const slotPoint = getTargetPoint(targetSlot);
     const accent = selectedCard.faction === 'FRANCE'
       ? '#002FA7'
       : selectedCard.faction === 'ENGLAND'
         ? '#C8102E'
         : '#C9A96E';
-    const handPoint = getHandPoint(Math.max(0, currentHandIndex));
 
-    queueCastEvent({
-      kind: 'attack',
-      accent,
-      fromX: handPoint.x,
-      fromY: handPoint.y,
-      toX: slotPoint.x,
-      toY: slotPoint.y,
+    queuedCards.forEach((card, queueIndex) => {
+      const currentHandIndex = hand.findIndex((item) => item.id === card.id);
+      const handPoint = getHandPoint(Math.max(0, currentHandIndex));
+      const cardAccent = card.faction === 'FRANCE'
+        ? '#002FA7'
+        : card.faction === 'ENGLAND'
+          ? '#C8102E'
+          : '#C9A96E';
+      const baseDamage = getCardDamage(card);
+      const rowPenalty = targetSlot.row === 'back' && card.type === CardType.UNIT ? 1 : 0;
+      const isCounterHit = counterArmed && card.type === CardType.UNIT;
+      const finalDamage = Math.max(0, baseDamage - rowPenalty - (isCounterHit ? 1 : 0));
+
+      totalDamage += finalDamage;
+      if (isCounterHit) {
+        counterHits += 1;
+        counterArmed = false;
+      }
+      nextSlotHealth = Math.max(0, nextSlotHealth - finalDamage);
+
+      setTimeout(() => {
+        queueCastEvent({
+          kind: 'attack',
+          accent: cardAccent,
+          fromX: handPoint.x,
+          fromY: handPoint.y,
+          toX: slotPoint.x,
+          toY: slotPoint.y,
+        });
+      }, queueIndex * 120);
+
+      const discardAnchor = discardAnchorRef.current ?? {
+        x: width * 0.84,
+        y: height - 126,
+      };
+
+      setTimeout(() => {
+        queueCastEvent(
+          {
+            kind: 'discard',
+            accent: '#8f5234',
+            fromX: handPoint.x,
+            fromY: handPoint.y,
+            toX: discardAnchor.x,
+            toY: discardAnchor.y,
+          },
+          760,
+        );
+      }, 180 + queueIndex * 120);
     });
 
     setBattleSlots((current) =>
@@ -554,20 +606,20 @@ export default function BattleScreen() {
       })
     );
 
-    setEnemyHealth((current) => Math.max(0, current - finalDamage));
+    setEnemyHealth((current) => Math.max(0, current - totalDamage));
     emitFeedback({
-      kind: isCounterHit ? 'counter' : 'attack',
-      title: isCounterHit ? '反制打断' : `${selectedCard.name} 命中目标`,
-      detail: isCounterHit
-        ? '目标槽位触发反制，伤害被压缩并回响到己方。'
-        : `已对 ${targetSlot.title} 造成 ${finalDamage} 点伤害。`,
+      kind: counterHits > 0 ? 'counter' : 'attack',
+      title: queuedCards.length > 1 ? `连携命中 ${targetSlot.title}` : `${selectedCard.name} 命中目标`,
+      detail: counterHits > 0
+        ? `连携总伤害 ${totalDamage}，目标触发了 ${counterHits} 次反制。`
+        : `队列中的 ${queuedCards.length} 张牌总计造成 ${totalDamage} 点伤害。`,
       accent,
       side: 'player',
-      duration: isCounterHit ? 720 : 780,
+      duration: counterHits > 0 ? 760 : 820,
     });
     emitDamage({
-      amount: Math.max(1, finalDamage),
-      kind: isCounterHit ? 'counter' : 'damage',
+      amount: Math.max(1, totalDamage),
+      kind: counterHits > 0 ? 'counter' : 'damage',
       x: slotPoint.x,
       y: slotPoint.y,
       accent,
@@ -576,16 +628,16 @@ export default function BattleScreen() {
       x: slotPoint.x,
       y: slotPoint.y,
       accent,
-      shatter: nextSlotHealth <= 0 || isCounterHit,
+      shatter: nextSlotHealth <= 0 || counterHits > 0,
     });
 
-    if (isCounterHit) {
-      setPlayerHealth((current) => Math.max(0, current - 1));
+    if (counterHits > 0) {
+      setPlayerHealth((current) => Math.max(0, current - counterHits));
       triggerScreenShake();
       appendLog({
         id: `counter-${Date.now()}`,
         title: '反制触发',
-        detail: `${targetSlot.title} 阻断了这次攻击，并让你损失 1 点生命。`,
+        detail: `${targetSlot.title} 在连携期间反打了 ${counterHits} 次。`,
         accent: '#6B7280',
       });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -593,7 +645,7 @@ export default function BattleScreen() {
       appendLog({
         id: `hit-${Date.now()}`,
         title: '目标结算',
-        detail: `${targetSlot.title} 承受 ${finalDamage} 点伤害。`,
+        detail: `${targetSlot.title} 承受了 ${totalDamage} 点连携伤害。`,
         accent,
       });
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -603,7 +655,7 @@ export default function BattleScreen() {
       appendLog({
         id: `death-${Date.now()}`,
         title: '单位退场',
-        detail: `${targetSlot.title} 已被击破，正在退场。`,
+        detail: `${targetSlot.title} 已被连携击破，正在退场。`,
         accent: '#111827',
       });
       emitFeedback({
@@ -618,46 +670,35 @@ export default function BattleScreen() {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
 
-    const discardAnchor = discardAnchorRef.current ?? {
-      x: width * 0.84,
-      y: height - 126,
-    };
-
-    queueCastEvent(
-      {
-        kind: 'discard',
-        accent: '#8f5234',
-        fromX: handPoint.x,
-        fromY: handPoint.y,
-        toX: discardAnchor.x,
-        toY: discardAnchor.y,
-      },
-      760,
-    );
-
-    setHand((current) => current.filter((card) => card.id !== selectedCard.id));
-    setDiscardCount((current) => current + 1);
+    setHand((current) => current.filter((card) => !selectedQueueIds.includes(card.id)));
+    setDiscardCount((current) => current + queuedCards.length);
     setSelectedCard(null);
     setSelectedHandIndex(null);
+    setSelectedQueueIds([]);
     setIsTargeting(false);
     setDragPoint(null);
     setBattleFocus('enemy-line');
-    scheduleDrawCard(420, 'draw');
+    queuedCards.forEach((_, queueIndex) => {
+      scheduleDrawCard(420 + queueIndex * 140, 'draw');
+    });
 
     setTimeout(() => {
       setIsResolving(false);
-    }, 260);
+    }, 260 + queuedCards.length * 80);
   };
 
   const handleCardPress = (card: AnyCard, index: number) => {
-    if (selectedCard?.id === card.id && !isTargeting) {
-      setSelectedCard(null);
-      setSelectedHandIndex(null);
+    if (selectedQueueIds.includes(card.id) && !isTargeting) {
+      const nextQueueIds = selectedQueueIds.filter((id) => id !== card.id);
+      const nextLastId = nextQueueIds[nextQueueIds.length - 1];
+      setSelectedQueueIds(nextQueueIds);
+      setSelectedCard(nextLastId ? hand.find((item) => item.id === nextLastId) ?? null : null);
+      setSelectedHandIndex(nextLastId ? hand.findIndex((item) => item.id === nextLastId) : null);
       setIsHandDragging(false);
       emitFeedback({
         kind: 'counter',
-        title: '取消手牌选择',
-        detail: `${card.name} 已从待出牌状态移除。`,
+        title: '移出连携队列',
+        detail: `${card.name} 已从当前连携序列中移除。`,
         accent: '#6B7280',
         side: 'player',
         duration: 360,
@@ -693,7 +734,7 @@ export default function BattleScreen() {
     }
 
     if (direction === 'up') {
-      if (selectedCard) {
+      if (selectedQueue.length > 0) {
         enterTargetMode();
       } else {
         emitFeedback({
@@ -709,7 +750,7 @@ export default function BattleScreen() {
     }
 
     if (direction === 'down') {
-      if (isTargeting || selectedCard) {
+      if (isTargeting || selectedQueue.length > 0) {
         cancelTargetMode();
         return;
       }
@@ -729,7 +770,7 @@ export default function BattleScreen() {
     <BattleHandCardMotion
       key={`${card.id}-${index}`}
       hovered={hoveredIndex === index}
-      selected={selectedCard?.id === card.id}
+      selected={selectedQueueIds.includes(card.id)}
       targeting={isTargeting}
       collapsed={handCollapsed}
       delay={index * 80}
@@ -742,7 +783,7 @@ export default function BattleScreen() {
         fanIndex={index}
         totalFanCards={hand.length}
         isHovered={hoveredIndex === index}
-        isSelected={selectedCard?.id === card.id}
+        isSelected={selectedQueueIds.includes(card.id)}
         onPress={() => handleCardPress(card, index)}
         onPressIn={() => setHoveredIndex(index)}
         onPressOut={() => setHoveredIndex(null)}
@@ -770,9 +811,12 @@ export default function BattleScreen() {
           setDragPoint(point);
         }}
         onDeselect={() => {
-          if (selectedCard?.id === card.id) {
-            setSelectedCard(null);
-            setSelectedHandIndex(null);
+          if (selectedQueueIds.includes(card.id)) {
+            const nextQueueIds = selectedQueueIds.filter((id) => id !== card.id);
+            const nextLastId = nextQueueIds[nextQueueIds.length - 1];
+            setSelectedQueueIds(nextQueueIds);
+            setSelectedCard(nextLastId ? hand.find((item) => item.id === nextLastId) ?? null : null);
+            setSelectedHandIndex(nextLastId ? hand.findIndex((item) => item.id === nextLastId) : null);
             setIsHandDragging(false);
             setDragPoint(null);
             setIsTargeting(false);
@@ -788,7 +832,7 @@ export default function BattleScreen() {
       slot={slot}
       selected={draggedTargetSlotId === slot.id}
       hovered={draggedTargetSlotId === slot.id}
-      targeting={isTargeting && selectedCard != null}
+      targeting={isTargeting && selectedQueue.length > 0}
       accent={selectedCard?.faction === 'FRANCE'
         ? '#002FA7'
         : selectedCard?.faction === 'ENGLAND'
@@ -808,7 +852,7 @@ export default function BattleScreen() {
             {row === 'front' ? '前排槽位' : '后排槽位'}
           </ThemedText>
           <ThemedText variant="caption" color={theme.textMuted} style={styles.rowHeaderHint}>
-            {isTargeting && selectedCard
+            {isTargeting && selectedQueue.length > 0
               ? '点击槽位完成结算'
               : row === 'front'
                 ? '承受正面冲击'
@@ -820,8 +864,8 @@ export default function BattleScreen() {
     );
   };
 
-  const selectedCardLabel = selectedCard
-    ? `已选：${selectedCard.name}`
+  const selectedCardLabel = selectedQueue.length > 0
+    ? `连携队列 ${selectedQueue.length} 张：${selectedQueue.map((card) => card.name).join(' / ')}`
     : '未选中手牌';
 
   return (
@@ -966,11 +1010,13 @@ export default function BattleScreen() {
               {isTargeting ? '点选目标完成出牌' : isHandDragging ? '继续上拖以释放并选择目标' : '拖动卡牌抬手，或点击后上滑出牌'}
             </ThemedText>
           </View>
-          {selectedCard ? (
+          {selectedQueue.length > 0 ? (
             <View style={styles.selectionTray}>
               <View style={styles.selectionDot} />
               <ThemedText variant="small" color={theme.textPrimary} style={styles.selectionTrayText}>
-                {isTargeting ? `${selectedCard.name} 已抬手，点击目标完成出牌` : `${selectedCard.name} 已选中，上滑进入出牌`}
+                {isTargeting
+                  ? `${selectedQueue.length} 张牌已进入连携出牌，点击目标完成结算`
+                  : `${selectedQueue.length} 张牌已加入连携队列，可继续点牌或直接指定目标`}
               </ThemedText>
             </View>
           ) : null}
