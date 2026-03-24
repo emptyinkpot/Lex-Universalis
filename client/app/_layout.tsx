@@ -32,6 +32,7 @@ export default function RootLayout() {
             <Stack.Screen name="battle" options={{ title: '战斗' }} />
             <Stack.Screen name="theme-settings" options={{ title: '主题设置' }} />
             <Stack.Screen name="card-editor" options={{ title: '卡牌编辑器' }} />
+            <Stack.Screen name="lore-library" options={{ title: '规则与设定' }} />
           </Stack>
           <Toast />
         </GestureHandlerRootView>

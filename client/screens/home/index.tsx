@@ -48,6 +48,13 @@ export default function HomeScreen() {
       iconColor: '#9333EA',
       route: '/theme-settings',
     },
+    {
+      title: '规则与设定',
+      subtitle: '查看规则与世界观设定',
+      icon: 'book-open',
+      iconColor: '#F59E0B',
+      route: '/lore-library',
+    },
   ];
 
   return (
@@ -100,7 +107,7 @@ export default function HomeScreen() {
 
         <View style={styles.footer}>
           <ThemedText variant="caption" color={theme.textMuted} style={styles.footerText}>
-            v1.0.0 | 中世纪策略卡牌对战
+            v1.0.0 | Lex Universalis | 规则与设定已入 UI
           </ThemedText>
         </View>
       </ScrollView>

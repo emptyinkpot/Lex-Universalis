@@ -23,4 +23,4 @@ pnpm start
 
 - Game design archive: [`docs/game-design/moon/README.md`](docs/game-design/moon/README.md)
 - Reference notes: [`docs/reference/README.md`](docs/reference/README.md)
-
+- Rule and setting UI: `client/screens/lore-library`
