@@ -4,37 +4,37 @@
 [ext_resource type="PackedScene" path="res://scenes/components/CardNode.tscn" id="2_7f4xk"]
 
 [node name="BattleSlot" type="PanelContainer"]
-custom_minimum_size = Vector2(0, 148)
+custom_minimum_size = Vector2(0, 112)
 size_flags_horizontal = 3
 mouse_filter = 1
 script = ExtResource("1_1tq1m")
 
 [node name="Padding" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
 [node name="Body" type="VBoxContainer" parent="Padding"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 4
 
 [node name="Title" type="Label" parent="Padding/Body"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 14
 
 [node name="OccupantWrap" type="CenterContainer" parent="Padding/Body"]
-custom_minimum_size = Vector2(0, 170)
+custom_minimum_size = Vector2(0, 118)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="OccupantAnchor" type="Control" parent="Padding/Body/OccupantWrap"]
-custom_minimum_size = Vector2(150, 210)
+custom_minimum_size = Vector2(96, 134)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Stats" type="Label" parent="Padding/Body"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 10

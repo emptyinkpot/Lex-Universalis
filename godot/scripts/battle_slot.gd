@@ -3,6 +3,8 @@ extends PanelContainer
 signal slot_pressed(slot_id: String)
 
 const CARD_NODE_SCENE := preload("res://scenes/components/CardNode.tscn")
+const BASE_OCCUPANT_SIZE := Vector2(96, 134)
+const BASE_OCCUPANT_SCALE := 0.54
 
 var slot_id := ""
 var is_armed := false
@@ -22,7 +24,7 @@ func setup(slot: Dictionary, armed: bool) -> void:
 	var occupant_anchor: Control = get_node("Padding/Body/OccupantWrap/OccupantAnchor")
 	var occupant_name := str(slot.get("occupantName", ""))
 	title_label.text = occupant_name if not occupant_name.is_empty() else str(slot.get("title", "Slot"))
-	stats_label.text = "%s   ATK %d   HP %d / %d   Counter %s" % [
+	stats_label.text = "%s  ATK %d  HP %d/%d  Ctr %s" % [
 		"Front" if str(slot.get("row", "front")) == "front" else "Back",
 		int(slot.get("attack", 0)),
 		int(slot.get("health", 0)),
@@ -34,10 +36,10 @@ func setup(slot: Dictionary, armed: bool) -> void:
 	if slot.has("occupantCard"):
 		occupant_card_node = CARD_NODE_SCENE.instantiate()
 		occupant_card_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		occupant_card_node.custom_minimum_size = occupant_anchor.custom_minimum_size
-		occupant_card_node.scale = Vector2.ONE * 0.68
+		occupant_card_node.custom_minimum_size = BASE_OCCUPANT_SIZE
+		occupant_card_node.scale = Vector2.ONE * BASE_OCCUPANT_SCALE
 		occupant_anchor.add_child(occupant_card_node)
-		occupant_card_node.position = Vector2(occupant_anchor.custom_minimum_size.x * 0.16, 0)
+		occupant_card_node.position = Vector2(occupant_anchor.custom_minimum_size.x * 0.08, 0)
 		occupant_card_node.call("setup", slot.get("occupantCard", {}))
 	_apply_style(armed)
 
@@ -81,6 +83,14 @@ func _on_mouse_exited() -> void:
 func set_drag_highlight(active: bool) -> void:
 	is_hovered = active
 	_apply_style(is_armed)
+
+func set_card_scale(scale: Vector2) -> void:
+	if not is_instance_valid(occupant_card_node):
+		return
+	var scale_factor := maxf(0.72, minf(scale.x, scale.y))
+	occupant_card_node.custom_minimum_size = BASE_OCCUPANT_SIZE * scale_factor
+	occupant_card_node.scale = Vector2.ONE * BASE_OCCUPANT_SCALE * scale_factor
+	occupant_card_node.position = Vector2(occupant_card_node.position.x, occupant_card_node.position.y)
 
 func _apply_style(armed: bool) -> void:
 	var style := StyleBoxFlat.new()

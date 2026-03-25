@@ -35,10 +35,21 @@ var active_drag_pointer := Vector2.ZERO
 @onready var order_chip: Label = get_node("Root/HUDStrip/OrderChip/Padding/Label")
 @onready var rules_label: RichTextLabel = get_node("Root/Stage/SideRail/RulesPanel/Padding/Body/RulesText")
 @onready var log_label: RichTextLabel = get_node("Root/Stage/SideRail/LogPanel/Padding/Body/LogText")
-@onready var enemy_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/EnemyFrontRow")
-@onready var enemy_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/EnemyBackRow")
-@onready var player_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/PlayerFrontRow")
-@onready var player_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/PlayerBackRow")
+@onready var root_container: VBoxContainer = get_node("Root")
+@onready var battlefield_header: Label = get_node("Root/Stage/Battlefield/Padding/Body/FieldHeader")
+@onready var enemy_section_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/EnemySectionLabel")
+@onready var front_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/FrontLabel")
+@onready var back_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/BackLabel")
+@onready var player_section_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/PlayerSectionLabel")
+@onready var player_front_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/PlayerFrontLabel")
+@onready var player_back_label: Label = get_node("Root/Stage/Battlefield/Padding/Body/PlayerBackLabel")
+@onready var rules_header: Label = get_node("Root/Stage/SideRail/RulesPanel/Padding/Body/RulesHeader")
+@onready var log_header: Label = get_node("Root/Stage/SideRail/LogPanel/Padding/Body/LogHeader")
+@onready var dock_title: Label = get_node("Root/BottomDock/DockPadding/DockBody/MetaRow/DockTitle")
+@onready var enemy_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyFrontPane/Padding/Body/EnemyFrontRow")
+@onready var enemy_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyBackPane/Padding/Body/EnemyBackRow")
+@onready var player_front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerFrontPane/Padding/Body/PlayerFrontRow")
+@onready var player_back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerBackPane/Padding/Body/PlayerBackRow")
 @onready var front_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/FrontRow")
 @onready var back_row: HBoxContainer = get_node("Root/Stage/Battlefield/Padding/Body/BackRow")
 @onready var hand_row: HBoxContainer = get_node("Root/BottomDock/DockPadding/DockBody/HandScroll/HandRow")
@@ -49,6 +60,7 @@ var active_drag_pointer := Vector2.ZERO
 @onready var overlay_layer: Control = get_node("Overlay")
 @onready var top_bar: PanelContainer = get_node("Root/TopBar")
 @onready var hud_strip: HBoxContainer = get_node("Root/HUDStrip")
+@onready var stage: HBoxContainer = get_node("Root/Stage")
 @onready var battlefield_panel: PanelContainer = get_node("Root/Stage/Battlefield")
 @onready var side_rail: VBoxContainer = get_node("Root/Stage/SideRail")
 @onready var bottom_dock: PanelContainer = get_node("Root/BottomDock")
@@ -58,17 +70,24 @@ func _ready() -> void:
 	battle_seed_template = data_loader.load_battle_seed()
 	base_cards = data_loader.load_base_cards()
 	_setup_drag_preview_layer()
+	resized.connect(_apply_responsive_desktop_layout)
+	_apply_responsive_desktop_layout()
 	rules_label.text = "[b]Battle Rules[/b]\n- Click or drag a hand card to arm it.\n- Release over an enemy slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn."
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	_reset_battle_state()
 	_play_intro()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_apply_responsive_desktop_layout()
+
 func start_level(level_data: Dictionary) -> void:
 	active_level = level_data.duplicate(true)
 	var enemy_faction := str(active_level.get("enemyFaction", "ENGLAND"))
 	_reset_battle_state(_build_level_deck(enemy_faction))
-	rules_label.text = "[b]Battle Rules[/b]\n- Click or drag a hand card to arm it.\n- Release over an enemy slot to resolve damage.\n- Counter slots reduce incoming damage once.\n- After playing a card, it moves to discard and a new card is drawn.\n\n[b]Scenario[/b]\nEnemy faction: %s" % enemy_faction
-	log_label.text = "[b]Scenario Loaded[/b]\n- %s\n- %s / %s\n- %s\n\n%s" % [
+	_apply_responsive_desktop_layout()
+	rules_label.text = "[b]战斗规则[/b]\n- 点击或拖动手牌即可出牌。\n- 松开到敌方槽位上即可结算伤害。\n- 带有反制的槽位会先抵消一次伤害。\n- 出牌后会进入弃牌堆，并补入新牌。\n\n[b]剧本信息[/b]\n敌方阵营：%s" % enemy_faction
+	log_label.text = "[b]剧本已载入[/b]\n- %s\n- %s / %s\n- %s\n\n%s" % [
 		str(active_level.get("name", "Scenario Battle")),
 		str(active_level.get("scenarioName", "Story Mode")),
 		str(active_level.get("chapterName", "Chapter")),
@@ -99,13 +118,13 @@ func _render_all() -> void:
 	_render_hand()
 
 func _render_hud() -> void:
-	var phase := "Resolving" if is_resolving else ("Orders" if selected_hand_index >= 0 or not selected_player_slot_id.is_empty() else "Ready")
+	var phase := "结算中" if is_resolving else ("指令中" if selected_hand_index >= 0 or not selected_player_slot_id.is_empty() else "待命")
 	var live_enemy_units := _count_live_units(battle_slots)
 	var live_player_units := _count_live_units(player_slots)
-	phase_chip.text = "Phase %s" % phase
-	hand_chip.text = "Hand %d | Draw %d" % [hand_cards.size(), draw_pile.size()]
-	board_chip.text = "Board %d v %d" % [live_player_units, live_enemy_units]
-	order_chip.text = "Order %s" % _build_selection_label()
+	phase_chip.text = "阶段 %s" % phase
+	hand_chip.text = "手牌 %d | 牌堆 %d" % [hand_cards.size(), draw_pile.size()]
+	board_chip.text = "战场 %d 对 %d" % [live_player_units, live_enemy_units]
+	order_chip.text = "指令 %s" % _build_selection_label()
 
 func _play_intro() -> void:
 	top_bar.modulate = Color(1, 1, 1, 0)
@@ -168,7 +187,7 @@ func _render_hand() -> void:
 	for index in range(hand_cards.size()):
 		var card := hand_cards[index] as Dictionary
 		var card_node := CARD_NODE_SCENE.instantiate()
-		card_node.custom_minimum_size = Vector2(184, 258)
+		card_node.custom_minimum_size = Vector2(164, 230)
 		card_node.base_position = Vector2(card_node.position.x, card_node.position.y)
 		card_node.call("setup", card)
 		card_node.call("set_selected", index == selected_hand_index)
@@ -310,7 +329,7 @@ func _animate_card_play(hand_index: int, slot_id: String, card: Dictionary) -> v
 	var target: Control = rendered_slot_nodes[slot_id]
 	var ghost := CARD_NODE_SCENE.instantiate()
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ghost.custom_minimum_size = Vector2(184, 258)
+	ghost.custom_minimum_size = Vector2(164, 230)
 	overlay_layer.add_child(ghost)
 	ghost.call("setup", card)
 	ghost.global_position = source.global_position
@@ -502,7 +521,7 @@ func _show_drag_preview(hand_index: int) -> void:
 	var source: Control = rendered_hand_nodes[hand_index]
 	preview_ghost = CARD_NODE_SCENE.instantiate()
 	preview_ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	preview_ghost.custom_minimum_size = Vector2(184, 258)
+	preview_ghost.custom_minimum_size = Vector2(164, 230)
 	overlay_layer.add_child(preview_ghost)
 	preview_ghost.call("setup", hand_cards[hand_index])
 	preview_ghost.size = source.size
@@ -694,7 +713,7 @@ func _animate_slot_attack(attacker_slot_id: String, target_slot_id: String, targ
 		return
 	var ghost := CARD_NODE_SCENE.instantiate()
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ghost.custom_minimum_size = Vector2(170, 238)
+	ghost.custom_minimum_size = Vector2(156, 216)
 	overlay_layer.add_child(ghost)
 	var source_slot := _find_slot_by_id(attacker_slot_id)
 	ghost.call("setup", _build_slot_card_payload(source_slot))
@@ -908,3 +927,52 @@ func _play_slot_break(slot_id: String) -> void:
 	if slot_node.has_method("play_death_feedback"):
 		slot_node.call("play_death_feedback")
 	await tween.finished
+
+func _apply_responsive_desktop_layout() -> void:
+	var available_size: Vector2 = size
+	if available_size.x <= 0.0 or available_size.y <= 0.0:
+		available_size = get_viewport_rect().size
+	if available_size.x <= 0.0 or available_size.y <= 0.0:
+		return
+	var ui_scale: float = clamp(min(available_size.x / 1600.0, available_size.y / 900.0), 0.72, 1.0)
+	root_container.scale = Vector2.ONE
+	root_container.position = Vector2.ZERO
+	var scale: float = ui_scale
+	var top_height := clampi(int(round(60.0 * scale)), 54, 72)
+	var hud_height := clampi(int(round(34.0 * scale)), 28, 44)
+	var dock_height := clampi(int(round(available_size.y * 0.145)), 124, 156)
+	var rail_width := clampi(int(round(available_size.x * 0.16)), 200, 256)
+	var card_width := clampi(int(round(136.0 * scale)), 120, 156)
+	var card_height := clampi(int(round(190.0 * scale)), 164, 210)
+	var attack_card_width := clampi(int(round(96.0 * scale)), 84, 124)
+	var attack_card_height := clampi(int(round(134.0 * scale)), 118, 160)
+	top_bar.custom_minimum_size = Vector2(0, top_height)
+	hud_strip.custom_minimum_size = Vector2(0, hud_height)
+	stage.custom_minimum_size = Vector2(0, 0)
+	battlefield_panel.custom_minimum_size = Vector2(0, 0)
+	side_rail.custom_minimum_size = Vector2(rail_width, 0)
+	bottom_dock.custom_minimum_size = Vector2(0, dock_height)
+	battlefield_header.add_theme_font_size_override("font_size", clampi(int(round(16.0 * scale)), 14, 20))
+	enemy_section_label.add_theme_font_size_override("font_size", clampi(int(round(12.0 * scale)), 11, 15))
+	front_label.add_theme_font_size_override("font_size", clampi(int(round(11.0 * scale)), 10, 14))
+	back_label.add_theme_font_size_override("font_size", clampi(int(round(11.0 * scale)), 10, 14))
+	player_section_label.add_theme_font_size_override("font_size", clampi(int(round(12.0 * scale)), 11, 15))
+	player_front_label.add_theme_font_size_override("font_size", clampi(int(round(11.0 * scale)), 10, 14))
+	player_back_label.add_theme_font_size_override("font_size", clampi(int(round(11.0 * scale)), 10, 14))
+	rules_header.add_theme_font_size_override("font_size", clampi(int(round(13.0 * scale)), 12, 16))
+	log_header.add_theme_font_size_override("font_size", clampi(int(round(13.0 * scale)), 12, 16))
+	dock_title.add_theme_font_size_override("font_size", clampi(int(round(14.0 * scale)), 12, 18))
+	player_stats.add_theme_font_size_override("font_size", clampi(int(round(11.0 * scale)), 10, 13))
+	queue_label.add_theme_font_size_override("font_size", clampi(int(round(10.0 * scale)), 9, 12))
+	pile_label.add_theme_font_size_override("font_size", clampi(int(round(10.0 * scale)), 9, 12))
+	top_bar.add_theme_constant_override("separation", clampi(int(round(3.0 * scale)), 0, 6))
+	hud_strip.add_theme_constant_override("separation", clampi(int(round(4.0 * scale)), 2, 8))
+	stage.add_theme_constant_override("separation", clampi(int(round(6.0 * scale)), 4, 10))
+	hand_row.add_theme_constant_override("separation", clampi(int(round(8.0 * scale)), 6, 12))
+	for card_node in rendered_hand_nodes:
+		if card_node != null:
+			card_node.custom_minimum_size = Vector2(card_width, card_height)
+	for key in rendered_slot_nodes.keys():
+		var slot_node: Control = rendered_slot_nodes[key]
+		if slot_node != null and slot_node.has_method("set_card_scale"):
+			slot_node.call("set_card_scale", Vector2(attack_card_width / 156.0, attack_card_height / 216.0))

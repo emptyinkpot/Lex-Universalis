@@ -44,8 +44,8 @@ theme_override_constants/separation = 16
 [node name="EnemyLabel" type="Label" parent="Root/TopBar/TopPadding/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Enemy Fortress"
 text = "敌方要塞"
+
 theme_override_font_sizes/font_size = 24
 
 [node name="EnemyStats" type="Label" parent="Root/TopBar/TopPadding/TopRow"]
@@ -146,93 +146,190 @@ theme_override_constants/margin_bottom = 18
 
 [node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="FieldHeader" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
-text = "固定 PC 战场"
-theme_override_font_sizes/font_size = 26
+text = "固定桌面战场"
+theme_override_font_sizes/font_size = 20
+
+[node name="BattleGrid" type="GridContainer" parent="Root/Stage/Battlefield/Padding/Body"]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="EnemyFrontPane" type="PanelContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyFrontPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyFrontPane/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyFrontPane/Padding/Body"]
+layout_mode = 2
+text = "敌方前排"
+theme_override_font_sizes/font_size = 14
+
+[node name="EnemyFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyFrontPane/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="EnemyBackPane" type="PanelContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyBackPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyBackPane/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyBackPane/Padding/Body"]
+layout_mode = 2
+text = "敌方后排"
+theme_override_font_sizes/font_size = 14
+
+[node name="EnemyBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/EnemyBackPane/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerFrontPane" type="PanelContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerFrontPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerFrontPane/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerFrontPane/Padding/Body"]
+layout_mode = 2
+text = "我方前排"
+theme_override_font_sizes/font_size = 14
+
+[node name="PlayerFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerFrontPane/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PlayerBackPane" type="PanelContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Padding" type="MarginContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerBackPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="Body" type="VBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerBackPane/Padding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerBackPane/Padding/Body"]
+layout_mode = 2
+text = "我方后排"
+theme_override_font_sizes/font_size = 14
+
+[node name="PlayerBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body/BattleGrid/PlayerBackPane/Padding/Body"]
+layout_mode = 2
+theme_override_constants/separation = 8
 
 [node name="EnemySectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "敌方阵线"
+text = "閺佸本鏌熼梼鐢靛殠"
 theme_override_font_sizes/font_size = 19
 
 [node name="FrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "前排"
+text = "Front"
 theme_override_font_sizes/font_size = 17
 
 [node name="FrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
-layout_mode = 2
-theme_override_constants/separation = 10
 visible = false
-
-[node name="EnemyFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="BackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "后排"
+text = "Back"
 theme_override_font_sizes/font_size = 17
 
 [node name="BackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
-layout_mode = 2
-theme_override_constants/separation = 10
 visible = false
-
-[node name="EnemyBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="PlayerSectionLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "我方阵线"
+text = "閹存垶鏌熼梼鐢靛殠"
 theme_override_font_sizes/font_size = 19
 
 [node name="PlayerFrontLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "前排防线"
+text = "閸撳秵甯撻梼鑼殠"
 theme_override_font_sizes/font_size = 17
-
-[node name="PlayerFrontRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
-layout_mode = 2
-theme_override_constants/separation = 10
 
 [node name="PlayerBackLabel" type="Label" parent="Root/Stage/Battlefield/Padding/Body"]
+visible = false
 layout_mode = 2
-text = "后排支援"
+text = "閸氬孩甯撻弨顖涘胶"
 theme_override_font_sizes/font_size = 17
 
-[node name="PlayerBackRow" type="HBoxContainer" parent="Root/Stage/Battlefield/Padding/Body"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
 [node name="SideRail" type="VBoxContainer" parent="Root/Stage"]
-custom_minimum_size = Vector2(320, 0)
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="RulesPanel" type="PanelContainer" parent="Root/Stage/SideRail"]
 layout_mode = 2
 
 [node name="Padding" type="MarginContainer" parent="Root/Stage/SideRail/RulesPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="Body" type="VBoxContainer" parent="Root/Stage/SideRail/RulesPanel/Padding"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="RulesHeader" type="Label" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
 layout_mode = 2
 text = "规则"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 16
 
 [node name="RulesText" type="RichTextLabel" parent="Root/Stage/SideRail/RulesPanel/Padding/Body"]
 layout_mode = 2
@@ -247,19 +344,19 @@ size_flags_vertical = 3
 
 [node name="Padding" type="MarginContainer" parent="Root/Stage/SideRail/LogPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="Body" type="VBoxContainer" parent="Root/Stage/SideRail/LogPanel/Padding"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="LogHeader" type="Label" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
 layout_mode = 2
 text = "日志"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 16
 
 [node name="LogText" type="RichTextLabel" parent="Root/Stage/SideRail/LogPanel/Padding/Body"]
 layout_mode = 2
@@ -269,43 +366,43 @@ fit_content = false
 scroll_active = false
 
 [node name="BottomDock" type="PanelContainer" parent="Root"]
-custom_minimum_size = Vector2(0, 292)
+custom_minimum_size = Vector2(0, 176)
 layout_mode = 2
 
 [node name="DockPadding" type="MarginContainer" parent="Root/BottomDock"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
 
 [node name="DockBody" type="VBoxContainer" parent="Root/BottomDock/DockPadding"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="MetaRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="DockTitle" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "手牌区"
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 18
 
 [node name="PlayerStats" type="Label" parent="Root/BottomDock/DockPadding/DockBody/MetaRow"]
 layout_mode = 2
 horizontal_alignment = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 13
 
 [node name="QueueLabel" type="Label" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 
 [node name="PileLabel" type="Label" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 
 [node name="HandScroll" type="ScrollContainer" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2
@@ -314,7 +411,7 @@ horizontal_scroll_mode = 1
 
 [node name="HandRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody/HandScroll"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="ActionRow" type="HBoxContainer" parent="Root/BottomDock/DockPadding/DockBody"]
 layout_mode = 2

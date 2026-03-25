@@ -30,6 +30,7 @@ func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	ui_theme = _build_desktop_theme()
 	theme = ui_theme
+	call_deferred("_maximize_window")
 	top_stats.add_theme_color_override("font_color", Color("f1e2bf"))
 	_apply_language_texts()
 	_render_stats()
@@ -55,6 +56,9 @@ func _ready() -> void:
 		settings_view.return_home.connect(_on_return_home)
 	_apply_tab_titles()
 	_refresh_views_language()
+
+func _maximize_window() -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 
 func _render_stats() -> void:
 	var manifest: Dictionary = data_loader.load_manifest()
@@ -112,7 +116,7 @@ func _mount_scene(tab_name: String, scene: PackedScene) -> Control:
 	return instance
 
 func _on_story_launch_level(level_data: Dictionary) -> void:
-	tab_container.current_tab = 1
+	tab_container.current_tab = 2
 	if battle_view.has_method("start_level"):
 		battle_view.start_level(level_data)
 
