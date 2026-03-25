@@ -148,7 +148,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 14
 
 [node name="EditorPanel" type="PanelContainer" parent="Padding/Root/Content"]
-custom_minimum_size = Vector2(440, 0)
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -170,7 +170,7 @@ theme_override_font_sizes/font_size = 20
 
 [node name="PreviewCard" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody" instance=ExtResource("2_9v2h1")]
 layout_mode = 2
-custom_minimum_size = Vector2(300, 420)
+custom_minimum_size = Vector2(220, 308)
 
 [node name="DetailTitle" type="Label" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody"]
 layout_mode = 2

@@ -26,6 +26,7 @@ func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	pool_cards = data_loader.load_working_cards()
 	deck_cards = data_loader.load_deck_list()
+	preview_card.custom_minimum_size = Vector2(220, 308)
 	_apply_language_texts()
 	summary_label.text = data_loader.t("deck_builder_summary") % [pool_cards.size(), deck_cards.size()]
 	_refresh_grids()
@@ -179,4 +180,3 @@ func _refresh_header_chips() -> void:
 	else:
 		selected_chip.text = "%s None" % data_loader.t("deck_builder_selected")
 	storage_chip.text = data_loader.t("deck_builder_storage")
-

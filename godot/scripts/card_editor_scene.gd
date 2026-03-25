@@ -30,6 +30,7 @@ var search_query := ""
 func _ready() -> void:
 	data_loader = DATA_LOADER.new()
 	working_cards = data_loader.load_working_cards()
+	preview_card.custom_minimum_size = Vector2(220, 308)
 	_apply_language_texts()
 	_refresh_header_chips()
 	_refresh_library()
