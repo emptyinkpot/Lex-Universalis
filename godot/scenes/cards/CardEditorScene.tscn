@@ -33,109 +33,111 @@ layout_mode = 2
 
 [node name="HeaderPadding" type="MarginContainer" parent="Padding/Root/Header"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
 
-[node name="HeaderStack" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
+[node name="HeaderBody" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="HeaderBody" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
+[node name="TitleRow" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody"]
+[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
+[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow/TextBlock"]
 layout_mode = 2
 text = "卡牌编辑器"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 32
 
-[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
+[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow/TextBlock"]
 layout_mode = 2
 autowrap_mode = 3
+text = "工作台从现有卡池中编辑、预览并保存本地草稿。"
 theme_override_font_sizes/font_size = 15
 
-[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody"]
+[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow"]
 layout_mode = 2
 horizontal_alignment = 2
 size_flags_horizontal = 3
+text = "Loading..."
 theme_override_font_sizes/font_size = 15
 
-[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="AccentBar" type="ColorRect" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
+[node name="AccentBar" type="ColorRect" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
 custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 color = Color(0.862745, 0.741176, 0.498039, 0.95)
 
-[node name="DraftChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DraftChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DraftChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/DraftChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DraftChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/DraftChip/Padding"]
 layout_mode = 2
 text = "草稿"
 theme_override_font_sizes/font_size = 15
 
-[node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/SelectedChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/SelectedChip/Padding"]
 layout_mode = 2
 text = "已选"
 theme_override_font_sizes/font_size = 15
 
-[node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/StorageChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/StorageChip/Padding"]
 layout_mode = 2
 text = "本地保存"
 theme_override_font_sizes/font_size = 15
 
-[node name="PreviewChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="PreviewChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PreviewChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/PreviewChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PreviewChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/PreviewChip/Padding"]
 layout_mode = 2
 text = "预览"
 theme_override_font_sizes/font_size = 15
@@ -145,154 +147,152 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 14
 
-[node name="CardListPanel" type="PanelContainer" parent="Padding/Root/Content"]
-custom_minimum_size = Vector2(280, 0)
+[node name="EditorPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(440, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="CardListPadding" type="MarginContainer" parent="Padding/Root/Content/CardListPanel"]
+[node name="EditorPadding" type="MarginContainer" parent="Padding/Root/Content/EditorPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="CardListBody" type="VBoxContainer" parent="Padding/Root/Content/CardListPanel/CardListPadding"]
+[node name="EditorBody" type="VBoxContainer" parent="Padding/Root/Content/EditorPanel/EditorPadding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="PreviewTitle" type="Label" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody"]
+layout_mode = 2
+text = "已选卡牌"
+theme_override_font_sizes/font_size = 20
+
+[node name="PreviewCard" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody" instance=ExtResource("2_9v2h1")]
+layout_mode = 2
+custom_minimum_size = Vector2(300, 420)
+
+[node name="DetailTitle" type="Label" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody"]
+layout_mode = 2
+text = "卡牌详情"
+theme_override_font_sizes/font_size = 18
+
+[node name="PreviewNotes" type="RichTextLabel" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 72)
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
+
+[node name="FormGrid" type="VBoxContainer" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="CardListHeader" type="Label" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
-layout_mode = 2
-text = "可编辑卡牌"
-theme_override_font_sizes/font_size = 18
-
-[node name="CardList" type="ItemList" parent="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="FormPanel" type="PanelContainer" parent="Padding/Root/Content"]
-custom_minimum_size = Vector2(360, 0)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="FormPadding" type="MarginContainer" parent="Padding/Root/Content/FormPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
-
-[node name="FormBody" type="VBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="FormHeader" type="Label" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
-layout_mode = 2
-text = "编辑卡牌"
-theme_override_font_sizes/font_size = 18
-
-[node name="NameField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="NameField" type="LineEdit" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
 placeholder_text = "名称"
 
-[node name="TypeRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="TypeRow" type="HBoxContainer" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TypeField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
+[node name="TypeField" type="LineEdit" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/TypeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "类型"
 
-[node name="FactionField" type="LineEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow"]
+[node name="FactionField" type="LineEdit" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/TypeRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "阵营"
 
-[node name="StatRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="StatRow" type="HBoxContainer" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="CostField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+[node name="CostField" type="SpinBox" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow"]
 layout_mode = 2
 min_value = 0.0
 max_value = 20.0
 step = 1.0
 
-[node name="AttackField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+[node name="AttackField" type="SpinBox" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow"]
 layout_mode = 2
 min_value = 0.0
 max_value = 20.0
 step = 1.0
 
-[node name="HealthField" type="SpinBox" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow"]
+[node name="HealthField" type="SpinBox" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow"]
 layout_mode = 2
 min_value = 0.0
 max_value = 40.0
 step = 1.0
 
-[node name="DescriptionField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="DescriptionField" type="TextEdit" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 140)
+custom_minimum_size = Vector2(0, 120)
 placeholder_text = "描述"
 
-[node name="FlavorField" type="TextEdit" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="FlavorField" type="TextEdit" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 90)
+custom_minimum_size = Vector2(0, 88)
 placeholder_text = "风味文本"
 
-[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody"]
+[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="SaveButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
+[node name="SaveButton" type="Button" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/ActionRow"]
 layout_mode = 2
 text = "保存草稿"
 
-[node name="ResetButton" type="Button" parent="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow"]
+[node name="ResetButton" type="Button" parent="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/ActionRow"]
 layout_mode = 2
 text = "重载"
 
-[node name="PreviewPanel" type="PanelContainer" parent="Padding/Root/Content"]
+[node name="LibraryPanel" type="PanelContainer" parent="Padding/Root/Content"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="PreviewPadding" type="MarginContainer" parent="Padding/Root/Content/PreviewPanel"]
+[node name="LibraryPadding" type="MarginContainer" parent="Padding/Root/Content/LibraryPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="PreviewBody" type="VBoxContainer" parent="Padding/Root/Content/PreviewPanel/PreviewPadding"]
+[node name="LibraryBody" type="VBoxContainer" parent="Padding/Root/Content/LibraryPanel/LibraryPadding"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="PreviewHeader" type="Label" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody"]
+[node name="LibraryHeader" type="Label" parent="Padding/Root/Content/LibraryPanel/LibraryPadding/LibraryBody"]
 layout_mode = 2
-text = "预览"
-theme_override_font_sizes/font_size = 18
+text = "卡池"
+theme_override_font_sizes/font_size = 20
 
-[node name="PreviewCard" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody" instance=ExtResource("2_9v2h1")]
+[node name="SearchField" type="LineEdit" parent="Padding/Root/Content/LibraryPanel/LibraryPadding/LibraryBody"]
 layout_mode = 2
-custom_minimum_size = Vector2(260, 364)
+placeholder_text = "搜索名称 / 类型 / 阵营"
 
-[node name="PreviewNotes" type="RichTextLabel" parent="Padding/Root/Content/PreviewPanel/PreviewPadding/PreviewBody"]
+[node name="LibraryGridScroll" type="ScrollContainer" parent="Padding/Root/Content/LibraryPanel/LibraryPadding/LibraryBody"]
 layout_mode = 2
 size_flags_vertical = 3
-bbcode_enabled = true
-fit_content = false
-scroll_active = false
 
-[connection signal="item_selected" from="Padding/Root/Content/CardListPanel/CardListPadding/CardListBody/CardList" to="." method="_on_card_selected"]
-[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/NameField" to="." method="_on_field_changed"]
-[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/TypeField" to="." method="_on_field_changed"]
-[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/TypeRow/FactionField" to="." method="_on_field_changed"]
-[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/CostField" to="." method="_on_field_changed"]
-[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/AttackField" to="." method="_on_field_changed"]
-[connection signal="value_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/StatRow/HealthField" to="." method="_on_field_changed"]
-[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/DescriptionField" to="." method="_on_field_changed"]
-[connection signal="text_changed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/FlavorField" to="." method="_on_field_changed"]
-[connection signal="pressed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/SaveButton" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="Padding/Root/Content/FormPanel/FormPadding/FormBody/ActionRow/ResetButton" to="." method="_on_reset_pressed"]
+[node name="LibraryGrid" type="GridContainer" parent="Padding/Root/Content/LibraryPanel/LibraryPadding/LibraryBody/LibraryGridScroll"]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[connection signal="text_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/NameField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/TypeRow/TypeField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/TypeRow/FactionField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow/CostField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow/AttackField" to="." method="_on_field_changed"]
+[connection signal="value_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/StatRow/HealthField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/DescriptionField" to="." method="_on_field_changed"]
+[connection signal="text_changed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/FlavorField" to="." method="_on_field_changed"]
+[connection signal="pressed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/ActionRow/SaveButton" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Padding/Root/Content/EditorPanel/EditorPadding/EditorBody/FormGrid/ActionRow/ResetButton" to="." method="_on_reset_pressed"]
+[connection signal="text_changed" from="Padding/Root/Content/LibraryPanel/LibraryPadding/LibraryBody/SearchField" to="." method="_on_search_changed"]

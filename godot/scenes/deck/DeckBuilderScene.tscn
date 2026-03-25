@@ -33,109 +33,111 @@ layout_mode = 2
 
 [node name="HeaderPadding" type="MarginContainer" parent="Padding/Root/Header"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
 
-[node name="HeaderStack" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
+[node name="HeaderBody" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="HeaderBody" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
+[node name="TitleRow" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody"]
+[node name="TextBlock" type="VBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
+[node name="Title" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow/TextBlock"]
 layout_mode = 2
 text = "卡组构筑"
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 32
 
-[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody/TextBlock"]
+[node name="Summary" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow/TextBlock"]
 layout_mode = 2
 autowrap_mode = 3
+text = "从卡池中挑选卡牌，组成并保存本地卡组。"
 theme_override_font_sizes/font_size = 15
 
-[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/HeaderBody"]
+[node name="Status" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/TitleRow"]
 layout_mode = 2
 horizontal_alignment = 2
 size_flags_horizontal = 3
+text = "Loading..."
 theme_override_font_sizes/font_size = 15
 
-[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="AccentBar" type="ColorRect" parent="Padding/Root/Header/HeaderPadding/HeaderStack"]
+[node name="AccentBar" type="ColorRect" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
 custom_minimum_size = Vector2(0, 4)
 layout_mode = 2
 color = Color(0.862745, 0.741176, 0.498039, 0.95)
 
-[node name="PoolChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="InfoStrip" type="HBoxContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PoolChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PoolChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/PoolChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/PoolChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/PoolChip/Padding"]
 layout_mode = 2
 text = "卡池"
 theme_override_font_sizes/font_size = 15
 
-[node name="DeckChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="DeckChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DeckChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/DeckChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/DeckChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/DeckChip/Padding"]
 layout_mode = 2
 text = "卡组"
 theme_override_font_sizes/font_size = 15
 
-[node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="SelectedChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/SelectedChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/SelectedChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/SelectedChip/Padding"]
 layout_mode = 2
 text = "已选"
 theme_override_font_sizes/font_size = 15
 
-[node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip"]
+[node name="StorageChip" type="PanelContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip"]
+[node name="Padding" type="MarginContainer" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/StorageChip"]
 layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderStack/InfoStrip/StorageChip/Padding"]
+[node name="Label" type="Label" parent="Padding/Root/Header/HeaderPadding/HeaderBody/InfoStrip/StorageChip/Padding"]
 layout_mode = 2
 text = "本地保存"
 theme_override_font_sizes/font_size = 15
@@ -145,104 +147,122 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 14
 
-[node name="PoolPanel" type="PanelContainer" parent="Padding/Root/Content"]
-custom_minimum_size = Vector2(320, 0)
+[node name="WorkbenchPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(440, 0)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="PoolPadding" type="MarginContainer" parent="Padding/Root/Content/PoolPanel"]
+[node name="WorkbenchPadding" type="MarginContainer" parent="Padding/Root/Content/WorkbenchPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="PoolBody" type="VBoxContainer" parent="Padding/Root/Content/PoolPanel/PoolPadding"]
+[node name="WorkbenchBody" type="VBoxContainer" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="PoolHeader" type="Label" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
+[node name="PreviewTitle" type="Label" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody"]
 layout_mode = 2
-text = "可用卡牌"
-theme_override_font_sizes/font_size = 18
+text = "当前卡牌"
+theme_override_font_sizes/font_size = 20
 
-[node name="PoolList" type="ItemList" parent="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody"]
+[node name="CardPreview" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody" instance=ExtResource("2_0m3x7")]
 layout_mode = 2
-size_flags_vertical = 3
+custom_minimum_size = Vector2(300, 420)
 
-[node name="DeckPanel" type="PanelContainer" parent="Padding/Root/Content"]
-custom_minimum_size = Vector2(320, 0)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="DeckPadding" type="MarginContainer" parent="Padding/Root/Content/DeckPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
-
-[node name="DeckBody" type="VBoxContainer" parent="Padding/Root/Content/DeckPanel/DeckPadding"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="DeckHeader" type="Label" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
-layout_mode = 2
-text = "当前卡组"
-theme_override_font_sizes/font_size = 18
-
-[node name="DeckList" type="ItemList" parent="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="EditPanel" type="PanelContainer" parent="Padding/Root/Content"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="EditPadding" type="MarginContainer" parent="Padding/Root/Content/EditPanel"]
-layout_mode = 2
-theme_override_constants/margin_left = 14
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 14
-theme_override_constants/margin_bottom = 14
-
-[node name="EditBody" type="VBoxContainer" parent="Padding/Root/Content/EditPanel/EditPadding"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="DetailTitle" type="Label" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody"]
+[node name="DetailTitle" type="Label" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody"]
 layout_mode = 2
 text = "卡组详情"
 theme_override_font_sizes/font_size = 18
 
-[node name="CardPreview" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody" instance=ExtResource("2_0m3x7")]
-layout_mode = 2
-custom_minimum_size = Vector2(260, 364)
-
-[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody"]
+[node name="ActionRow" type="HBoxContainer" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="AddButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+[node name="AddButton" type="Button" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody/ActionRow"]
 layout_mode = 2
 text = "加入卡组"
 
-[node name="RemoveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+[node name="RemoveButton" type="Button" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody/ActionRow"]
 layout_mode = 2
 text = "移出卡组"
 
-[node name="SaveButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+[node name="SaveButton" type="Button" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody/ActionRow"]
 layout_mode = 2
 text = "保存卡组"
 
-[node name="ResetButton" type="Button" parent="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow"]
+[node name="ResetButton" type="Button" parent="Padding/Root/Content/WorkbenchPanel/WorkbenchPadding/WorkbenchBody/ActionRow"]
 layout_mode = 2
-text = "Reset"
+text = "重载"
 
-[connection signal="item_selected" from="Padding/Root/Content/PoolPanel/PoolPadding/PoolBody/PoolList" to="." method="_on_pool_selected"]
-[connection signal="item_selected" from="Padding/Root/Content/DeckPanel/DeckPadding/DeckBody/DeckList" to="." method="_on_deck_selected"]
-[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/AddButton" to="." method="_on_add_pressed"]
-[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/RemoveButton" to="." method="_on_remove_pressed"]
-[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/SaveButton" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="Padding/Root/Content/EditPanel/EditPadding/EditBody/ActionRow/ResetButton" to="." method="_on_reset_pressed"]
+[node name="LibraryColumn" type="VBoxContainer" parent="Padding/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="PoolPanel" type="PanelContainer" parent="Padding/Root/Content/LibraryColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PoolPadding" type="MarginContainer" parent="Padding/Root/Content/LibraryColumn/PoolPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="PoolBody" type="VBoxContainer" parent="Padding/Root/Content/LibraryColumn/PoolPanel/PoolPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PoolHeader" type="Label" parent="Padding/Root/Content/LibraryColumn/PoolPanel/PoolPadding/PoolBody"]
+layout_mode = 2
+text = "卡池"
+theme_override_font_sizes/font_size = 20
+
+[node name="SearchField" type="LineEdit" parent="Padding/Root/Content/LibraryColumn/PoolPanel/PoolPadding/PoolBody"]
+layout_mode = 2
+placeholder_text = "搜索名称 / 类型 / 阵营"
+
+[node name="PoolGridScroll" type="ScrollContainer" parent="Padding/Root/Content/LibraryColumn/PoolPanel/PoolPadding/PoolBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PoolGrid" type="GridContainer" parent="Padding/Root/Content/LibraryColumn/PoolPanel/PoolPadding/PoolBody/PoolGridScroll"]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+
+[node name="DeckPanel" type="PanelContainer" parent="Padding/Root/Content/LibraryColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeckPadding" type="MarginContainer" parent="Padding/Root/Content/LibraryColumn/DeckPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="DeckBody" type="VBoxContainer" parent="Padding/Root/Content/LibraryColumn/DeckPanel/DeckPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DeckHeader" type="Label" parent="Padding/Root/Content/LibraryColumn/DeckPanel/DeckPadding/DeckBody"]
+layout_mode = 2
+text = "当前卡组"
+theme_override_font_sizes/font_size = 20
+
+[node name="DeckGridScroll" type="ScrollContainer" parent="Padding/Root/Content/LibraryColumn/DeckPanel/DeckPadding/DeckBody"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="DeckGrid" type="GridContainer" parent="Padding/Root/Content/LibraryColumn/DeckPanel/DeckPadding/DeckBody/DeckGridScroll"]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12

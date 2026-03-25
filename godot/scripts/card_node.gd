@@ -8,11 +8,15 @@ signal drag_ended(card_data: Dictionary, global_position: Vector2)
 var card_data: Dictionary = {}
 var is_selected := false
 var is_dragging := false
+var is_compact := false
 var base_position := Vector2.ZERO
 var hover_target_position := Vector2.ZERO
 var hover_target_scale := Vector2.ONE
 var hover_target_rotation := 0.0
 var hover_target_modulate := Color.WHITE
+
+const FULL_CARD_SIZE := Vector2(220, 308)
+const COMPACT_CARD_SIZE := Vector2(160, 224)
 
 func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
@@ -68,6 +72,7 @@ func setup(card: Dictionary) -> void:
 		var tuned := frame_style.duplicate() as StyleBoxFlat
 		tuned.border_color = accent
 		frame.add_theme_stylebox_override("panel", tuned)
+	_apply_layout()
 	_apply_selected_state(false)
 	hover_target_position = base_position
 	hover_target_scale = Vector2.ONE
@@ -82,6 +87,66 @@ func set_selected(value: bool) -> void:
 		hover_target_scale = Vector2.ONE * (1.04 if value else 1.0)
 		hover_target_rotation = 0.0
 		hover_target_modulate = Color(1, 1, 1, 1.0)
+
+func set_compact_mode(value: bool) -> void:
+	is_compact = value
+	_apply_layout()
+	_apply_selected_state(is_selected)
+
+func _apply_layout() -> void:
+	var title_label: Label = get_node("Frame/Padding/Body/Header/TitleBlock/Title")
+	var meta_label: Label = get_node("Frame/Padding/Body/Header/TitleBlock/Meta")
+	var cost_label: Label = get_node("Frame/Padding/Body/Header/CostBadge/Cost")
+	var art_label: Label = get_node("Frame/Padding/Body/Illustration/IllustrationLabel")
+	var type_label: Label = get_node("Frame/Padding/Body/TypeLine")
+	var description_label: RichTextLabel = get_node("Frame/Padding/Body/Description")
+	var stat_label: Label = get_node("Frame/Padding/Body/Footer/Stats")
+	var tag_label: Label = get_node("Frame/Padding/Body/Footer/Tag")
+	var padding: MarginContainer = get_node("Frame/Padding")
+	var body: VBoxContainer = get_node("Frame/Padding/Body")
+	var header: HBoxContainer = get_node("Frame/Padding/Body/Header")
+	var title_block: VBoxContainer = get_node("Frame/Padding/Body/Header/TitleBlock")
+	var illustration: PanelContainer = get_node("Frame/Padding/Body/Illustration")
+	var footer: HBoxContainer = get_node("Frame/Padding/Body/Footer")
+	if is_compact:
+		custom_minimum_size = COMPACT_CARD_SIZE
+		padding.add_theme_constant_override("margin_left", 10)
+		padding.add_theme_constant_override("margin_top", 10)
+		padding.add_theme_constant_override("margin_right", 10)
+		padding.add_theme_constant_override("margin_bottom", 10)
+		body.add_theme_constant_override("separation", 6)
+		header.add_theme_constant_override("separation", 8)
+		title_block.add_theme_constant_override("separation", 2)
+		illustration.custom_minimum_size = Vector2(0, 88)
+		footer.add_theme_constant_override("separation", 6)
+		title_label.add_theme_font_size_override("font_size", 14)
+		meta_label.add_theme_font_size_override("font_size", 9)
+		cost_label.add_theme_font_size_override("font_size", 18)
+		art_label.add_theme_font_size_override("font_size", 13)
+		type_label.add_theme_font_size_override("font_size", 10)
+		description_label.add_theme_font_size_override("normal_font_size", 10)
+		stat_label.add_theme_font_size_override("font_size", 10)
+		tag_label.add_theme_font_size_override("font_size", 9)
+	else:
+		custom_minimum_size = FULL_CARD_SIZE
+		padding.add_theme_constant_override("margin_left", 14)
+		padding.add_theme_constant_override("margin_top", 14)
+		padding.add_theme_constant_override("margin_right", 14)
+		padding.add_theme_constant_override("margin_bottom", 14)
+		body.add_theme_constant_override("separation", 10)
+		header.add_theme_constant_override("separation", 10)
+		title_block.add_theme_constant_override("separation", 4)
+		illustration.custom_minimum_size = Vector2(0, 118)
+		footer.add_theme_constant_override("separation", 8)
+		title_label.add_theme_font_size_override("font_size", 19)
+		meta_label.add_theme_font_size_override("font_size", 11)
+		cost_label.add_theme_font_size_override("font_size", 22)
+		art_label.add_theme_font_size_override("font_size", 16)
+		type_label.add_theme_font_size_override("font_size", 13)
+		description_label.add_theme_font_size_override("normal_font_size", 13)
+		stat_label.add_theme_font_size_override("font_size", 12)
+		tag_label.add_theme_font_size_override("font_size", 11)
+	pivot_offset = custom_minimum_size * 0.5
 
 func _apply_selected_state(value: bool) -> void:
 	var frame: PanelContainer = get_node("Frame")
