@@ -36,6 +36,8 @@ func setup(slot: Dictionary, armed: bool) -> void:
 	if slot.has("occupantCard"):
 		occupant_card_node = CARD_NODE_SCENE.instantiate()
 		occupant_card_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		if occupant_card_node.has_method("set_compact_mode"):
+			occupant_card_node.call("set_compact_mode", true)
 		occupant_card_node.custom_minimum_size = BASE_OCCUPANT_SIZE
 		occupant_card_node.scale = Vector2.ONE * BASE_OCCUPANT_SCALE
 		occupant_anchor.add_child(occupant_card_node)

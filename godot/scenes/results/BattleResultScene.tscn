@@ -46,7 +46,6 @@ theme_override_font_sizes/font_size = 34
 
 [node name="Subtitle" type="Label" parent="Padding/Root/Hero/Padding/HeroStack"]
 layout_mode = 2
-position = Vector2(0, 42)
 text = "故事模式  |  战斗"
 theme_override_font_sizes/font_size = 16
 

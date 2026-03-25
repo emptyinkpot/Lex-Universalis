@@ -187,7 +187,9 @@ func _render_hand() -> void:
 	for index in range(hand_cards.size()):
 		var card := hand_cards[index] as Dictionary
 		var card_node := CARD_NODE_SCENE.instantiate()
-		card_node.custom_minimum_size = Vector2(164, 230)
+		if card_node.has_method("set_compact_mode"):
+			card_node.call("set_compact_mode", true)
+		card_node.custom_minimum_size = Vector2(148, 206)
 		card_node.base_position = Vector2(card_node.position.x, card_node.position.y)
 		card_node.call("setup", card)
 		card_node.call("set_selected", index == selected_hand_index)
@@ -329,7 +331,9 @@ func _animate_card_play(hand_index: int, slot_id: String, card: Dictionary) -> v
 	var target: Control = rendered_slot_nodes[slot_id]
 	var ghost := CARD_NODE_SCENE.instantiate()
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ghost.custom_minimum_size = Vector2(164, 230)
+	if ghost.has_method("set_compact_mode"):
+		ghost.call("set_compact_mode", true)
+	ghost.custom_minimum_size = Vector2(148, 206)
 	overlay_layer.add_child(ghost)
 	ghost.call("setup", card)
 	ghost.global_position = source.global_position
@@ -521,7 +525,9 @@ func _show_drag_preview(hand_index: int) -> void:
 	var source: Control = rendered_hand_nodes[hand_index]
 	preview_ghost = CARD_NODE_SCENE.instantiate()
 	preview_ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	preview_ghost.custom_minimum_size = Vector2(164, 230)
+	if preview_ghost.has_method("set_compact_mode"):
+		preview_ghost.call("set_compact_mode", true)
+	preview_ghost.custom_minimum_size = Vector2(148, 206)
 	overlay_layer.add_child(preview_ghost)
 	preview_ghost.call("setup", hand_cards[hand_index])
 	preview_ghost.size = source.size
@@ -713,7 +719,9 @@ func _animate_slot_attack(attacker_slot_id: String, target_slot_id: String, targ
 		return
 	var ghost := CARD_NODE_SCENE.instantiate()
 	ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ghost.custom_minimum_size = Vector2(156, 216)
+	if ghost.has_method("set_compact_mode"):
+		ghost.call("set_compact_mode", true)
+	ghost.custom_minimum_size = Vector2(140, 194)
 	overlay_layer.add_child(ghost)
 	var source_slot := _find_slot_by_id(attacker_slot_id)
 	ghost.call("setup", _build_slot_card_payload(source_slot))
@@ -939,13 +947,13 @@ func _apply_responsive_desktop_layout() -> void:
 	root_container.position = Vector2.ZERO
 	var scale: float = ui_scale
 	var top_height := clampi(int(round(60.0 * scale)), 54, 72)
-	var hud_height := clampi(int(round(34.0 * scale)), 28, 44)
-	var dock_height := clampi(int(round(available_size.y * 0.145)), 124, 156)
-	var rail_width := clampi(int(round(available_size.x * 0.16)), 200, 256)
-	var card_width := clampi(int(round(136.0 * scale)), 120, 156)
-	var card_height := clampi(int(round(190.0 * scale)), 164, 210)
-	var attack_card_width := clampi(int(round(96.0 * scale)), 84, 124)
-	var attack_card_height := clampi(int(round(134.0 * scale)), 118, 160)
+	var hud_height := clampi(int(round(30.0 * scale)), 26, 40)
+	var dock_height := clampi(int(round(available_size.y * 0.12)), 108, 136)
+	var rail_width := clampi(int(round(available_size.x * 0.15)), 188, 232)
+	var card_width := clampi(int(round(120.0 * scale)), 108, 144)
+	var card_height := clampi(int(round(168.0 * scale)), 146, 186)
+	var attack_card_width := clampi(int(round(84.0 * scale)), 76, 108)
+	var attack_card_height := clampi(int(round(118.0 * scale)), 104, 140)
 	top_bar.custom_minimum_size = Vector2(0, top_height)
 	hud_strip.custom_minimum_size = Vector2(0, hud_height)
 	stage.custom_minimum_size = Vector2(0, 0)
