@@ -26,6 +26,11 @@ To run the project from source:
 
 - [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
 
+Local Codex bridge for AI-assisted UI edits:
+
+- [`E:\Lex Universalis\start-codex-bridge.bat`](/E:/Lex%20Universalis/start-codex-bridge.bat)
+- [`E:\Lex Universalis\tools\codex-bridge`](/E:/Lex%20Universalis/tools/codex-bridge)
+
 Validate the Godot project headlessly:
 
 - [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)

@@ -8,6 +8,7 @@ const CARD_SCENE := preload("res://scenes/cards/CardGalleryScene.tscn")
 const RESULT_SCENE := preload("res://scenes/results/BattleResultScene.tscn")
 const HOME_SCENE := preload("res://scenes/home/HomeScene.tscn")
 const SETTINGS_SCENE := preload("res://scenes/settings/SettingsScene.tscn")
+const ASSISTANT_SCENE := preload("res://scenes/assistant/AiAssistantScene.tscn")
 const DATA_LOADER = preload("res://scripts/data_loader.gd")
 
 @onready var top_stats: Label = get_node("Margin/Root/TopBar/TopBarPadding/TopBarRow/TopStats")
@@ -24,6 +25,7 @@ var deck_builder_view: Control
 var card_view: Control
 var result_view: Control
 var settings_view: Control
+var assistant_view: Control
 var ui_theme: Theme
 
 func _ready() -> void:
@@ -42,6 +44,7 @@ func _ready() -> void:
 	card_view = _mount_scene("CardsTab", CARD_SCENE)
 	result_view = _mount_scene("ResultsTab", RESULT_SCENE)
 	settings_view = _mount_scene("SettingsTab", SETTINGS_SCENE)
+	assistant_view = _mount_scene("AssistantTab", ASSISTANT_SCENE)
 	if home_view.has_signal("open_page"):
 		home_view.open_page.connect(_on_home_open_page)
 	if story_view.has_signal("launch_level"):
@@ -54,8 +57,11 @@ func _ready() -> void:
 		settings_view.language_changed.connect(_on_language_changed)
 	if settings_view.has_signal("return_home"):
 		settings_view.return_home.connect(_on_return_home)
+	if assistant_view.has_method("refresh_language"):
+		assistant_view.refresh_language()
 	_apply_tab_titles()
 	_refresh_views_language()
+	call_deferred("_apply_debug_tab_from_env")
 
 func _maximize_window() -> void:
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
@@ -63,15 +69,18 @@ func _maximize_window() -> void:
 func _render_stats() -> void:
 	var manifest: Dictionary = data_loader.load_manifest()
 	var datasets: Array = manifest.get("datasets", [])
-	var summary: Array[String] = []
+	var dataset_count := 0
+	var card_total := 0
 	for dataset in datasets:
 		if dataset is Dictionary:
+			dataset_count += 1
 			var count: Variant = dataset.get("count", null)
-			if count == null:
-				summary.append(str(dataset.get("id", "dataset")))
-			else:
-				summary.append("%s %s" % [str(dataset.get("id", "dataset")), str(count)])
-	top_stats.text = "%s: %s" % [data_loader.t("home_datasets"), "   |   ".join(summary)]
+			if count != null:
+				card_total += int(count)
+	if data_loader.get_language() == "en":
+		top_stats.text = "%s %d | Cards %d" % [data_loader.t("home_datasets"), dataset_count, card_total]
+	else:
+		top_stats.text = "%s %d | 卡牌 %d" % [data_loader.t("home_datasets"), dataset_count, card_total]
 
 func _apply_language_texts() -> void:
 	app_title.text = data_loader.t("app_title")
@@ -87,6 +96,7 @@ func _apply_tab_titles() -> void:
 	tab_container.set_tab_title(5, data_loader.t("cards_title"))
 	tab_container.set_tab_title(6, data_loader.t("result_tab_title"))
 	tab_container.set_tab_title(7, data_loader.t("settings_title"))
+	tab_container.set_tab_title(8, data_loader.t("assistant_title"))
 
 func _refresh_views_language() -> void:
 	if home_view.has_method("refresh_language"):
@@ -105,6 +115,8 @@ func _refresh_views_language() -> void:
 		result_view.refresh_language()
 	if settings_view.has_method("refresh_language"):
 		settings_view.refresh_language()
+	if assistant_view.has_method("refresh_language"):
+		assistant_view.refresh_language()
 
 func _mount_scene(tab_name: String, scene: PackedScene) -> Control:
 	var host := tab_container.get_node(tab_name) as Control
@@ -126,7 +138,7 @@ func _on_battle_finished(result_data: Dictionary) -> void:
 		if not level_id.is_empty():
 			data_loader.update_story_progress(level_id, int(result_data.get("starsEarned", 0)), result_data.get("rewards", []))
 		_render_stats()
-	tab_container.current_tab = 3
+	tab_container.current_tab = 6
 	if result_view.has_method("setup_result"):
 		result_view.setup_result(result_data)
 
@@ -154,6 +166,8 @@ func _on_home_open_page(page_id: String) -> void:
 			tab_container.current_tab = 6
 		"settings":
 			tab_container.current_tab = 7
+		"assistant":
+			tab_container.current_tab = 8
 		_:
 			tab_container.current_tab = 0
 
@@ -170,6 +184,25 @@ func _on_language_changed(language: String) -> void:
 		battle_view.refresh_language()
 	if result_view.has_method("refresh_language"):
 		result_view.refresh_language()
+
+func _apply_debug_tab_from_env() -> void:
+	var tab_id := OS.get_environment("LEX_DEBUG_TAB").strip_edges().to_lower()
+	if tab_id.is_empty():
+		return
+	var tab_map := {
+		"home": 0,
+		"story": 1,
+		"battle": 2,
+		"card_editor": 3,
+		"deck_builder": 4,
+		"cards": 5,
+		"results": 6,
+		"settings": 7,
+		"assistant": 8,
+	}
+	if not tab_map.has(tab_id):
+		return
+	tab_container.current_tab = int(tab_map[tab_id])
 
 func _build_desktop_theme() -> Theme:
 	var theme := Theme.new()

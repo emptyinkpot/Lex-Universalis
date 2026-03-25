@@ -62,6 +62,12 @@ var mode_entries := [
 		"summary": "",
 		"action": "",
 	},
+	{
+		"id": "ai_assistant",
+		"title": "",
+		"summary": "",
+		"action": "",
+	},
 ]
 
 func _ready() -> void:
@@ -127,6 +133,9 @@ func _apply_language_texts() -> void:
 	mode_entries[6]["title"] = data_loader.t("home_settings_title")
 	mode_entries[6]["summary"] = data_loader.t("home_settings_summary")
 	mode_entries[6]["action"] = data_loader.t("home_settings_action")
+	mode_entries[7]["title"] = data_loader.t("home_ai_title")
+	mode_entries[7]["summary"] = data_loader.t("home_ai_summary")
+	mode_entries[7]["action"] = data_loader.t("home_ai_action")
 	get_node("Padding/Root/Hero/HeroPadding/HeroStack/HeroBody/HeroText/Title").text = data_loader.t("app_title")
 	get_node("Padding/Root/Hero/HeroPadding/HeroStack/HeroBody/HeroText/Subtitle").text = data_loader.t("app_subtitle")
 	get_node("Padding/Root/Content/ModePanel/ModePadding/ModeBody/ModeHeader").text = data_loader.t("home_modes_title")
@@ -144,7 +153,12 @@ func _select_mode(index: int) -> void:
 		data_loader.t("app_footer"),
 	]
 	launch_button.text = str(entry.get("action", data_loader.t("home_story_action")))
-	secondary_button.text = data_loader.t("settings_back") if selected_mode_id == "settings" else data_loader.t("home_settings_action")
+	if selected_mode_id == "settings":
+		secondary_button.text = data_loader.t("settings_back")
+	elif selected_mode_id == "ai_assistant":
+		secondary_button.text = data_loader.t("home_ai_action")
+	else:
+		secondary_button.text = data_loader.t("home_settings_action")
 
 func _on_mode_selected(index: int) -> void:
 	_select_mode(index)

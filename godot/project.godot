@@ -1,24 +1,32 @@
 ; Engine configuration file.
-; Godot 4.x project bootstrap for Lex Universalis.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
 
 config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 [application]
 
 config/name="Lex Universalis"
 run/main_scene="res://scenes/Main.tscn"
-config/features=PackedStringArray("4.2")
+config/features=PackedStringArray("4.6")
 config/icon="res://assets/lex-universalis.ico"
 
 [display]
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
-window/size/resizable=true
+window/size/mode=2
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[rendering]
+[editor_plugins]
 
-renderer/rendering_method="forward_plus"
-renderer/rendering_method.mobile="mobile"
+enabled=PackedStringArray("res://addons/lex_universalis_codex_editor/plugin.cfg")

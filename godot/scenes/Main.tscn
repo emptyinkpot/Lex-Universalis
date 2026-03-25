@@ -62,34 +62,34 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = -24.0
-offset_bottom = -24.0
+offset_left = 12.0
+offset_top = 12.0
+offset_right = -12.0
+offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
-theme_override_constants/margin_right = 24
-theme_override_constants/margin_bottom = 24
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
 
 [node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 8
 
 [node name="TopBar" type="PanelContainer" parent="Margin/Root"]
 layout_mode = 2
 
 [node name="TopBarPadding" type="MarginContainer" parent="Margin/Root/TopBar"]
 layout_mode = 2
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 16
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
 
 [node name="TopBarRow" type="HBoxContainer" parent="Margin/Root/TopBar/TopBarPadding"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 10
 
 [node name="TitleBlock" type="VBoxContainer" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow"]
 layout_mode = 2
@@ -98,19 +98,19 @@ size_flags_horizontal = 3
 [node name="Title" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock"]
 layout_mode = 2
 text = "我即真理 Lex Universalis"
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 24
 
 [node name="Subtitle" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow/TitleBlock"]
 layout_mode = 2
 text = "Godot 桌面版工作台"
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 11
 
 [node name="TopStats" type="Label" parent="Margin/Root/TopBar/TopBarPadding/TopBarRow"]
 layout_mode = 2
 horizontal_alignment = 2
 size_flags_horizontal = 3
 text = "加载数据中..."
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 11
 
 [node name="Modes" type="TabContainer" parent="Margin/Root"]
 layout_mode = 2
@@ -162,18 +162,25 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="AssistantTab" type="Control" parent="Margin/Root/Modes"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
 [node name="Footer" type="PanelContainer" parent="Margin/Root"]
 layout_mode = 2
+visible = false
 
 [node name="FooterPadding" type="MarginContainer" parent="Margin/Root/Footer"]
 layout_mode = 2
-theme_override_constants/margin_left = 18
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
 
 [node name="FooterLabel" type="Label" parent="Margin/Root/Footer/FooterPadding"]
 layout_mode = 2
 text = "固定单窗口桌面版：故事、战斗、卡牌编辑与卡组构筑都在 Godot 原生视口中运行。"
 autowrap_mode = 3
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 11

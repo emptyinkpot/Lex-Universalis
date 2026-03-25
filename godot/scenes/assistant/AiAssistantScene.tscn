@@ -1,0 +1,241 @@
+[gd_scene load_steps=2 format=3 uid="uid://lexaiassistantscene001"]
+
+[ext_resource type="Script" path="res://scripts/ai_assistant_scene.gd" id="1_ai001"]
+
+[node name="AiAssistantScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ai001")
+
+[node name="Padding" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Root" type="VBoxContainer" parent="Padding"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Hero" type="PanelContainer" parent="Padding/Root"]
+layout_mode = 2
+
+[node name="HeroPadding" type="MarginContainer" parent="Padding/Root/Hero"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="HeroStack" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HeroRow" type="HBoxContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleBlock" type="VBoxContainer" parent="Padding/Root/Hero/HeroPadding/HeroStack/HeroRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Title" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/HeroRow/TitleBlock"]
+layout_mode = 2
+text = "AI 助手 / Codex Bridge"
+theme_override_font_sizes/font_size = 26
+
+[node name="Subtitle" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/HeroRow/TitleBlock"]
+layout_mode = 2
+text = "把 Godot UI 目标、场景路径和修改意图发给本地 Codex 桥。"
+theme_override_font_sizes/font_size = 13
+
+[node name="Status" type="Label" parent="Padding/Root/Hero/HeroPadding/HeroStack/HeroRow"]
+layout_mode = 2
+horizontal_alignment = 2
+size_flags_horizontal = 3
+text = "Bridge: offline"
+theme_override_font_sizes/font_size = 13
+
+[node name="AccentBar" type="ColorRect" parent="Padding/Root/Hero/HeroPadding/HeroStack"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.843137, 0.72549, 0.447059, 0.95)
+
+[node name="Content" type="HBoxContainer" parent="Padding/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="RequestPanel" type="PanelContainer" parent="Padding/Root/Content"]
+custom_minimum_size = Vector2(480, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RequestPadding" type="MarginContainer" parent="Padding/Root/Content/RequestPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="RequestBody" type="VBoxContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RequestTitle" type="Label" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+text = "请求"
+theme_override_font_sizes/font_size = 20
+
+[node name="BridgeRow" type="HBoxContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BridgeUrl" type="LineEdit" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/BridgeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "http://127.0.0.1:43987"
+
+[node name="PingButton" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/BridgeRow"]
+layout_mode = 2
+text = "测试"
+
+[node name="ModelRow" type="HBoxContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ModelLabel" type="Label" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/ModelRow"]
+layout_mode = 2
+text = "模型"
+custom_minimum_size = Vector2(56, 0)
+theme_override_font_sizes/font_size = 13
+
+[node name="ModelEdit" type="LineEdit" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/ModelRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TargetRow" type="VBoxContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TargetLabel" type="Label" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/TargetRow"]
+layout_mode = 2
+text = "目标场景"
+theme_override_font_sizes/font_size = 13
+
+[node name="TargetEdit" type="LineEdit" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/TargetRow"]
+layout_mode = 2
+text = "res://scenes/battle/BattleScene.tscn"
+
+[node name="PresetRow" type="GridContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="BattlePreset" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/PresetRow"]
+layout_mode = 2
+text = "战斗页"
+
+[node name="HomePreset" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/PresetRow"]
+layout_mode = 2
+text = "首页"
+
+[node name="StoryPreset" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/PresetRow"]
+layout_mode = 2
+text = "故事页"
+
+[node name="EditorPreset" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/PresetRow"]
+layout_mode = 2
+text = "卡牌编辑"
+
+[node name="DeckPreset" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/PresetRow"]
+layout_mode = 2
+text = "卡组构筑"
+
+[node name="ApplyRow" type="HBoxContainer" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ApplyCheck" type="CheckBox" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/ApplyRow"]
+layout_mode = 2
+text = "直接写入文件"
+
+[node name="AnalyzeButton" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/ApplyRow"]
+layout_mode = 2
+text = "发送请求"
+
+[node name="OpenBridgeButton" type="Button" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody/ApplyRow"]
+layout_mode = 2
+text = "打开桥"
+
+[node name="InstructionLabel" type="Label" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+text = "修改意图"
+theme_override_font_sizes/font_size = 13
+
+[node name="InstructionEdit" type="TextEdit" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 220)
+text = "请先把当前页面的 Godot UI 简化为三段式布局：顶部信息、中央主体、底部操作栏。减少重叠、截断和冗余图标。"
+
+[node name="ContextLabel" type="Label" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+text = "上下文路径（每行一个）"
+theme_override_font_sizes/font_size = 13
+
+[node name="ContextEdit" type="TextEdit" parent="Padding/Root/Content/RequestPanel/RequestPadding/RequestBody"]
+layout_mode = 2
+size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 144)
+text = "res://scenes/battle/BattleScene.tscn\nres://scripts/battle_scene.gd\nres://scenes/components/BattleSlot.tscn\nres://scripts/battle_slot.gd\nres://scenes/components/CardNode.tscn\nres://scripts/card_node.gd"
+
+[node name="ResponsePanel" type="PanelContainer" parent="Padding/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ResponsePadding" type="MarginContainer" parent="Padding/Root/Content/ResponsePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="ResponseBody" type="VBoxContainer" parent="Padding/Root/Content/ResponsePanel/ResponsePadding"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ResponseTitle" type="Label" parent="Padding/Root/Content/ResponsePanel/ResponsePadding/ResponseBody"]
+layout_mode = 2
+text = "结果"
+theme_override_font_sizes/font_size = 20
+
+[node name="ResponseStatus" type="Label" parent="Padding/Root/Content/ResponsePanel/ResponsePadding/ResponseBody"]
+layout_mode = 2
+text = "等待请求"
+theme_override_font_sizes/font_size = 13
+
+[node name="ResponseText" type="RichTextLabel" parent="Padding/Root/Content/ResponsePanel/ResponsePadding/ResponseBody"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = true
+text = "这里会显示 Codex 的分析结果、建议和可选修改。"
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+timeout = 60.0
+

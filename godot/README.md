@@ -8,6 +8,7 @@ This directory is now the active desktop game project.
 - Data-driven bootstrap from JSON exports
 - Main shell scene for story/card/battle flow
 - Story mode, card editor, deck builder, battle, result screen, and persistent story progress
+- AI Assistant page for local Codex bridge-driven UI analysis and rewrites
 - Player-side unit deployment, orders, and enemy turn resolution
 
 ## Open In Godot
