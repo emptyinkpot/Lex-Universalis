@@ -16,7 +16,7 @@ var hover_target_rotation := 0.0
 var hover_target_modulate := Color.WHITE
 
 const FULL_CARD_SIZE := Vector2(220, 308)
-const COMPACT_CARD_SIZE := Vector2(160, 224)
+const COMPACT_CARD_SIZE := Vector2(144, 202)
 
 func _ready() -> void:
 	mouse_entered.connect(_on_mouse_entered)
@@ -83,8 +83,9 @@ func set_selected(value: bool) -> void:
 	is_selected = value
 	_apply_selected_state(value)
 	if not is_dragging:
-		hover_target_position = base_position + Vector2(0, -20 if value else 0)
-		hover_target_scale = Vector2.ONE * (1.04 if value else 1.0)
+		var lift := 0.0 if is_compact else (-20.0 if value else 0.0)
+		hover_target_position = base_position + Vector2(0, lift)
+		hover_target_scale = Vector2.ONE * (1.0 if is_compact else (1.04 if value else 1.0))
 		hover_target_rotation = 0.0
 		hover_target_modulate = Color(1, 1, 1, 1.0)
 
@@ -117,16 +118,16 @@ func _apply_layout() -> void:
 		body.add_theme_constant_override("separation", 6)
 		header.add_theme_constant_override("separation", 8)
 		title_block.add_theme_constant_override("separation", 2)
-		illustration.custom_minimum_size = Vector2(0, 88)
+		illustration.custom_minimum_size = Vector2(0, 76)
 		footer.add_theme_constant_override("separation", 6)
-		title_label.add_theme_font_size_override("font_size", 14)
-		meta_label.add_theme_font_size_override("font_size", 9)
-		cost_label.add_theme_font_size_override("font_size", 18)
-		art_label.add_theme_font_size_override("font_size", 13)
-		type_label.add_theme_font_size_override("font_size", 10)
-		description_label.add_theme_font_size_override("normal_font_size", 10)
-		stat_label.add_theme_font_size_override("font_size", 10)
-		tag_label.add_theme_font_size_override("font_size", 9)
+		title_label.add_theme_font_size_override("font_size", 13)
+		meta_label.add_theme_font_size_override("font_size", 8)
+		cost_label.add_theme_font_size_override("font_size", 16)
+		art_label.add_theme_font_size_override("font_size", 12)
+		type_label.add_theme_font_size_override("font_size", 9)
+		description_label.add_theme_font_size_override("normal_font_size", 9)
+		stat_label.add_theme_font_size_override("font_size", 9)
+		tag_label.add_theme_font_size_override("font_size", 8)
 	else:
 		custom_minimum_size = FULL_CARD_SIZE
 		padding.add_theme_constant_override("margin_left", 14)
@@ -177,15 +178,15 @@ func _on_gui_input(event: InputEvent) -> void:
 		_update_hover_tilt(event.position)
 
 func _on_mouse_entered() -> void:
-	var target_position := base_position + Vector2(0, -18 if not is_selected else -28)
+	var target_position := base_position + Vector2(0, 0 if is_compact else (-18 if not is_selected else -28))
 	hover_target_position = target_position
-	hover_target_scale = Vector2.ONE * (1.03 if not is_selected else 1.05)
+	hover_target_scale = Vector2.ONE * (1.0 if is_compact else (1.03 if not is_selected else 1.05))
 	hover_target_rotation = rotation
 	hover_target_modulate = Color(1, 1, 1, 1.0)
 
 func _on_mouse_exited() -> void:
-	hover_target_position = base_position + Vector2(0, -20 if is_selected else 0)
-	hover_target_scale = Vector2.ONE * (1.04 if is_selected else 1.0)
+	hover_target_position = base_position + Vector2(0, 0 if is_compact else (-20 if is_selected else 0))
+	hover_target_scale = Vector2.ONE * (1.0 if is_compact else (1.04 if is_selected else 1.0))
 	hover_target_rotation = 0.0
 	hover_target_modulate = Color(1, 1, 1, 1.0)
 
@@ -204,6 +205,9 @@ func _process(delta: float) -> void:
 	modulate = modulate.lerp(hover_target_modulate, minf(1.0, delta * 12.0))
 
 func _update_hover_tilt(mouse_position: Vector2) -> void:
+	if is_compact:
+		hover_target_rotation = 0.0
+		return
 	var center: Vector2 = size * 0.5
 	if center == Vector2.ZERO:
 		return
