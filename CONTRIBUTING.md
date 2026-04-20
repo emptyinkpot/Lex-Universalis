@@ -1,34 +1,50 @@
-# Contributing Guide
+# 贡献规范
 
-## Repository layout
+## 仓库布局
 
-- `godot/`: active Godot game project
-- `build/`: packaged desktop output
-- `docs/`: design notes, rules, lore, and Godot implementation records
-- `config/`: retained project configuration and reference data
-- `scripts/`: helper scripts for export and maintenance
+- `godot/`: 当前桌面版 Godot 4 工程真源
+- `build/`: 打包后的桌面输出
+- `docs/`: 设计、规则、世界观与迁移记录
+- `config/`: 项目配置与参考数据
+- `scripts/`: 辅助脚本
 
-## Common commands
+## 常用命令
 
 ```bash
 .\validate-godot.bat
 .\start-godot.bat
+.\publish-desktop.bat
+.\start-codex-bridge.bat
 ```
 
-## Package rules
+## Reviewer / Sourcery 会重点看什么
 
-- Keep runtime behavior in the Godot project.
-- Keep generated data under `godot/data/generated/`.
-- Keep packaged build outputs under `build/windows/`.
+- scene / script / resource / signal / node path 是否保持一致
+- `godot/data/generated/` 的更新是否有明确来源与目标
+- Godot 桌面版是否仍然是唯一 canonical runtime
+- 导出、验证、bridge 脚本是否仍可执行且含义明确
 
-## Commit rules
+## 提交规则
 
-- Use the template in `.gitmessage`
-- Prefer `type(scope): subject`
-- Keep each commit focused on one change
+- 继续使用 `.gitmessage` 里的格式
+- 优先使用 `type(scope): subject`
+- 一个 commit / PR 尽量只做一个清晰主题
 
-## File hygiene
+## PR 期望内容
 
-- Keep generated archives out of the repository
-- Keep binary assets as binary files
-- Use LF line endings for text files
+每个 PR 请说明：
+
+1. 改动影响了哪些 scene / script / generated data / build 脚本
+2. 你的验证步骤是什么
+3. 是否有截图、录屏或等价证据
+4. 如果改了导出或 bridge 链路，如何最短回滚
+
+## 跳过 Sourcery 的规则
+
+默认不要跳过。如果确实需要跳过，请在 PR 上加：
+
+- `skip-sourcery`
+- `no-sourcery`
+- `sourcery-ignore`
+
+并在 PR 描述里说明原因。
