@@ -146,8 +146,8 @@ func _load_preset(preset_id: String) -> void:
 	response_status.text = "Preset loaded: %s" % preset_id if data_loader.get_language() == "en" else "已加载预设：%s" % preset_id
 
 func _open_bridge() -> void:
-	var path := "E:/Lex Universalis/start-codex-bridge.bat"
-	OS.shell_open(path)
+	var project_root := ProjectSettings.globalize_path("res://..")
+	OS.shell_open(project_root.path_join("start-codex-bridge.bat"))
 
 func _ping_bridge() -> void:
 	var url := _bridge_url().trim_suffix("/")

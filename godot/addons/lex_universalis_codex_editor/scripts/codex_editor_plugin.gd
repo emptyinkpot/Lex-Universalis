@@ -1,23 +1,37 @@
 @tool
 extends EditorPlugin
 
-const BUILDER_PATH := "E:/Program Files(x86)/Godot/4.6.1/addons/lex_universalis_codex_editor/scripts/codex_dock_builder.gd"
-
-var builder: RefCounted
 var dock: Control
 
 func _enter_tree() -> void:
-	var builder_script: Variant = load(BUILDER_PATH)
-	if builder_script is Script:
-		builder = (builder_script as Script).new()
-	if builder != null and builder.has_method("build_dock"):
-		dock = builder.call("build_dock") as Control
-		if dock != null:
-			add_control_to_dock(DOCK_SLOT_RIGHT_UL, dock)
+	dock = _build_dock()
+	add_control_to_dock(DOCK_SLOT_RIGHT_UL, dock)
 
 func _exit_tree() -> void:
 	if dock != null:
 		remove_control_from_docks(dock)
 		dock.queue_free()
 		dock = null
-	builder = null
+
+func _build_dock() -> Control:
+	var root := VBoxContainer.new()
+	root.name = "LexUniversalisCodexDock"
+	root.custom_minimum_size = Vector2(280, 160)
+
+	var title := Label.new()
+	title.text = "Lex Universalis Codex Bridge"
+	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	root.add_child(title)
+
+	var hint := RichTextLabel.new()
+	hint.fit_content = true
+	hint.bbcode_enabled = true
+	hint.text = "[b]Local bridge:[/b] run start-codex-bridge.bat from the repository root, then open the in-game AI Assistant page."
+	root.add_child(hint)
+
+	var button := Button.new()
+	button.text = "Health: http://127.0.0.1:43987/health"
+	button.tooltip_text = "Open this URL in a browser after starting the bridge."
+	root.add_child(button)
+
+	return root

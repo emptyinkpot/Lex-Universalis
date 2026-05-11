@@ -4,7 +4,7 @@ The migration is now in the maintenance phase. The Godot project is the runtime 
 
 ## Completed
 
-1. Desktop Godot project scaffolded under [`E:\Lex Universalis\godot`](/E:/Lex%20Universalis/godot).
+1. Desktop Godot project scaffolded under `godot/`.
 2. Story, battle, results, and card gallery scenes moved into Godot.
 3. Generated JSON data feeds the Godot runtime.
 4. Story progress is written to a user save file.

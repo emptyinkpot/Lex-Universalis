@@ -1,17 +1,14 @@
 @echo off
 setlocal
 
-set GODOT_CONSOLE=C:\Users\ASUS-KL\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.1-stable_win64_console.exe
-set PROJECT_DIR=%~dp0godot
-set BUILD_DIR=%~dp0build\windows
-set PACK_PATH=%BUILD_DIR%\Lex Universalis.pck
-set EXE_PATH=%BUILD_DIR%\Lex Universalis.exe
+call "%~dp0scripts\find-godot.bat" console
+if errorlevel 1 exit /b 1
 
-if not exist "%GODOT_CONSOLE%" (
-  echo Godot console executable not found:
-  echo %GODOT_CONSOLE%
-  exit /b 1
-)
+set "GODOT_CONSOLE=%LEX_GODOT_EXE%"
+set "PROJECT_DIR=%~dp0godot"
+set "BUILD_DIR=%~dp0build\windows"
+set "PACK_PATH=%BUILD_DIR%\Lex Universalis.pck"
+set "EXE_PATH=%BUILD_DIR%\Lex Universalis.exe"
 
 if not exist "%BUILD_DIR%" (
   mkdir "%BUILD_DIR%"
@@ -21,13 +18,9 @@ echo Exporting Windows pack...
 "%GODOT_CONSOLE%" --headless --path "%PROJECT_DIR%" --export-pack "Windows Desktop" "%PACK_PATH%"
 if errorlevel 1 exit /b 1
 
-set GODOT_GUI=C:\Users\ASUS-KL\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.1-stable_win64.exe
-
-if not exist "%GODOT_GUI%" (
-  echo Godot GUI executable not found:
-  echo %GODOT_GUI%
-  exit /b 1
-)
+call "%~dp0scripts\find-godot.bat"
+if errorlevel 1 exit /b 1
+set "GODOT_GUI=%LEX_GODOT_EXE%"
 
 echo Refreshing desktop launcher binary...
 copy /Y "%GODOT_GUI%" "%EXE_PATH%" >nul

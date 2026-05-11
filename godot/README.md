@@ -1,6 +1,6 @@
 # Lex Universalis Godot Project
 
-This directory is now the active desktop game project.
+This directory is the active Godot 4 desktop runtime.
 
 ## Current Scope
 
@@ -13,32 +13,28 @@ This directory is now the active desktop game project.
 
 ## Open In Godot
 
-Open [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot) in Godot 4.6.x.
+Open `project.godot` in Godot 4.6.x, or run from the repository root:
 
-Or use:
+```bat
+.\start-godot.bat
+```
 
-- [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
+Headless validation:
 
-To validate the project without opening the editor:
+```bat
+.\validate-godot.bat
+```
 
-- [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)
+Windows export:
 
-To use the packaged desktop build:
+```bat
+.\publish-desktop.bat
+```
 
-- [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
+## Runtime Notes
 
-To rebuild the packaged desktop build from source:
-
-- [`E:\Lex Universalis\publish-desktop.bat`](/E:/Lex%20Universalis/publish-desktop.bat)
-
-## Data
-
-Generated runtime data lives in:
-
-- [`E:\Lex Universalis\godot\data\generated`](/E:/Lex%20Universalis/godot/data/generated)
-
-Story progress is written at runtime to:
-
-- `user://story-progress.save.json`
-
-The project target remains a true desktop single-viewport layout, not a scroll-page UI.
+- Main scene: `scenes/Main.tscn`
+- Generated data: `data/generated/`
+- Story progress: `user://story-progress.save.json`
+- Editor plugin: `addons/lex_universalis_codex_editor/`
+- Resource paths should stay as `res://...` so the project works from any checkout path.

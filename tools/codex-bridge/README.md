@@ -1,11 +1,13 @@
 # Lex Universalis Codex Bridge
 
-This local Node service exposes a simple HTTP bridge for the Godot AI Assistant page.
+This local Node service exposes a small HTTP bridge for the Godot AI Assistant page.
 
 ## Start
 
+Run from the repository root:
+
 ```bat
-E:\Lex Universalis\start-codex-bridge.bat
+.\start-codex-bridge.bat
 ```
 
 ## Endpoints
@@ -17,7 +19,7 @@ E:\Lex Universalis\start-codex-bridge.bat
 
 - Copy `.env.example` to `.env` if you want the batch launcher to load variables automatically.
 - `OPENAI_API_KEY` - required for model calls
-- `CODEX_WORKSPACE` - defaults to `E:\Lex Universalis`
+- `CODEX_WORKSPACE` - optional; defaults to the repository root
 - `CODEX_BRIDGE_PORT` - defaults to `43987`
 - `CODEX_MODEL` - defaults to `gpt-5.2-codex`
 

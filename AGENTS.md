@@ -1,5 +1,14 @@
 # Lex-Universalis Review Guide
 
+## Read Order
+
+1. `README.md`
+2. `project.json`
+3. `godot/README.md`
+4. `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
+5. `docs/contracts/git-workflow.md`
+6. `docs/contracts/environment-branch-runbook.md`
+
 ## 常用命令
 
 ```bash
@@ -7,6 +16,7 @@
 .\start-godot.bat
 .\publish-desktop.bat
 .\start-codex-bridge.bat
+.\scripts\git-env-sync.ps1 status
 ```
 
 ## 仓库专属审查重点
@@ -21,6 +31,7 @@
 3. 文档、脚本与配置相关变更要重点检查：
    - 继续把 Godot 桌面版视为 canonical runtime；
    - 不要重新引入已经退役的 Web runtime 假设或历史路径。
+   - 不要提交用户机器绝对路径；启动脚本必须从仓库根或环境变量推导。
 
 ## PR 要求
 

@@ -1,0 +1,88 @@
+{
+  "name": "Lex-Universalis",
+  "projectName": "Lex Universalis",
+  "canonicalDoc": "README.md",
+  "machineReadableEntry": "project.json",
+  "githubRepo": "https://github.com/emptyinkpot/Lex-Universalis",
+  "visibility": "public",
+  "type": "godot-game",
+  "status": "active",
+  "canonicalPurpose": "Godot 4 desktop card roguelike prototype and design repository for Lex Universalis.",
+  "owner": "emptyinkpot",
+  "sourceOfTruth": "Git repository; Godot runtime under godot/",
+  "runtimeLocation": "portable repository checkout",
+  "runtimeRoot": "godot",
+  "engine": {
+    "name": "Godot",
+    "majorVersion": 4,
+    "testedVersion": "4.6.x",
+    "projectFile": "godot/project.godot",
+    "mainScene": "godot/scenes/Main.tscn"
+  },
+  "repositoryRole": "active-game-source",
+  "preferredSource": true,
+  "branchContract": {
+    "model": "three-environment-branches",
+    "integrationBranch": "main",
+    "localDebugBranch": "local",
+    "remoteIdeDebugBranch": "remote-ide",
+    "promotionRule": "local and remote-ide are debugging lanes; durable changes should land on main after validation."
+  },
+  "consumerInterfaces": [
+    "README.md",
+    "project.json",
+    "godot/project.godot",
+    "docs/"
+  ],
+  "configurationSurfaces": [
+    "godot/project.godot",
+    "godot/export_presets.cfg",
+    "config/theme-settings.json",
+    "tools/codex-bridge/.env"
+  ],
+  "secretSurfaces": [
+    "tools/codex-bridge/.env"
+  ],
+  "verificationCommands": [
+    ".\\validate-godot.bat"
+  ],
+  "runCommands": [
+    ".\\start-godot.bat",
+    ".\\start-codex-bridge.bat"
+  ],
+  "buildCommands": [
+    ".\\publish-desktop.bat"
+  ],
+  "documentation": [
+    "README.md",
+    "godot/README.md",
+    "docs/README.md",
+    "docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md",
+    "docs/reference/dev/godot-repo-guide.md",
+    "docs/reference/dev/godot-migration-checklist.md"
+  ],
+  "readOrder": [
+    "README.md",
+    "project.json",
+    "godot/README.md",
+    "docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md",
+    "docs/game-design/moon/README.md",
+    "docs/reference/README.md",
+    "docs/reference/dev/godot-repo-guide.md",
+    "docs/reference/dev/godot-migration-checklist.md",
+    "godot/project.godot",
+    "godot/scripts/main.gd",
+    "godot/scripts/data_loader.gd"
+  ],
+  "portabilityPolicy": {
+    "noAbsoluteUserPaths": true,
+    "godotResolution": "Use GODOT_EXE/GODOT_CONSOLE, PATH, or common Godot install locations through scripts/find-godot.bat.",
+    "workspaceResolution": "Batch launchers derive paths from %~dp0; Node bridge defaults to its repository root.",
+    "godotResourcePolicy": "Use res:// paths inside Godot resources and scenes."
+  },
+  "doNotUseAs": [
+    "secret store",
+    "Obsidian-only planning vault",
+    "web runtime source"
+  ]
+}

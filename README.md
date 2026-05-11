@@ -1,43 +1,69 @@
 # Lex Universalis
 
-`Lex Universalis` is now a Godot desktop game project. The active runtime is:
+Lex Universalis is a Godot 4 desktop card roguelike prototype. The repository
+truth is portable: clone it anywhere, open `godot/project.godot`, and keep
+runtime paths relative to the checkout.
 
-- [`E:\Lex Universalis\godot\project.godot`](/E:/Lex%20Universalis/godot/project.godot)
+## Repository Identity
 
-## Active Structure
+- Canonical repo: <https://github.com/emptyinkpot/Lex-Universalis>
+- Machine-readable entry: `project.json`
+- Runtime root: `godot/`
+- Godot project: `godot/project.godot`
+- Main scene: `godot/scenes/Main.tscn`
+- Design plan: `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
 
-- `godot/` - Godot 4 desktop game project
-- `docs/` - design notes, rules, worldbuilding, and migration records
+## Structure
+
+- `godot/` - active Godot 4 desktop game project
+- `docs/` - design notes, planning docs, migration records, and reference notes
 - `config/` - retained project configuration and reference data
-- `scripts/` - small helper scripts that are not part of the retired Web runtime
+- `scripts/` - portable helper scripts
+- `tools/codex-bridge/` - optional local AI bridge used by the in-game assistant
 
 ## Run
 
-Double-click the packaged desktop build or the launcher:
+Install Godot 4.6.x first. The launcher resolves Godot from `GODOT_EXE`,
+`GODOT_CONSOLE`, `PATH`, or common Windows install paths.
 
-- [`E:\Lex Universalis\build\windows\Lex Universalis.exe`](/E:/Lex%20Universalis/build/windows/Lex%20Universalis.exe)
-- [`E:\Lex Universalis\start-desktop.bat`](/E:/Lex%20Universalis/start-desktop.bat)
+```bat
+.\start-godot.bat
+```
 
-To rebuild the Windows package from source:
+Headless validation:
 
-- [`E:\Lex Universalis\publish-desktop.bat`](/E:/Lex%20Universalis/publish-desktop.bat)
+```bat
+.\validate-godot.bat
+```
 
-To run the project from source:
+Build a Windows desktop package:
 
-- [`E:\Lex Universalis\start-godot.bat`](/E:/Lex%20Universalis/start-godot.bat)
+```bat
+.\publish-desktop.bat
+```
 
-Local Codex bridge for AI-assisted UI edits:
+Optional local Codex bridge:
 
-- [`E:\Lex Universalis\start-codex-bridge.bat`](/E:/Lex%20Universalis/start-codex-bridge.bat)
-- [`E:\Lex Universalis\tools\codex-bridge`](/E:/Lex%20Universalis/tools/codex-bridge)
+```bat
+.\start-codex-bridge.bat
+```
 
-Validate the Godot project headlessly:
+## Read Order
 
-- [`E:\Lex Universalis\validate-godot.bat`](/E:/Lex%20Universalis/validate-godot.bat)
+1. `README.md`
+2. `project.json`
+3. `godot/README.md`
+4. `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
+5. `docs/game-design/moon/README.md`
+6. `docs/reference/README.md`
+7. `docs/reference/dev/godot-repo-guide.md`
+8. `docs/reference/dev/godot-migration-checklist.md`
 
-## Documentation
+## Portability Rules
 
-- Active Godot workspace notes: [`E:\Lex Universalis\godot\README.md`](/E:/Lex%20Universalis/godot/README.md)
-- Game design archive: [`E:\Lex Universalis\docs\game-design\moon\README.md`](/E:/Lex%20Universalis/docs/game-design/moon/README.md)
-- Reference notes: [`E:\Lex Universalis\docs\reference\README.md`](/E:/Lex%20Universalis/docs/reference/README.md)
-- Packaged Windows build output: [`E:\Lex Universalis\build\windows`](/E:/Lex%20Universalis/build/windows)
+- Do not commit user-specific paths such as `E:\...` or
+  `C:\Users\<name>\...`.
+- Use `res://` for Godot resources.
+- Use `%~dp0` in Windows launchers.
+- Use `GODOT_EXE` or `GODOT_CONSOLE` only as optional local overrides.
+- Keep generated gameplay data under `godot/data/generated/`.

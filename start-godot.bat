@@ -1,13 +1,9 @@
 @echo off
 setlocal
 
-set GODOT_EXE=C:\Users\ASUS-KL\AppData\Local\Microsoft\WinGet\Packages\GodotEngine.GodotEngine_Microsoft.Winget.Source_8wekyb3d8bbwe\Godot_v4.6.1-stable_win64.exe
-set PROJECT_DIR=%~dp0godot
+call "%~dp0scripts\find-godot.bat"
+if errorlevel 1 exit /b 1
 
-if not exist "%GODOT_EXE%" (
-  echo Godot executable not found:
-  echo %GODOT_EXE%
-  exit /b 1
-)
+set "PROJECT_DIR=%~dp0godot"
 
-start "" "%GODOT_EXE%" --path "%PROJECT_DIR%"
+start "" "%LEX_GODOT_EXE%" --path "%PROJECT_DIR%"

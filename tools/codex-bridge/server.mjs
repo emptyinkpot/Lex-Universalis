@@ -4,7 +4,7 @@ import path from "node:path";
 import OpenAI from "openai";
 
 const PORT = Number.parseInt(process.env.CODEX_BRIDGE_PORT ?? "43987", 10);
-const WORKSPACE = path.resolve(process.env.CODEX_WORKSPACE ?? "E:\\Lex Universalis");
+const WORKSPACE = path.resolve(process.env.CODEX_WORKSPACE ?? path.join(import.meta.dirname, "..", ".."));
 const DEFAULT_MODEL = process.env.CODEX_MODEL ?? "gpt-5.2-codex";
 const API_KEY = process.env.OPENAI_API_KEY ?? "";
 
