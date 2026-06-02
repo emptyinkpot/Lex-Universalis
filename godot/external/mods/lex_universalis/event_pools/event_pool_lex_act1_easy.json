@@ -1,0 +1,14 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"event_pool_event_object_ids": [
+			"event_lex_sentinel",
+			"event_lex_thief",
+			"event_lex_thief_pair"
+		],
+		"event_pool_fallback_event_object_id": "event_lex_sentinel",
+		"object_id": "event_pool_lex_act1_easy"
+	}
+}

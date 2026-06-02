@@ -1,0 +1,51 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"enemy_object_id": "enemy_lex_sentinel",
+		"enemy_name": "哨兵",
+		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_health": 40,
+		"enemy_health_max": 40,
+		"enemy_block": 0,
+		"enemy_actions_on_death": [],
+		"enemy_type": 0,
+		"enemy_is_minion": false,
+		"enemy_attack_states": {
+			"initial": {
+				"attack_damage": 0,
+				"number_of_attacks": 0,
+				"block": 0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 1,
+					"2": 0
+				}
+			},
+			"1": {
+				"attack_damage": 8,
+				"number_of_attacks": 1,
+				"block": 0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 0,
+					"2": 1
+				}
+			},
+			"2": {
+				"attack_damage": 0,
+				"number_of_attacks": 0,
+				"block": 8,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 1,
+					"2": 0
+				}
+			}
+		},
+		"enemy_initial_status_effects": {},
+		"enemy_difficulty_to_enemy_modfiers": {},
+		"object_id": "enemy_lex_sentinel"
+	}
+}

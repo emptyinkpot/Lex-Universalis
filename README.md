@@ -1,69 +1,31 @@
 # Lex Universalis
 
-Lex Universalis is a Godot 4 desktop card roguelike prototype. The repository
-truth is portable: clone it anywhere, open `godot/project.godot`, and keep
-runtime paths relative to the checkout.
+PvE 优先的卡牌肉鸽，基于 Godot 4.6 开发。战斗内核参考杀戮尖塔，双方都按同一规则打牌。
 
-## Repository Identity
+## Repository
 
-- Canonical repo: <https://github.com/emptyinkpot/Lex-Universalis>
-- Machine-readable entry: `project.json`
-- Runtime root: `godot/`
-- Godot project: `godot/project.godot`
-- Main scene: `godot/scenes/Main.tscn`
-- Design plan: `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
+- Canonical repo: https://github.com/emptyinkpot/Lex-Universalis
+- Engine: Godot 4.6
+- Framework base: [Slay-The-Robot](https://github.com/DesirePathGames/Slay-The-Robot) (MIT)
 
 ## Structure
 
-- `godot/` - active Godot 4 desktop game project
-- `docs/` - design notes, planning docs, migration records, and reference notes
-- `config/` - retained project configuration and reference data
+- `godot/` - Godot 4 game project (runtime root)
+- `docs/` - design notes, planning docs
+- `config/` - project configuration
 - `scripts/` - portable helper scripts
-- `tools/codex-bridge/` - optional local AI bridge used by the in-game assistant
 
 ## Run
-
-Install Godot 4.6.x first. The launcher resolves Godot from `GODOT_EXE`,
-`GODOT_CONSOLE`, `PATH`, or common Windows install paths.
 
 ```bat
 .\start-godot.bat
 ```
 
-Headless validation:
+## Content Editing
 
-```bat
-.\validate-godot.bat
-```
+Cards, enemies, and scenarios are defined via JSON in `godot/external/mods/`.
+The "Edit Resources as Table" plugin is also available inside the Godot editor.
 
-Build a Windows desktop package:
+## Design Document
 
-```bat
-.\publish-desktop.bat
-```
-
-Optional local Codex bridge:
-
-```bat
-.\start-codex-bridge.bat
-```
-
-## Read Order
-
-1. `README.md`
-2. `project.json`
-3. `godot/README.md`
-4. `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
-5. `docs/game-design/moon/README.md`
-6. `docs/reference/README.md`
-7. `docs/reference/dev/godot-repo-guide.md`
-8. `docs/reference/dev/godot-migration-checklist.md`
-
-## Portability Rules
-
-- Do not commit user-specific paths such as `E:\...` or
-  `C:\Users\<name>\...`.
-- Use `res://` for Godot resources.
-- Use `%~dp0` in Windows launchers.
-- Use `GODOT_EXE` or `GODOT_CONSOLE` only as optional local overrides.
-- Keep generated gameplay data under `godot/data/generated/`.
+See `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`

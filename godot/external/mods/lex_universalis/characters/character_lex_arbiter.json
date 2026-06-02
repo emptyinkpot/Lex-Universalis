@@ -1,0 +1,33 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"character_name": "裁决者",
+		"character_description": "以法律为剑，以正义为盾。裁决者以绝对的秩序审判一切违法之人。",
+		"character_color_id": "color_lex",
+		"character_texture_path": "",
+		"character_icon_texture_path": "",
+		"character_background_texture_path": "",
+		"character_text_energy_texture_path": "",
+		"character_player_id": "player_lex_arbiter",
+		"character_starting_artifact_ids": [],
+		"character_starting_artifact_pack_ids": [],
+		"character_starting_card_object_ids": [
+			"card_lex_strike",
+			"card_lex_strike",
+			"card_lex_strike",
+			"card_lex_strike",
+			"card_lex_strike",
+			"card_lex_defend",
+			"card_lex_defend",
+			"card_lex_defend",
+			"card_lex_defend",
+			"card_lex_judgment"
+		],
+		"character_starting_money": 99,
+		"character_starting_health": 75,
+		"character_starting_card_draft_card_pack_ids": ["card_pack_lex"],
+		"object_id": "character_lex_arbiter"
+	}
+}

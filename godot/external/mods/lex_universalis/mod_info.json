@@ -1,0 +1,69 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"mod_author": "Lex Universalis Team",
+		"mod_dependency_mod_ids": [],
+		"mod_description": "Lex Universalis - Act 1 content. Medieval legal-themed roguelike deckbuilder.",
+		"mod_folder_to_load_data": {
+			"external/mods/lex_universalis/cards/": {
+				"class_name": "CardData",
+				"table_name": "_id_to_card_data"
+			},
+			"external/mods/lex_universalis/enemies/": {
+				"class_name": "EnemyData",
+				"table_name": "_id_to_enemy_data"
+			},
+			"external/mods/lex_universalis/characters/": {
+				"class_name": "CharacterData",
+				"table_name": "_id_to_character_data"
+			},
+			"external/mods/lex_universalis/events/": {
+				"class_name": "EventData",
+				"table_name": "_id_to_event_data"
+			},
+			"external/mods/lex_universalis/event_pools/": {
+				"class_name": "EventPoolData",
+				"table_name": "_id_to_event_pool_data"
+			},
+			"external/mods/lex_universalis/acts/": {
+				"class_name": "ActData",
+				"table_name": "_id_to_act_data"
+			},
+			"external/mods/lex_universalis/player/": {
+				"class_name": "PlayerData",
+				"table_name": "_id_to_player_data"
+			},
+			"external/mods/lex_universalis/status_effects/": {
+				"class_name": "StatusEffectData",
+				"table_name": "_id_to_status_data"
+			},
+			"external/mods/lex_universalis/action_interceptors/": {
+				"class_name": "ActionInterceptorData",
+				"table_name": "_id_to_action_interceptor_data"
+			},
+			"external/mods/lex_universalis/card_packs/": {
+				"class_name": "CardPackData",
+				"table_name": "_id_to_card_pack_data"
+			},
+			"external/mods/lex_universalis/colors/": {
+				"class_name": "ColorData",
+				"table_name": "_id_to_color_data"
+			}
+		},
+		"mod_game_version": {
+			"major": 0,
+			"minor": 0,
+			"patch": 1
+		},
+		"mod_name": "Lex Universalis",
+		"mod_version": {
+			"major": 0,
+			"minor": 1,
+			"patch": 0
+		},
+		"mod_script_file_paths": {},
+		"object_id": "mod_data_lex_universalis"
+	}
+}

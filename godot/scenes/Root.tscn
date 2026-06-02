@@ -1,0 +1,1585 @@
+[gd_scene format=3 uid="uid://bg7gmq537qyn5"]
+
+[ext_resource type="Script" uid="uid://ckfi22o2jit0b" path="res://scripts/Root.gd" id="1_ak6de"]
+[ext_resource type="Theme" uid="uid://cd5rw86bhiyn" path="res://themes/title_screen_theme.tres" id="2_bi5lp"]
+[ext_resource type="Script" uid="uid://dw0xyfu580mkb" path="res://scripts/ui/menus/TitleScreen.gd" id="2_m6atk"]
+[ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="3_8ax2e"]
+[ext_resource type="Script" uid="uid://dao05mln2rw4g" path="res://scripts/ui/Combat.gd" id="3_h4evn"]
+[ext_resource type="Script" uid="uid://cg1kj2nrg24jw" path="res://scripts/ui/menus/MainMenu.gd" id="3_jd5n0"]
+[ext_resource type="Script" uid="uid://dlwowe1wugkh4" path="res://scripts/ui/Hand.gd" id="4_i2yfj"]
+[ext_resource type="Script" uid="uid://p4ouiuival0e" path="res://scripts/ui/EnemyContainer.gd" id="4_kvn7e"]
+[ext_resource type="PackedScene" uid="uid://c0sxkaemtqb5x" path="res://scenes/combatants/Player.tscn" id="5_7crh0"]
+[ext_resource type="Script" uid="uid://c4twsg7v4ky8u" path="res://scripts/ui/menus/NewRunMenu.gd" id="5_878fa"]
+[ext_resource type="Script" uid="uid://cedacrx3ip1sl" path="res://scripts/ui/ArtifactContainer.gd" id="5_a7j3r"]
+[ext_resource type="Script" uid="uid://chcjmcum7dbn7" path="res://scripts/ui/CharacterButtonContainer.gd" id="6_2ahpg"]
+[ext_resource type="Script" uid="uid://djp4k7pq27a7e" path="res://scripts/ui/CustomRunModifierButtonContainer.gd" id="8_nlp47"]
+[ext_resource type="Script" uid="uid://cu62o32eaklx7" path="res://scripts/ui/TurnOverlay.gd" id="9_u2w0b"]
+[ext_resource type="Script" uid="uid://dgls5w4w7ym84" path="res://scripts/ui/menus/CodexMenu.gd" id="9_uxrgu"]
+[ext_resource type="Script" uid="uid://brwptyvf1yacl" path="res://scripts/ui/CardSelectionOverlay.gd" id="10_bwtvr"]
+[ext_resource type="Script" uid="uid://ejl2op54o7aw" path="res://scripts/ui/RewardOverlay.gd" id="10_u2l48"]
+[ext_resource type="Script" uid="uid://b8gg8exxeg26k" path="res://scripts/ui/Chest.gd" id="11_1uvyw"]
+[ext_resource type="Script" uid="uid://b5htysy0x53ab" path="res://scripts/ui/Consumables.gd" id="11_c46y0"]
+[ext_resource type="Script" uid="uid://bepy2gle06uwf" path="res://scripts/ui/CardDraftSelectionOverlay.gd" id="11_yys3c"]
+[ext_resource type="Script" uid="uid://dm6o2678kafwr" path="res://scripts/ui/menus/RunScreen.gd" id="12_elxq6"]
+[ext_resource type="Script" uid="uid://c2i6b2ert5jls" path="res://scripts/ui/PauseButton.gd" id="13_i7igs"]
+[ext_resource type="Script" uid="uid://cdp0fx5l64nnt" path="res://scripts/ui/Shop.gd" id="13_w8i8k"]
+[ext_resource type="Script" uid="uid://dnvcyccyhfcmu" path="res://scripts/ui/Map.gd" id="14_fc5ht"]
+[ext_resource type="Script" uid="uid://b2hl2ln4jm0mj" path="res://scripts/ui/RestOverlay.gd" id="14_k6wys"]
+[ext_resource type="Script" uid="uid://cw6tfwitjoo0i" path="res://scripts/ui/ShopOverlay.gd" id="17_stqr4"]
+[ext_resource type="Script" uid="uid://pk2e8kasw6rr" path="res://scripts/ui/RunSummaryOverlay.gd" id="21_fj66g"]
+[ext_resource type="Script" uid="uid://s7lqf6p66yti" path="res://scripts/ui/RunStartOptions.gd" id="25_ll3o0"]
+[ext_resource type="Script" uid="uid://b2t515tpjrija" path="res://addons/smooth_scroll_container/SmoothScrollContainer.gd" id="25_t3i5t"]
+[ext_resource type="Script" uid="uid://ci6oby4hmnfg6" path="res://scripts/ui/DialogueOverlay.gd" id="25_tn5yy"]
+[ext_resource type="Script" uid="uid://b3nvcsku8u75w" path="res://addons/smooth_scroll_container/scroll_damper/expo_scroll_damper.gd" id="26_08sam"]
+[ext_resource type="Script" uid="uid://6xsavir53fvp" path="res://scripts/ui/PauseOverlay.gd" id="29_p8axl"]
+
+[sub_resource type="Resource" id="Resource_i7igs"]
+script = ExtResource("26_08sam")
+friction = 10.0
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_elxq6"]
+script = ExtResource("26_08sam")
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="InputEventKey" id="InputEventKey_p8axl"]
+device = -1
+pressed = true
+keycode = 4194305
+
+[sub_resource type="Shortcut" id="Shortcut_i7igs"]
+events = [SubResource("InputEventKey_p8axl")]
+
+[sub_resource type="Animation" id="Animation_m5prp"]
+resource_name = "end_turn"
+length = 0.5
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.5),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"_on_player_end_turn_animation_finished"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("BattleLayout/BottomBar/EndTurnButton:disabled")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, true]
+}
+
+[sub_resource type="Animation" id="Animation_beguj"]
+resource_name = "start_turn"
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(1),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"_on_player_start_turn_animation_finished"
+}]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TurnOverlay:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.7, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/2/type = "method"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TurnOverlay")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"update_turn_label"
+}]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TurnOverlay:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("BattleLayout/BottomBar/EndTurnButton:disabled")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_yww7o"]
+_data = {
+&"end_turn": SubResource("Animation_m5prp"),
+&"start_turn": SubResource("Animation_beguj")
+}
+
+[sub_resource type="Resource" id="Resource_uxrgu"]
+script = ExtResource("26_08sam")
+friction = 10.0
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_p8axl"]
+script = ExtResource("26_08sam")
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_tn5yy"]
+script = ExtResource("26_08sam")
+friction = 10.0
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_kpmo0"]
+script = ExtResource("26_08sam")
+metadata/_custom_type_script = "uid://b3nvcsku8u75w"
+
+[sub_resource type="Resource" id="Resource_kqcdx"]
+script = ExtResource("26_08sam")
+friction = 10.0
+
+[sub_resource type="Resource" id="Resource_frd6h"]
+script = ExtResource("26_08sam")
+
+[sub_resource type="InputEventKey" id="InputEventKey_i7igs"]
+device = -1
+pressed = true
+keycode = 4194305
+location = 1
+
+[sub_resource type="Shortcut" id="Shortcut_elxq6"]
+events = [SubResource("InputEventKey_i7igs")]
+
+[node name="Root" type="Node2D" unique_id=1360443767]
+script = ExtResource("1_ak6de")
+
+[node name="TitleScreen" type="Control" parent="." unique_id=867872106]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("2_m6atk")
+metadata/_edit_lock_ = true
+
+[node name="Background" type="ColorRect" parent="TitleScreen" unique_id=161510262]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.202309, 0.187588, 0.216973, 1)
+
+[node name="MainMenu" type="Control" parent="TitleScreen" unique_id=202647218]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("3_jd5n0")
+
+[node name="Label" type="Label" parent="TitleScreen/MainMenu" unique_id=2070723024]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_top = 27.3429
+offset_right = 680.0
+offset_bottom = 93.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+text = "我即真理"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TitleScreen/MainMenu" unique_id=1796377823]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 700.0
+offset_right = 560.0
+offset_bottom = 1100.0
+
+[node name="ContinueButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=5226168]
+visible = false
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "继续"
+
+[node name="ForfeitRunButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=160571787]
+visible = false
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "放弃本局"
+
+[node name="NewRunButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=2012576478]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "新游戏"
+
+[node name="CodexButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=507716921]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "图鉴"
+
+[node name="SettingsButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=218447649]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+disabled = true
+text = "设置"
+
+[node name="ExitButton" type="Button" parent="TitleScreen/MainMenu/VBoxContainer" unique_id=648162412]
+layout_mode = 2
+theme = ExtResource("2_bi5lp")
+text = "退出"
+
+[node name="NewRunMenu" type="Control" parent="TitleScreen" unique_id=1133243123]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("5_878fa")
+
+[node name="Label" type="Label" parent="TitleScreen/NewRunMenu" unique_id=342405039]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_top = 27.3429
+offset_right = 680.0
+offset_bottom = 93.0286
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+text = "新一局"
+horizontal_alignment = 1
+
+[node name="CharacterNameLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=1691187279]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 126.343
+offset_right = 205.0
+offset_bottom = 159.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "角色名称"
+
+[node name="CharacterHealthLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=275163000]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 166.343
+offset_right = 80.0
+offset_bottom = 199.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 17
+text = "生命: "
+vertical_alignment = 1
+
+[node name="CharacterMoneyLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=114156041]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 184.0
+offset_top = 166.343
+offset_right = 208.0
+offset_bottom = 199.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 17
+text = "金币:"
+
+[node name="CharacterDescriptionLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=1374144857]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 56.0
+offset_top = 214.343
+offset_right = 328.0
+offset_bottom = 309.029
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "角色描述"
+
+[node name="CharacterArtifactTextureRect" type="TextureRect" parent="TitleScreen/NewRunMenu" unique_id=1377775981]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
+offset_left = 56.0
+offset_top = 320.0
+offset_right = 120.0
+offset_bottom = 384.0
+texture = ExtResource("3_8ax2e")
+expand_mode = 1
+
+[node name="CharacterArtifactNameLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=1811988893]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 128.0
+offset_top = 318.343
+offset_right = 352.0
+offset_bottom = 349.029
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "遗物名称"
+clip_text = true
+
+[node name="CharacterArtifactDescriptionLabel" type="Label" parent="TitleScreen/NewRunMenu" unique_id=1658968818]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 128.0
+offset_top = 350.343
+offset_right = 320.0
+offset_bottom = 461.029
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "描述 "
+autowrap_mode = 2
+
+[node name="DifficultySelect" type="Control" parent="TitleScreen/NewRunMenu" unique_id=52573204]
+anchors_preset = 0
+offset_left = 64.0
+offset_top = 504.0
+offset_right = 336.0
+offset_bottom = 544.0
+
+[node name="DecreaseDifficultyButton" type="Button" parent="TitleScreen/NewRunMenu/DifficultySelect" unique_id=529582368]
+layout_mode = 0
+offset_top = 8.0
+offset_right = 64.0
+offset_bottom = 40.0
+text = "<--"
+
+[node name="DifficultyLabel" type="Label" parent="TitleScreen/NewRunMenu/DifficultySelect" unique_id=1590194108]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 72.0
+offset_top = 6.34286
+offset_right = -72.0
+offset_bottom = 37.0286
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 16
+text = "难度 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+
+[node name="IncreaseDifficultyButton" type="Button" parent="TitleScreen/NewRunMenu/DifficultySelect" unique_id=119300951]
+layout_mode = 0
+offset_left = 208.0
+offset_top = 8.0
+offset_right = 272.0
+offset_bottom = 39.0
+text = "-->"
+
+[node name="CharacterButtonContainer" type="ScrollContainer" parent="TitleScreen/NewRunMenu" unique_id=222917229]
+layout_mode = 0
+offset_left = 56.0
+offset_top = 552.0
+offset_right = 344.0
+offset_bottom = 688.0
+script = ExtResource("6_2ahpg")
+
+[node name="GridContainer" type="GridContainer" parent="TitleScreen/NewRunMenu/CharacterButtonContainer" unique_id=1561640276]
+layout_mode = 2
+columns = 4
+
+[node name="CustomRunModifierButtonContainer" type="ScrollContainer" parent="TitleScreen/NewRunMenu" unique_id=1091273582]
+layout_mode = 0
+offset_left = 824.0
+offset_top = 168.0
+offset_right = 1168.0
+offset_bottom = 680.0
+script = ExtResource("8_nlp47")
+
+[node name="MarginContainer" type="MarginContainer" parent="TitleScreen/NewRunMenu/CustomRunModifierButtonContainer" unique_id=2124571296]
+layout_mode = 2
+theme_override_constants/margin_left = 3
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 3
+theme_override_constants/margin_bottom = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TitleScreen/NewRunMenu/CustomRunModifierButtonContainer/MarginContainer" unique_id=1656569672]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="TitleScreen/NewRunMenu" unique_id=1740243271]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 400.0
+offset_top = 550.343
+offset_right = 424.0
+offset_bottom = 583.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "种子"
+vertical_alignment = 1
+
+[node name="Label4" type="Label" parent="TitleScreen/NewRunMenu" unique_id=852866111]
+layout_direction = 2
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.0414286
+anchor_right = 1.0
+anchor_bottom = 0.0742857
+offset_left = 824.0
+offset_top = 126.343
+offset_right = 1128.0
+offset_bottom = 159.029
+grow_horizontal = 2
+theme = ExtResource("2_bi5lp")
+theme_override_font_sizes/font_size = 24
+text = "自定义修改器"
+horizontal_alignment = 1
+
+[node name="SeedInput" type="LineEdit" parent="TitleScreen/NewRunMenu" unique_id=1171425216]
+layout_mode = 0
+offset_left = 472.0
+offset_top = 552.0
+offset_right = 784.0
+offset_bottom = 584.0
+text = "1234567890123456"
+alignment = 1
+max_length = 16
+
+[node name="StartRunButton" type="Button" parent="TitleScreen/NewRunMenu" unique_id=1419295550]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 600.0
+offset_right = 785.0
+offset_bottom = 634.0
+theme = ExtResource("2_bi5lp")
+text = "开始"
+
+[node name="BackButton" type="Button" parent="TitleScreen/NewRunMenu" unique_id=1673446998]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 648.0
+offset_right = 785.0
+offset_bottom = 682.0
+theme = ExtResource("2_bi5lp")
+text = "返回"
+
+[node name="CodexMenu" type="Control" parent="TitleScreen" unique_id=63336493]
+visible = false
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("9_uxrgu")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="TitleScreen/CodexMenu" unique_id=647893464]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 24.0
+offset_right = 700.0
+offset_bottom = 1150.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("25_t3i5t")
+wheel_scroll_damper = SubResource("Resource_i7igs")
+dragging_scroll_damper = SubResource("Resource_elxq6")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+
+[node name="MarginContainer" type="MarginContainer" parent="TitleScreen/CodexMenu/ScrollContainer" unique_id=1797662800]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="CodexCardContainer" type="GridContainer" parent="TitleScreen/CodexMenu/ScrollContainer/MarginContainer" unique_id=1993503863]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 4
+
+[node name="BackButton" type="Button" parent="TitleScreen/CodexMenu" unique_id=1486790359]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 1180.0
+offset_right = 480.0
+offset_bottom = 1214.0
+theme = ExtResource("2_bi5lp")
+text = "返回"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TitleScreen/CodexMenu" unique_id=578007286]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 88.0
+offset_right = 136.0
+offset_bottom = 584.0
+
+[node name="Button" type="Button" parent="TitleScreen/CodexMenu/VBoxContainer" unique_id=403461643]
+layout_mode = 2
+text = "卡牌"
+
+[node name="Button2" type="Button" parent="TitleScreen/CodexMenu/VBoxContainer" unique_id=1173592864]
+layout_mode = 2
+disabled = true
+text = "敌人"
+
+[node name="Button3" type="Button" parent="TitleScreen/CodexMenu/VBoxContainer" unique_id=736010329]
+layout_mode = 2
+disabled = true
+text = "遗物"
+
+[node name="Button4" type="Button" parent="TitleScreen/CodexMenu/VBoxContainer" unique_id=1221014644]
+layout_mode = 2
+disabled = true
+text = "消耗品"
+
+[node name="RunScreen" type="Control" parent="." unique_id=849293485]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("12_elxq6")
+
+[node name="Combat" type="Control" parent="RunScreen" unique_id=2111159325]
+unique_name_in_owner = true
+process_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_h4evn")
+
+[node name="Background" type="ColorRect" parent="RunScreen/Combat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.12, 0.11, 0.14, 1)
+
+[node name="BackgroundButton" type="TextureButton" parent="RunScreen/Combat"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+button_mask = 3
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="BattleLayout" type="VBoxContainer" parent="RunScreen/Combat"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="TopBar" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 0
+
+[node name="PauseButton" type="TextureButton" parent="RunScreen/Combat/BattleLayout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+shortcut = SubResource("Shortcut_i7igs")
+shortcut_feedback = false
+shortcut_in_tooltip = false
+texture_normal = ExtResource("3_8ax2e")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("13_i7igs")
+
+[node name="MapButton" type="TextureButton" parent="RunScreen/Combat/BattleLayout/TopBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("3_8ax2e")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="DeckButton" type="TextureButton" parent="RunScreen/Combat/BattleLayout/TopBar"]
+custom_minimum_size = Vector2(50, 50)
+layout_mode = 2
+size_flags_vertical = 4
+texture_normal = ExtResource("3_8ax2e")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="MoneyLabel" type="Label" parent="RunScreen/Combat/BattleLayout/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 24
+text = "$10000"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="HealthLabel" type="Label" parent="RunScreen/Combat/BattleLayout/TopBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_font_sizes/font_size = 24
+text = "99/99"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ArtifactContainer" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+script = ExtResource("5_a7j3r")
+
+[node name="EnemyZone" type="VBoxContainer" parent="RunScreen/Combat/BattleLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+mouse_filter = 2
+alignment = 1
+
+[node name="EnemyContainer" type="Control" parent="RunScreen/Combat/BattleLayout/EnemyZone"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(600, 300)
+size_flags_horizontal = 4
+mouse_filter = 2
+script = ExtResource("4_kvn7e")
+metadata/_edit_group_ = true
+
+[node name="AutomaticEnemyContainer" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout/EnemyZone/EnemyContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="PositionalEnemyContainer" type="Control" parent="RunScreen/Combat/BattleLayout/EnemyZone/EnemyContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Player" parent="RunScreen/Combat/BattleLayout/EnemyZone" instance=ExtResource("5_7crh0")]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(200, 100)
+
+[node name="Consumables" type="Control" parent="RunScreen/Combat/BattleLayout/EnemyZone"]
+layout_mode = 2
+custom_minimum_size = Vector2(240, 32)
+size_flags_horizontal = 0
+script = ExtResource("11_c46y0")
+
+[node name="ConsumableContainer" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout/EnemyZone/Consumables"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ConsumableActionDropdown" type="Control" parent="RunScreen/Combat/BattleLayout/EnemyZone/Consumables"]
+anchors_preset = 0
+offset_top = 40.0
+offset_right = 144.0
+offset_bottom = 136.0
+
+[node name="ColorRect" type="ColorRect" parent="RunScreen/Combat/BattleLayout/EnemyZone/Consumables/ConsumableActionDropdown"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.278431, 0.278431, 0.278431, 1)
+
+[node name="UseConsumableButton" type="Button" parent="RunScreen/Combat/BattleLayout/EnemyZone/Consumables/ConsumableActionDropdown"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 136.0
+offset_bottom = 39.0
+theme_override_font_sizes/font_size = 16
+text = "使用"
+
+[node name="DiscardConsumableButton" type="Button" parent="RunScreen/Combat/BattleLayout/EnemyZone/Consumables/ConsumableActionDropdown"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 48.0
+offset_right = 136.0
+offset_bottom = 79.0
+theme_override_font_sizes/font_size = 16
+text = "弃牌"
+
+[node name="PlayerStatsBar" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Energy" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout/PlayerStatsBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="EnergyIcon" type="TextureRect" parent="RunScreen/Combat/BattleLayout/PlayerStatsBar/Energy"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("3_8ax2e")
+expand_mode = 1
+
+[node name="EnergyCount" type="Label" parent="RunScreen/Combat/BattleLayout/PlayerStatsBar/Energy"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 22
+text = "3/3"
+vertical_alignment = 1
+
+[node name="Chest" type="TextureButton" parent="RunScreen/Combat"]
+visible = false
+layout_mode = 0
+offset_left = 264.0
+offset_top = 200.0
+offset_right = 456.0
+offset_bottom = 392.0
+texture_normal = ExtResource("3_8ax2e")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("11_1uvyw")
+
+[node name="Label" type="Label" parent="RunScreen/Combat/Chest"]
+layout_mode = 0
+offset_top = -56.0
+offset_right = 192.0
+offset_bottom = -11.0
+theme_override_font_sizes/font_size = 32
+text = "宝箱"
+horizontal_alignment = 1
+
+[node name="Shop" type="TextureButton" parent="RunScreen/Combat"]
+visible = false
+layout_mode = 0
+offset_left = 264.0
+offset_top = 200.0
+offset_right = 456.0
+offset_bottom = 392.0
+texture_normal = ExtResource("3_8ax2e")
+ignore_texture_size = true
+stretch_mode = 0
+script = ExtResource("13_w8i8k")
+
+[node name="Label" type="Label" parent="RunScreen/Combat/Shop"]
+layout_mode = 0
+offset_top = -56.0
+offset_right = 192.0
+offset_bottom = -11.0
+theme_override_font_sizes/font_size = 32
+text = "商店"
+horizontal_alignment = 1
+
+[node name="CardPicking" type="Control" parent="RunScreen/Combat"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -344.0
+offset_top = -100.0
+offset_right = 344.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CardPickLabel" type="Label" parent="RunScreen/Combat/CardPicking"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 31.0
+grow_horizontal = 2
+text = "选择卡牌"
+horizontal_alignment = 1
+
+[node name="ConfirmPickButton" type="Button" parent="RunScreen/Combat/CardPicking"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 180.0
+offset_top = 150.0
+offset_right = 508.0
+offset_bottom = 181.0
+text = "确认"
+
+[node name="HandZone" type="MarginContainer" parent="RunScreen/Combat/BattleLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="Hand" type="Control" parent="RunScreen/Combat/BattleLayout/HandZone"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("4_i2yfj")
+
+[node name="HandSizeExceededRect" type="ColorRect" parent="RunScreen/Combat/BattleLayout/HandZone"]
+unique_name_in_owner = true
+visible = false
+self_modulate = Color(1, 1, 1, 0.258824)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="BottomBar" type="HBoxContainer" parent="RunScreen/Combat/BattleLayout"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="DrawPileButton" type="Button" parent="RunScreen/Combat/BattleLayout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 60)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "抽牌堆
+30"
+
+[node name="ExhaustPileButton" type="Button" parent="RunScreen/Combat/BattleLayout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 60)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "消耗堆
+0"
+
+[node name="EndTurnButton" type="Button" parent="RunScreen/Combat/BattleLayout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 60)
+layout_mode = 2
+size_flags_vertical = 4
+disabled = true
+theme_override_font_sizes/font_size = 20
+text = "结束回合"
+
+[node name="DiscardPileButton" type="Button" parent="RunScreen/Combat/BattleLayout/BottomBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 60)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_font_sizes/font_size = 16
+text = "弃牌堆
+0"
+
+[node name="SelectTargetLabel" type="Label" parent="RunScreen/Combat"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 480.0
+offset_bottom = 520.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 34
+text = "选择目标"
+horizontal_alignment = 1
+
+[node name="TurnOverlay" type="Control" parent="RunScreen/Combat"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("9_u2w0b")
+
+[node name="ColorRect" type="ColorRect" parent="RunScreen/Combat/TurnOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0862745, 0.0862745, 0.0862745, 0.192157)
+
+[node name="TurnLabel" type="Label" parent="RunScreen/Combat/TurnOverlay"]
+layout_mode = 1
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -30.0
+offset_bottom = 42.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 36
+text = "回合"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CombatAnimation" type="AnimationPlayer" parent="RunScreen/Combat"]
+libraries/ = SubResource("AnimationLibrary_yww7o")
+
+[node name="RestOverlay" type="Control" parent="RunScreen" unique_id=1337056205]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("14_k6wys")
+
+[node name="Background" type="ColorRect" parent="RunScreen/RestOverlay" unique_id=790089096]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.635294)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RunScreen/RestOverlay" unique_id=2008305682]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 200.0
+offset_right = 680.0
+offset_bottom = 1000.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("25_t3i5t")
+wheel_scroll_damper = SubResource("Resource_uxrgu")
+dragging_scroll_damper = SubResource("Resource_p8axl")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+
+[node name="MarginContainer" type="MarginContainer" parent="RunScreen/RestOverlay/ScrollContainer" unique_id=1675293347]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="RestActionContainer" type="GridContainer" parent="RunScreen/RestOverlay/ScrollContainer/MarginContainer" unique_id=1874645806]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+columns = 3
+
+[node name="ContinueButton" type="Button" parent="RunScreen/RestOverlay" unique_id=125026603]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 1060.0
+offset_right = 440.0
+offset_bottom = 1091.0
+text = "继续"
+
+[node name="ShopOverlay" type="Control" parent="RunScreen" unique_id=1144379016]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("17_stqr4")
+
+[node name="Background" type="ColorRect" parent="RunScreen/ShopOverlay" unique_id=313885347]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.635294)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/ShopOverlay" unique_id=2059597384]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -560.0
+offset_right = 340.0
+offset_bottom = 560.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0941176, 0.0862745, 0.101961, 0.67451)
+
+[node name="CardContainer" type="HBoxContainer" parent="RunScreen/ShopOverlay" unique_id=716177800]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -500.0
+offset_right = 320.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="ArtifactContainer" type="VBoxContainer" parent="RunScreen/ShopOverlay" unique_id=1040237283]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -80.0
+offset_right = -40.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="ConsumableContainer" type="VBoxContainer" parent="RunScreen/ShopOverlay" unique_id=1430922079]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 40.0
+offset_top = -80.0
+offset_right = 320.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="ContinueButton" type="Button" parent="RunScreen/ShopOverlay" unique_id=345283864]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 1200.0
+offset_right = 440.0
+offset_bottom = 1231.0
+text = "继续"
+
+[node name="DialogueOverlay" type="Control" parent="RunScreen" unique_id=13101104]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("25_tn5yy")
+
+[node name="Background" type="ColorRect" parent="RunScreen/DialogueOverlay" unique_id=1869590912]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.635294)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/DialogueOverlay" unique_id=1032234181]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -568.0
+offset_top = -286.0
+offset_right = 568.0
+offset_bottom = 290.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0941176, 0.0862745, 0.101961, 0.67451)
+
+[node name="DialogueTextureRect" type="TextureRect" parent="RunScreen/DialogueOverlay" unique_id=1647205059]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 0
+offset_left = 64.0
+offset_top = 88.0
+offset_right = 592.0
+offset_bottom = 616.0
+texture = ExtResource("3_8ax2e")
+expand_mode = 1
+
+[node name="DialoguePromptLabel" type="RichTextLabel" parent="RunScreen/DialogueOverlay" unique_id=569327848]
+layout_mode = 0
+offset_left = 608.0
+offset_top = 96.0
+offset_right = 1152.0
+offset_bottom = 392.0
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[color=green]Dialogue Prompt Rich Text[/color]"
+
+[node name="DialogueOptionContainer" type="VBoxContainer" parent="RunScreen/DialogueOverlay" unique_id=275236613]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_top = -22.0
+offset_right = 544.0
+offset_bottom = 226.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="RunSummaryOverlay" type="Control" parent="RunScreen" unique_id=861873821]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("21_fj66g")
+
+[node name="Background" type="ColorRect" parent="RunScreen/RunSummaryOverlay" unique_id=635107889]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.635294)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/RunSummaryOverlay" unique_id=342207624]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -568.0
+offset_top = -286.0
+offset_right = 568.0
+offset_bottom = 290.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0941176, 0.0862745, 0.101961, 0.67451)
+
+[node name="VictoryLabel" type="Label" parent="RunScreen/RunSummaryOverlay" unique_id=228374504]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 64.0
+offset_right = 1168.0
+offset_bottom = 224.0
+theme_override_font_sizes/font_size = 50
+text = "胜利"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="DefeatLabel" type="Label" parent="RunScreen/RunSummaryOverlay" unique_id=1791378375]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 64.0
+offset_right = 1168.0
+offset_bottom = 224.0
+theme_override_font_sizes/font_size = 50
+text = "失败"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="EndRunButton" type="Button" parent="RunScreen/RunSummaryOverlay" unique_id=214897653]
+layout_mode = 0
+offset_left = 352.0
+offset_top = 528.0
+offset_right = 856.0
+offset_bottom = 609.0
+theme_override_font_sizes/font_size = 32
+text = "返回主菜单"
+
+[node name="RunStartOptions" type="Control" parent="RunScreen" unique_id=2019813069]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("25_ll3o0")
+
+[node name="StartingOptionContainer" type="VBoxContainer" parent="RunScreen/RunStartOptions" unique_id=1698706762]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 528.0
+offset_right = 520.0
+offset_bottom = 640.0
+
+[node name="RewardOverlay" type="Control" parent="RunScreen" unique_id=388575104]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("10_u2l48")
+
+[node name="Background" type="ColorRect" parent="RunScreen/RewardOverlay" unique_id=1035447920]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.635294)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/RewardOverlay" unique_id=275698728]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -224.0
+offset_top = -196.0
+offset_right = 224.0
+offset_bottom = 187.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0941176, 0.0862745, 0.101961, 0.67451)
+
+[node name="RewardContainer" type="VBoxContainer" parent="RunScreen/RewardOverlay" unique_id=550025701]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -216.0
+offset_top = -190.0
+offset_right = 216.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="ContinueButton" type="Button" parent="RunScreen/RewardOverlay" unique_id=64174486]
+layout_mode = 0
+offset_left = 528.0
+offset_top = 544.0
+offset_right = 672.0
+offset_bottom = 575.0
+text = "继续"
+
+[node name="CardSelectionOverlay" type="Control" parent="RunScreen" unique_id=130023492]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("10_bwtvr")
+
+[node name="Background" type="ColorRect" parent="RunScreen/CardSelectionOverlay" unique_id=292376452]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.631373)
+
+[node name="BackButton" type="Button" parent="RunScreen/CardSelectionOverlay" unique_id=324587340]
+visible = false
+layout_mode = 0
+offset_left = 504.0
+offset_top = 40.0
+offset_right = 648.0
+offset_bottom = 71.0
+text = "<----"
+
+[node name="ConfirmButton" type="Button" parent="RunScreen/CardSelectionOverlay" unique_id=952440462]
+visible = false
+layout_mode = 0
+offset_left = 504.0
+offset_top = 40.0
+offset_right = 648.0
+offset_bottom = 71.0
+text = "确认"
+
+[node name="CardPickLabel" type="Label" parent="RunScreen/CardSelectionOverlay" unique_id=1638980375]
+layout_mode = 0
+offset_left = 176.0
+offset_top = 8.0
+offset_right = 1016.0
+offset_bottom = 32.0
+text = "选择卡牌"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RunScreen/CardSelectionOverlay" unique_id=1046540062]
+layout_mode = 0
+offset_left = 152.0
+offset_top = 80.0
+offset_right = 1000.0
+offset_bottom = 680.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("25_t3i5t")
+wheel_scroll_damper = SubResource("Resource_tn5yy")
+dragging_scroll_damper = SubResource("Resource_kpmo0")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="RunScreen/CardSelectionOverlay/ScrollContainer" unique_id=2063733560]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 96
+
+[node name="CardContainer" type="GridContainer" parent="RunScreen/CardSelectionOverlay/ScrollContainer/MarginContainer" unique_id=308397456]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 5
+
+[node name="CardDraftSelectionOverlay" type="Control" parent="RunScreen" unique_id=1914941649]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 10
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("11_yys3c")
+
+[node name="Background" type="ColorRect" parent="RunScreen/CardDraftSelectionOverlay" unique_id=1832675280]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.631373)
+
+[node name="CardContainer" type="HBoxContainer" parent="RunScreen/CardDraftSelectionOverlay" unique_id=1661438307]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -120.0
+offset_right = 400.0
+offset_bottom = 74.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="SkipButton" type="Button" parent="RunScreen/CardDraftSelectionOverlay" unique_id=324751188]
+layout_mode = 0
+offset_left = 528.0
+offset_top = 432.0
+offset_right = 672.0
+offset_bottom = 463.0
+text = "跳过"
+
+[node name="Map" type="Control" parent="RunScreen" unique_id=1729670442]
+unique_name_in_owner = true
+process_mode = 1
+visible = false
+z_index = 100
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("14_fc5ht")
+
+[node name="Background" type="ColorRect" parent="RunScreen/Map" unique_id=811115329]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.631373)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/Map" unique_id=1481858278]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -560.0
+offset_right = 340.0
+offset_bottom = 560.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.701961, 0.67451, 0.721569, 1)
+
+[node name="BackButton" type="Button" parent="RunScreen/Map" unique_id=1168369790]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 32.0
+offset_right = 440.0
+offset_bottom = 63.0
+text = "<----"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RunScreen/Map" unique_id=1262497816]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 72.0
+offset_right = 700.0
+offset_bottom = 1240.0
+follow_focus = true
+horizontal_scroll_mode = 3
+vertical_scroll_mode = 3
+script = ExtResource("25_t3i5t")
+wheel_scroll_damper = SubResource("Resource_kqcdx")
+dragging_scroll_damper = SubResource("Resource_frd6h")
+follow_focus_margin = 200
+allow_horizontal_scroll = false
+
+[node name="LocationContainer" type="Control" parent="RunScreen/Map/ScrollContainer" unique_id=461880636]
+layout_mode = 2
+
+[node name="PauseOverlay" type="Control" parent="RunScreen" unique_id=1074633433]
+unique_name_in_owner = true
+process_mode = 3
+visible = false
+z_index = 100
+anchors_preset = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+script = ExtResource("29_p8axl")
+
+[node name="Background" type="ColorRect" parent="RunScreen/PauseOverlay" unique_id=2142535919]
+layout_mode = 0
+offset_right = 720.0
+offset_bottom = 1280.0
+color = Color(0.203922, 0.188235, 0.215686, 0.141176)
+
+[node name="Background2" type="ColorRect" parent="RunScreen/PauseOverlay" unique_id=299908168]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -216.0
+offset_top = -238.0
+offset_right = 232.0
+offset_bottom = 234.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.290196, 0.266667, 0.305882, 0.662745)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RunScreen/PauseOverlay/Background2" unique_id=858742089]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResumeButton" type="Button" parent="RunScreen/PauseOverlay/Background2/VBoxContainer" unique_id=1219978341]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+shortcut = SubResource("Shortcut_elxq6")
+shortcut_feedback = false
+shortcut_in_tooltip = false
+text = "继续游戏"
+
+[node name="ReturnToTitleButton" type="Button" parent="RunScreen/PauseOverlay/Background2/VBoxContainer" unique_id=1791863685]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "返回标题"
+
+[node name="ForfeitRunButton" type="Button" parent="RunScreen/PauseOverlay/Background2/VBoxContainer" unique_id=1419610482]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+text = "放弃本局"

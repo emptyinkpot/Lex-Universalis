@@ -1,0 +1,55 @@
+{
+	"patch_data": {
+
+	},
+	"properties": {
+		"enemy_object_id": "enemy_lex_mage",
+		"enemy_name": "法师",
+		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_health": 35,
+		"enemy_health_max": 35,
+		"enemy_block": 0,
+		"enemy_actions_on_death": [],
+		"enemy_type": 0,
+		"enemy_is_minion": false,
+		"enemy_attack_states": {
+			"initial": {
+				"attack_damage": 0,
+				"number_of_attacks": 0,
+				"block": 0,
+				"custom_actions": [],
+				"next_attack_weights": {
+					"1": 1,
+					"2": 1
+				}
+			},
+			"1": {
+				"attack_damage": 7,
+				"number_of_attacks": 1,
+				"block": 0,
+				"custom_actions": [
+					{"res://scripts/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_vulnerable", "status_charge_amount": 1, "target_override": 2}}
+				],
+				"next_attack_weights": {
+					"1": 1,
+					"2": 2
+				}
+			},
+			"2": {
+				"attack_damage": 5,
+				"number_of_attacks": 1,
+				"block": 0,
+				"custom_actions": [
+					{"res://scripts/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_weaken", "status_charge_amount": 1, "target_override": 2}}
+				],
+				"next_attack_weights": {
+					"1": 2,
+					"2": 1
+				}
+			}
+		},
+		"enemy_initial_status_effects": {},
+		"enemy_difficulty_to_enemy_modfiers": {},
+		"object_id": "enemy_lex_mage"
+	}
+}
