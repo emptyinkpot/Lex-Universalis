@@ -23,16 +23,18 @@ func fit_root_controls(root: Node) -> void:
 			fit_fullscreen_control(child, viewport_size)
 
 func fit_fullscreen_control(control: Control, viewport_size: Vector2) -> void:
-	# 让根级 Control 占满视口，再对背景和已知页面做二次适配。
-	control.set_anchors_preset(Control.PRESET_FULL_RECT)
-	control.offset_left = 0
-	control.offset_top = 0
-	control.offset_right = 0
-	control.offset_bottom = 0
-	control.custom_minimum_size = viewport_size
+	# 保持 720x1280 设计画布比例，窗口拉伸时整体居中缩放，避免子 UI 被挤散。
+	var scale_factor: float = min(viewport_size.x / DESIGN_SIZE.x, viewport_size.y / DESIGN_SIZE.y)
+	if scale_factor <= 0.0:
+		scale_factor = 1.0
+	var scaled_size: Vector2 = DESIGN_SIZE * scale_factor
+	control.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	control.position = (viewport_size - scaled_size) * 0.5
+	control.size = DESIGN_SIZE
+	control.scale = Vector2(scale_factor, scale_factor)
+	control.custom_minimum_size = DESIGN_SIZE
 	_fit_backgrounds(control)
-	_fit_known_screens(control, viewport_size)
-	_fit_oversized_controls(control, viewport_size)
+	_fit_known_screens(control, DESIGN_SIZE)
 
 func _fit_backgrounds(root: Control) -> void:
 	for node in root.find_children("Background", "Control", true, false):
@@ -42,18 +44,6 @@ func _fit_backgrounds(root: Control) -> void:
 		control.offset_top = 0
 		control.offset_right = 0
 		control.offset_bottom = 0
-
-func _fit_oversized_controls(root: Control, viewport_size: Vector2) -> void:
-	var width_scale: float = min(1.0, viewport_size.x / DESIGN_SIZE.x)
-	for node in root.find_children("*", "Control", true, false):
-		var control := node as Control
-		var rect := control.get_rect()
-		if rect.end.x > viewport_size.x and rect.size.x <= DESIGN_SIZE.x:
-			control.position.x = max(0.0, viewport_size.x - rect.size.x)
-		if rect.end.y > viewport_size.y and rect.size.y <= DESIGN_SIZE.y:
-			control.position.y = max(0.0, viewport_size.y - rect.size.y)
-		if rect.size.x > viewport_size.x and width_scale < 1.0:
-			control.scale.x = width_scale
 
 func _fit_known_screens(root: Control, viewport_size: Vector2) -> void:
 	if root.name == "TitleScreen":
@@ -117,6 +107,11 @@ func _fit_main_menu(main_menu: Control, viewport_size: Vector2) -> void:
 	if not main_menu:
 		return
 	_fill_rect(main_menu)
+	var title := main_menu.get_node_or_null("Label") as Label
+	if title:
+		_fit_node_rect(title, SCREEN_MARGIN, 80.0, viewport_size.x - SCREEN_MARGIN, 180.0)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	var buttons := main_menu.get_node_or_null("VBoxContainer") as Control
 	if buttons:
 		buttons.set_anchors_preset(Control.PRESET_CENTER)

@@ -18,7 +18,14 @@ func init(_enemy_data: EnemyData):
 	selection_button.mouse_entered.connect(_on_mouse_entered)
 	selection_button.mouse_exited.connect(_on_mouse_exited)
 	
-	sprite.texture = FileLoader.load_texture(enemy_data.enemy_texture_path)
+	var texture_path := enemy_data.enemy_texture_path
+	var prototype := Global.get_enemy_data(enemy_data.object_id)
+	if prototype and (texture_path == "" or texture_path == "external/sprites/enemies/enemy_blue_small.png"):
+		texture_path = prototype.enemy_texture_path
+	if texture_path != "":
+		var texture := FileLoader.load_texture(texture_path)
+		if texture != null:
+			sprite.texture = texture
 	
 	# apply initial effects
 	for status_effect_object_id in enemy_data.enemy_initial_status_effects.keys():

@@ -3,8 +3,8 @@
 
 	},
 	"properties": {
-		"action_interceptor_script_path": "res://scripts/action_interceptors/InterceptorVulnerable.gd",
-		"action_intercepted_action_paths": ["res://scripts/actions/generated_actions/ActionAttack.gd"],
+		"action_interceptor_script_path": "res://core/runtime/action_interceptors/InterceptorVulnerable.gd",
+		"action_intercepted_action_paths": ["res://core/runtime/actions/generated_actions/ActionAttack.gd"],
 		"action_interceptor_modifies_parent": false,
 		"action_interceptor_priority": 50,
 		"object_id": "action_interceptor_vulnerable"

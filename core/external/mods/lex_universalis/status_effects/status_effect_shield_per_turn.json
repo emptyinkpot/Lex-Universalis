@@ -4,7 +4,7 @@
 	},
 	"properties": {
 		"status_effect_name": "正义之盾",
-		"status_effect_script_path": "res://scripts/status_effects/BaseStatusEffect.gd",
+		"status_effect_script_path": "res://core/domain/status_effects/BaseStatusEffect.gd",
 		"status_effect_stacks": true,
 		"status_effect_can_be_negative": false,
 		"status_effect_allows_multiples": false,
@@ -13,7 +13,7 @@
 		"status_effect_is_visible": true,
 		"status_effect_type": 0,
 		"status_effect_player_actions": [
-			{"res://scripts/actions/ActionBlock.gd": {"block": 1, "target_override": 1, "custom_key_names": {"block": "invoking_status_effect_charges"}}}
+			{"res://core/runtime/actions/ActionBlock.gd": {"block": 1, "target_override": 1, "custom_key_names": {"block": "invoking_status_effect_charges"}}}
 		],
 		"status_effect_enemy_actions": [],
 		"status_effect_priority": 0,

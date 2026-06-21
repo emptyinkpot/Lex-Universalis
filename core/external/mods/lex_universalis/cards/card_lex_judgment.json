@@ -24,10 +24,10 @@
 		"card_is_retained": false,
 		"card_requires_target": true,
 		"card_values": {"damage": 8, "draw_count": 1},
-		"card_description_preview_overrides": [["damage", "res://scripts/actions/meta_actions/ActionAttackGenerator.gd"]],
+		"card_description_preview_overrides": [["damage", "res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd"]],
 		"card_play_actions": [
-			{"res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 8, "number_of_attacks": 1}},
-			{"res://scripts/actions/meta_actions/ActionDrawGenerator.gd": {"draw_count": 1}}
+			{"res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 8, "number_of_attacks": 1}},
+			{"res://core/runtime/actions/meta_actions/ActionDrawGenerator.gd": {"draw_count": 1}}
 		],
 		"card_play_validators": [],
 		"card_glow_validators": [],

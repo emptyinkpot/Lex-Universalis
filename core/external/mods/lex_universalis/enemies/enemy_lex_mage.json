@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_mage",
 		"enemy_name": "法师",
-		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "res://assets/art/content/enemies/enemy_purple_medium.png",
 		"enemy_health": 35,
 		"enemy_health_max": 35,
 		"enemy_block": 0,
@@ -28,7 +28,7 @@
 				"number_of_attacks": 1,
 				"block": 0,
 				"custom_actions": [
-					{"res://scripts/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_vulnerable", "status_charge_amount": 1, "target_override": 2}}
+					{"res://core/runtime/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_vulnerable", "status_charge_amount": 1, "target_override": 2}}
 				],
 				"next_attack_weights": {
 					"1": 1,
@@ -40,7 +40,7 @@
 				"number_of_attacks": 1,
 				"block": 0,
 				"custom_actions": [
-					{"res://scripts/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_weaken", "status_charge_amount": 1, "target_override": 2}}
+					{"res://core/runtime/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_weaken", "status_charge_amount": 1, "target_override": 2}}
 				],
 				"next_attack_weights": {
 					"1": 2,

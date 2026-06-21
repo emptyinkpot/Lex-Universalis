@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_sentinel",
 		"enemy_name": "哨兵",
-		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "res://assets/art/content/enemies/enemy_blue_medium.png",
 		"enemy_health": 40,
 		"enemy_health_max": 40,
 		"enemy_block": 0,

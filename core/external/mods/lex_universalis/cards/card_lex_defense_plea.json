@@ -24,10 +24,10 @@
 		"card_is_retained": false,
 		"card_requires_target": false,
 		"card_values": {"block": 4, "energy": 1},
-		"card_description_preview_overrides": [["block", "res://scripts/actions/ActionBlock.gd"]],
+		"card_description_preview_overrides": [["block", "res://core/runtime/actions/ActionBlock.gd"]],
 		"card_play_actions": [
-			{"res://scripts/actions/ActionBlock.gd": {"block": 4, "target_override": 1}},
-			{"res://scripts/actions/ActionAddEnergy.gd": {"energy": 1, "target_override": 1}}
+			{"res://core/runtime/actions/ActionBlock.gd": {"block": 4, "target_override": 1}},
+			{"res://core/runtime/actions/ActionAddEnergy.gd": {"energy": 1, "target_override": 1}}
 		],
 		"card_play_validators": [],
 		"card_glow_validators": [],

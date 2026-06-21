@@ -24,13 +24,13 @@
 		"card_is_retained": false,
 		"card_requires_target": true,
 		"card_values": {"damage": 10, "bonus_damage": 5},
-		"card_description_preview_overrides": [["damage", "res://scripts/actions/meta_actions/ActionAttackGenerator.gd"]],
+		"card_description_preview_overrides": [["damage", "res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd"]],
 		"card_play_actions": [
-			{"res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 10, "number_of_attacks": 1}},
-			{"res://scripts/actions/meta_actions/ActionValidator.gd": {
-				"validator_data": [{"res://scripts/validators/ValidatorCombatStats.gd": {"stat_name": "target_has_status", "stat_value": "status_effect_weaken"}}],
+			{"res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 10, "number_of_attacks": 1}},
+			{"res://core/runtime/actions/meta_actions/ActionValidator.gd": {
+				"validator_data": [{"res://core/runtime/validators/ValidatorCombatStats.gd": {"stat_name": "target_has_status", "stat_value": "status_effect_weaken"}}],
 				"child_actions": [
-					{"res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 5, "number_of_attacks": 1}}
+					{"res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 5, "number_of_attacks": 1}}
 				]
 			}}
 		],

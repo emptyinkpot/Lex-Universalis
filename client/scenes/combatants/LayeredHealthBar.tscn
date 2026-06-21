@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://b0qk0vn81d0kp"]
 
-[ext_resource type="Script" uid="uid://lltsdli24v32" path="res://core/combatants/LayeredHealthBar.gd" id="1_smklb"]
+[ext_resource type="Script" path="res://core/domain/combatants/LayeredHealthBar.gd" id="1_smklb"]
 [ext_resource type="Texture2D" uid="uid://bnukx08xo2hps" path="res://client/sprites/health_bar_frame.PNG" id="3_0ueoi"]
 
 [node name="LayeredHealthBar" type="Control"]

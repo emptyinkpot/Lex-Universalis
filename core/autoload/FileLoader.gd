@@ -74,28 +74,35 @@ func get_files_in_directory(partial_dir_path: String):
 	var dir = DirAccess.open(full_path)
 	return dir.get_files()
 
-func load_texture(image_partial_path, is_absolute: bool = false) -> ImageTexture:
-	# 从外部图片加载并缓存纹理。
+func load_texture(image_partial_path: String, is_absolute: bool = false) -> Texture2D:
+	# 加载图片纹理；res:// 内部资源走 Godot 导入系统，外部文件才按磁盘图片读取。
 	var full_path: String = image_partial_path
-	if not is_absolute:
+	if not is_absolute and not image_partial_path.begins_with("res://"):
 		full_path = _get_modified_filepath(image_partial_path)
 	
 	if self._cached_textures.has(full_path):
 		return self._cached_textures[full_path]
-	else:
-		if FileAccess.file_exists(full_path):
-			var image := Image.load_from_file(full_path)
-			var texture: ImageTexture
-			if image == null:
-				texture = ImageTexture.new()
-			else:
-				texture = ImageTexture.create_from_image(image)
-			texture.take_over_path(full_path)
-			self._cached_textures[full_path] = texture
-			return texture
-		else:
-			push_error("Image failed to load: ", full_path)
-			return ImageTexture.new()	# return an empty image
+	
+	if full_path.begins_with("res://"):
+		var imported_texture := ResourceLoader.load(full_path, "Texture2D")
+		if imported_texture is Texture2D:
+			self._cached_textures[full_path] = imported_texture
+			return imported_texture
+		push_error("Image failed to load: ", full_path)
+		return null
+	
+	if FileAccess.file_exists(full_path):
+		var image := Image.load_from_file(full_path)
+		if image == null:
+			push_error("Image failed to decode: ", full_path)
+			return null
+		var texture := ImageTexture.create_from_image(image)
+		texture.take_over_path(full_path)
+		self._cached_textures[full_path] = texture
+		return texture
+	
+	push_error("Image failed to load: ", full_path)
+	return null
 		
 func load_animation(animation_id: String, animation_data: Dictionary) -> SpriteFrames:
 	# given an animation id and animation data, will generate and cache a SpriteFrames from external images
@@ -110,8 +117,9 @@ func load_animation(animation_id: String, animation_data: Dictionary) -> SpriteF
 			
 			var partial_image_paths: Array = animation_data[anim_name]
 			for partial_image_path in partial_image_paths:
-				var texture: ImageTexture = self.load_texture(partial_image_path)
-				animation.add_frame(anim_name, texture)
+				var texture := self.load_texture(partial_image_path)
+				if texture != null:
+					animation.add_frame(anim_name, texture)
 		
 		self._cached_animations[animation_id] = animation
 		return animation

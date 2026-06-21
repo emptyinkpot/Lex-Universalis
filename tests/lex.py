@@ -8,7 +8,7 @@ r"""Lex Universalis 的统一工程入口。
 - 运行游戏：python .\tests\lex.py run
 - 无头验证：python .\tests\lex.py validate
 
-注意：每个命令执行前都会先推送当前分支到 origin。
+注意：每个命令都会先从 origin 拉取当前分支，命令成功后再推送当前分支到 origin。
 """
 
 from __future__ import annotations
@@ -114,6 +114,12 @@ def run_command(command: list[str], *, cwd: Path = PROJECT_ROOT, wait: bool = Tr
     return 0
 
 
+def pull_current_branch() -> int:
+    """先从 origin 拉取当前分支，保证本地在远端最新提交之后运行。"""
+
+    return run_command(["git", "pull", "--ff-only", REMOTE_NAME, "HEAD"])
+
+
 def push_current_branch() -> int:
     """把当前分支已有提交推到 origin；不自动提交工作区改动。"""
 
@@ -192,7 +198,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """主流程：解析命令，先推送，再执行指定 Godot 工作流。"""
+    """主流程：解析命令，先拉取，执行指定 Godot 工作流，成功后再推送。"""
 
     args = parse_args(argv or sys.argv[1:])
     actions = {
@@ -203,10 +209,15 @@ def main(argv: list[str] | None = None) -> int:
         "desktop": run_desktop_build,
     }
     try:
-        push_code = push_current_branch()
-        if push_code != 0:
-            return push_code
-        return actions[args.command]()
+        pull_code = pull_current_branch()
+        if pull_code != 0:
+            return pull_code
+
+        action_code = actions[args.command]()
+        if action_code != 0:
+            return action_code
+
+        return push_current_branch()
     except Exception as exc:
         print(f"[lex] {exc}", file=sys.stderr, flush=True)
         return 1

@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://528isoebkdpv"]
 
-[ext_resource type="Script" uid="uid://d4l5y1jvle1mq" path="res://core/combatants/Enemy.gd" id="1_10iyf"]
+[ext_resource type="Script" path="res://core/domain/combatants/Enemy.gd" id="1_10iyf"]
 [ext_resource type="Texture2D" uid="uid://nh32y87hcke5" path="res://icon.svg" id="2_x4bdi"]
 [ext_resource type="PackedScene" uid="uid://b0qk0vn81d0kp" path="res://client/scenes/combatants/LayeredHealthBar.tscn" id="3_nimvv"]
 

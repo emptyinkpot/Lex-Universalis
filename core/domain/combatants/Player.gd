@@ -16,6 +16,7 @@ func _ready():
 	Signals.artifact_proc.connect(_on_artifact_proc)
 	Signals.run_started.connect(_on_run_started)
 	Signals.run_ended.connect(_on_run_ended)
+	_refresh_character_texture()
 
 ## Does damage to combatant and returns [unblocked damage dealt, damage to 0 (if player dies), overkill damage (if player dies)].
 ## eg 15 damage on 10 remaining health and 3 block will return [12, 10, 2].
@@ -127,8 +128,7 @@ func register_run_modifier_interceptors() -> void:
 
 
 func _on_run_started():
-	var character_data: CharacterData = Global.get_player_character_data()
-	sprite.texture = FileLoader.load_texture(character_data.character_texture_path)
+	_refresh_character_texture()
 	
 	reset_block()
 	clear_all_status_effects()
@@ -147,6 +147,16 @@ func _on_run_started():
 	var location_data: LocationData = Global.get_player_location_data()
 	if location_data.location_type == LocationData.LOCATION_TYPES.STARTING:
 		animation_player.play("run_start")
+
+func _refresh_character_texture() -> void:
+	var character_data: CharacterData = Global.get_player_character_data()
+	if character_data == null:
+		return
+	var texture_path := character_data.character_texture_path
+	if texture_path != "":
+		var texture := FileLoader.load_texture(texture_path)
+		if texture != null:
+			sprite.texture = texture
 
 func _on_run_ended():
 	reset_block()

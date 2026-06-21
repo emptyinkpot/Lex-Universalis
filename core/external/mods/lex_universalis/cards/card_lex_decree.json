@@ -26,7 +26,7 @@
 		"card_values": {"status_charge_amount": 2},
 		"card_description_preview_overrides": [],
 		"card_play_actions": [
-			{"res://scripts/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_weaken", "status_charge_amount": 2}}
+			{"res://core/runtime/actions/status_actions/ActionApplyStatus.gd": {"status_effect_object_id": "status_effect_weaken", "status_charge_amount": 2}}
 		],
 		"card_play_validators": [],
 		"card_glow_validators": [],

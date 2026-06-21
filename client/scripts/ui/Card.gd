@@ -81,8 +81,15 @@ func update_card_display(selected_enemy: Enemy = null) -> void:
 		_card_is_rerendering = false
 	
 	# update visuals
-	if card_data.card_texture_path != "":
-		card_texture.texture = FileLoader.load_texture(card_data.card_texture_path)
+	var texture_path := card_data.card_texture_path
+	if texture_path == "":
+		var prototype := Global.get_card_data(card_data.object_id)
+		if prototype:
+			texture_path = prototype.card_texture_path
+	if texture_path != "":
+		var texture := FileLoader.load_texture(texture_path)
+		if texture != null:
+			card_texture.texture = texture
 	
 	# updates the card's display
 	card_name.set_bbcode("[center]" + card_data.get_card_name() + "[/center]")

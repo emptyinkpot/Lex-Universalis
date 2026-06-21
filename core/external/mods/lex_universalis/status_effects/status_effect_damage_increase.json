@@ -4,7 +4,7 @@
 	},
 	"properties": {
 		"status_effect_name": "力量",
-		"status_effect_script_path": "res://scripts/status_effects/BaseStatusEffect.gd",
+		"status_effect_script_path": "res://core/domain/status_effects/BaseStatusEffect.gd",
 		"status_effect_stacks": true,
 		"status_effect_can_be_negative": true,
 		"status_effect_allows_multiples": false,

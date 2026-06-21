@@ -25,12 +25,12 @@
 		"card_requires_target": true,
 		"card_values": {"damage": 7, "block": 7},
 		"card_description_preview_overrides": [
-			["damage", "res://scripts/actions/meta_actions/ActionAttackGenerator.gd"],
-			["block", "res://scripts/actions/ActionBlock.gd"]
+			["damage", "res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd"],
+			["block", "res://core/runtime/actions/ActionBlock.gd"]
 		],
 		"card_play_actions": [
-			{"res://scripts/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 7, "number_of_attacks": 1}},
-			{"res://scripts/actions/ActionBlock.gd": {"block": 7, "target_override": 1}}
+			{"res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd": {"damage": 7, "number_of_attacks": 1}},
+			{"res://core/runtime/actions/ActionBlock.gd": {"block": 7, "target_override": 1}}
 		],
 		"card_play_validators": [],
 		"card_glow_validators": [],

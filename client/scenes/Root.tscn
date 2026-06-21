@@ -223,8 +223,9 @@ offset_right = 680.0
 offset_bottom = 93.0286
 grow_horizontal = 2
 theme = ExtResource("2_bi5lp")
-text = "我即真理"
+text = "普世法则"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="VBoxContainer" type="VBoxContainer" parent="TitleScreen/MainMenu" unique_id=1796377823]
 layout_mode = 0
