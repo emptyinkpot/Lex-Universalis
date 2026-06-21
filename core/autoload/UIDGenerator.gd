@@ -1,5 +1,8 @@
-## Helper singleton
-## Manages Unique ID generation for PrototypeData objects
+## UIDGenerator 负责为运行时生成的 PrototypeData 实例创建唯一 ID。
+## 它把对象前缀、时间戳和递增计数拼起来，避免同一局里临时对象互相覆盖。
+##
+## 辅助单例。
+## 负责为 PrototypeData 对象生成唯一 ID。
 extends Node
 
 var unique_id_counter = 0

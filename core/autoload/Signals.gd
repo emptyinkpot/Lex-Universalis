@@ -1,4 +1,6 @@
-# Singleton defining global signals
+## Signals 是全局事件总线。
+## UI、运行时 action、数据状态变化通过这里解耦通信；
+## 例如卡牌请求、战斗开始结束、奖励发放、地图移动都在这里定义信号。
 extends Node
 
 var _id_to_custom_signal: Dictionary[String, CustomSignal] = {}

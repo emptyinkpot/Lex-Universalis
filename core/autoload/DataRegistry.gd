@@ -1,5 +1,9 @@
 extends Node
 
+## DataRegistry 是 Global 数据读取 API 的薄封装。
+## 它让 UI 或规则代码不用直接触碰 Global 内部字典字段，
+## 后续如果要替换数据来源，也可以先从这里收口。
+
 func get_card_data(card_object_id: String) -> CardData:
 	return Global.get_card_data(card_object_id)
 

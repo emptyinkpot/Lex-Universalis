@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-r"""Single launcher for Lex Universalis Godot workflows.
+r"""Lex Universalis 的统一工程入口。
 
-Start editor: python .\tests\lex.py editor
-Start game:   python .\tests\lex.py run
+这个脚本放在 tests/ 下，但它操作的是仓库根目录里的 Godot 工程。
+常用命令：
 
-Every command pushes the current branch to origin once before running.
+- 打开编辑器：python .\tests\lex.py editor
+- 运行游戏：python .\tests\lex.py run
+- 无头验证：python .\tests\lex.py validate
+
+注意：每个命令执行前都会先推送当前分支到 origin。
 """
 
 from __future__ import annotations
@@ -18,22 +22,26 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-GODOT_PROJECT_DIR = PROJECT_ROOT
-BUILD_DIR = PROJECT_ROOT / "build" / "windows"
-GAME_EXE = BUILD_DIR / "Lex Universalis.exe"
-GAME_PCK = BUILD_DIR / "Lex Universalis.pck"
-EXPORT_PRESET = "Windows Desktop"
-REMOTE_NAME = "origin"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent  # tests/ 的上一层就是 Godot 工程根。
+GODOT_PROJECT_DIR = PROJECT_ROOT  # project.godot 直接放在仓库根目录。
+BUILD_DIR = PROJECT_ROOT / "build" / "windows"  # Windows 桌面构建输出目录。
+GAME_EXE = BUILD_DIR / "Lex Universalis.exe"  # 复制 Godot 可执行文件后得到的启动器。
+GAME_PCK = BUILD_DIR / "Lex Universalis.pck"  # Godot 导出的游戏数据包。
+EXPORT_PRESET = "Windows Desktop"  # 必须对应 Godot export preset 的名称。
+REMOTE_NAME = "origin"  # 每次运行前推送到这个 Git 远端。
 
 
 @dataclass(frozen=True)
 class GodotCandidate:
+    """一个可能的 Godot 可执行文件位置。"""
+
     path: Path
     source: str
 
 
 def env_path(name: str) -> GodotCandidate | None:
+    """从环境变量读取 Godot 路径。"""
+
     value = os.environ.get(name, "").strip().strip('"')
     if not value:
         return None
@@ -42,6 +50,8 @@ def env_path(name: str) -> GodotCandidate | None:
 
 
 def possible_godot_paths(console: bool) -> list[GodotCandidate]:
+    """列出 Windows 上常见的 Godot 安装位置。"""
+
     local_appdata = Path(os.environ.get("LOCALAPPDATA", ""))
     program_files = Path(os.environ.get("ProgramFiles", r"C:\Program Files"))
     program_files_x86 = Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"))
@@ -77,6 +87,8 @@ def possible_godot_paths(console: bool) -> list[GodotCandidate]:
 
 
 def find_godot(console: bool = False) -> Path:
+    """按环境变量、PATH、常见安装目录的顺序寻找 Godot。"""
+
     env_candidates = []
     if console:
         env_candidates.append(env_path("GODOT_CONSOLE"))
@@ -88,11 +100,13 @@ def find_godot(console: bool = False) -> Path:
 
     mode = "console/headless" if console else "editor/runtime"
     raise FileNotFoundError(
-        f"Godot executable not found for {mode}. Set GODOT_EXE, or GODOT_CONSOLE for headless commands."
+        f"没有找到 {mode} 模式需要的 Godot 可执行文件。请设置 GODOT_EXE；无头命令可额外设置 GODOT_CONSOLE。"
     )
 
 
 def run_command(command: list[str], *, cwd: Path = PROJECT_ROOT, wait: bool = True) -> int:
+    """打印并执行外部命令，保证所有工程命令都有同一份日志格式。"""
+
     print("[lex] " + " ".join(f'"{part}"' if " " in part else part for part in command), flush=True)
     if wait:
         return subprocess.run(command, cwd=cwd).returncode
@@ -101,25 +115,35 @@ def run_command(command: list[str], *, cwd: Path = PROJECT_ROOT, wait: bool = Tr
 
 
 def push_current_branch() -> int:
+    """把当前分支已有提交推到 origin；不自动提交工作区改动。"""
+
     return run_command(["git", "push", REMOTE_NAME, "HEAD"])
 
 
 def open_editor() -> int:
+    """打开 Godot 编辑器，不阻塞当前终端。"""
+
     godot = find_godot(console=False)
     return run_command([str(godot), "--editor", "--path", str(GODOT_PROJECT_DIR)], wait=False)
 
 
 def run_game() -> int:
+    """从源码直接运行 Godot 工程。"""
+
     godot = find_godot(console=False)
     return run_command([str(godot), "--path", str(GODOT_PROJECT_DIR)])
 
 
 def validate_project() -> int:
+    """用 headless Godot 加载项目，检查脚本和资源能否启动。"""
+
     godot = find_godot(console=True)
     return run_command([str(godot), "--headless", "--path", str(GODOT_PROJECT_DIR), "--quit"])
 
 
 def build_desktop() -> int:
+    """导出 Windows pck，并复制 Godot 可执行文件作为桌面启动器。"""
+
     console_godot = find_godot(console=True)
     gui_godot = find_godot(console=False)
     BUILD_DIR.mkdir(parents=True, exist_ok=True)
@@ -137,33 +161,39 @@ def build_desktop() -> int:
         return export_code
 
     shutil.copyfile(gui_godot, GAME_EXE)
-    print("[lex] Build complete.", flush=True)
+    print("[lex] 构建完成。", flush=True)
     print(f"[lex] {GAME_EXE}", flush=True)
     print(f"[lex] {GAME_PCK}", flush=True)
     return 0
 
 
 def run_desktop_build() -> int:
+    """运行已经导出的 Windows 桌面构建。"""
+
     if not GAME_EXE.exists():
-        print(f"[lex] Desktop executable not found: {GAME_EXE}", file=sys.stderr, flush=True)
+        print(f"[lex] 没有找到桌面可执行文件：{GAME_EXE}", file=sys.stderr, flush=True)
         return 1
     if not GAME_PCK.exists():
-        print(f"[lex] Packed game data not found: {GAME_PCK}", file=sys.stderr, flush=True)
+        print(f"[lex] 没有找到打包后的游戏数据：{GAME_PCK}", file=sys.stderr, flush=True)
         return 1
     return run_command([str(GAME_EXE), "--main-pack", str(GAME_PCK)], wait=False)
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Lex Universalis launcher.")
+    """解析命令行参数，并限制入口命令集合。"""
+
+    parser = argparse.ArgumentParser(description="Lex Universalis 统一启动脚本。")
     parser.add_argument(
         "command",
         choices=("editor", "run", "validate", "build", "desktop"),
-        help="editor=open Godot editor, run=run project, validate=headless load, build=export Windows pack, desktop=run built exe",
+        help="editor=打开 Godot 编辑器，run=运行项目，validate=无头加载验证，build=导出 Windows 数据包，desktop=运行已构建 exe",
     )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
+    """主流程：解析命令，先推送，再执行指定 Godot 工作流。"""
+
     args = parse_args(argv or sys.argv[1:])
     actions = {
         "editor": open_editor,

@@ -1,10 +1,15 @@
 extends Node
 
+## LayoutService 负责运行时 UI 适配。
+## 当前项目以 720x1280 竖屏为设计基准，这里在不同视口下调整根控件、
+## 背景和已知页面，减少 PC/手机尺寸切换时的错位。
+
 const DESIGN_SIZE: Vector2 = Vector2(720, 1280)
 const MOBILE_WIDTH_THRESHOLD: float = 760.0
 const SCREEN_MARGIN: float = 24.0
 
 func refresh_from(node: Node) -> void:
+	# 从任意节点向上找到当前场景，再刷新整棵根 UI。
 	if not node:
 		return
 	var root := node.get_tree().current_scene
@@ -18,6 +23,7 @@ func fit_root_controls(root: Node) -> void:
 			fit_fullscreen_control(child, viewport_size)
 
 func fit_fullscreen_control(control: Control, viewport_size: Vector2) -> void:
+	# 让根级 Control 占满视口，再对背景和已知页面做二次适配。
 	control.set_anchors_preset(Control.PRESET_FULL_RECT)
 	control.offset_left = 0
 	control.offset_top = 0

@@ -1,5 +1,9 @@
 extends Node
 
+## Scenes 集中缓存常用 PackedScene。
+## 其他脚本通过这里实例化 UI、战斗单位、奖励按钮等场景，
+## 避免到处散落硬编码 scene path。
+
 var CARD: PackedScene = load("res://client/scenes/ui/Card.tscn")
 
 var ARTIFACT: PackedScene = load("res://client/scenes/ui/Artifact.tscn")

@@ -1,7 +1,10 @@
-## Helper service that provides basic logging functionality
+## DebugLogger 是项目内统一日志服务。
+## 用它输出 Godot 控制台日志，并保留一份内存日志，后续可以扩展为写入文件。
+##
+## 提供基础日志功能的辅助服务。
 extends Node
 
-## [timestamp, message, severity]
+## [时间戳, 消息, 严重级别]
 var logged_lines: Array[Array] = []
 
 enum Severities {STANDARD, WARNING, ERROR}

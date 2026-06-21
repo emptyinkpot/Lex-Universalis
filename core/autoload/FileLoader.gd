@@ -1,42 +1,44 @@
-## Helper singleton for externalizing non critical file loads such as images and json.
-## This allows for easy end user modability support when building the game rather than packing all
-## human configurable or static assets into the standalone executable as is Godot's standard.
-## Use load_xxx() for external files, and Godot's standard load() for internal ones
+## FileLoader 负责外部化资源和 JSON 的读写。
+## 编辑器运行时从 res:// 读取；导出版本可从 exe 同级目录读取 core/external，
+## 这样卡牌、敌人、图片和存档能在不重新打包 exe 的情况下被修改或保存。
+##
+## 辅助单例：外置图片、JSON 等非核心文件加载。
+## 这样导出游戏时，玩家或开发者可以更方便地修改配置和静态资源，
+## 不必把所有可配置内容都塞进 Godot 默认的独立可执行包里。
+## 外部文件使用 load_xxx()，内部资源仍使用 Godot 标准 load()。
 
-## CRITICAL: When exporting the game, copy the project's "core/external" folder
-## into the exported .exe's directory as "core/external"
-## and add "exported" to the export tags
+## 重要：导出游戏时，需要把项目的 "core/external" 文件夹复制到 exe 同级目录，
+## 路径保持为 "core/external"，并在导出标签中加入 "exported"。
 
-## This singleton can also be used for other file related routines such as saving and loading the game
+## 这个单例也负责存档、读档等文件相关流程。
 extends Node
 
-###### Directories and cached assets
-## The file path where anything externally loaded is found. This will automatically change depending on whether
-## you are running from editor (directory of project) or have built the game (full path of exe).
+###### 目录和资源缓存
+## 外部加载资源的路径前缀。编辑器运行时指向项目目录，导出版本指向 exe 所在目录。
 var _EXTERNAL_FILE_PREFIX: String = "res://"
 
 const EXTERNAL_DIR_PATH: String = "core/external/"
 const EXTERNAL_DIR_DATA_PATH: String = EXTERNAL_DIR_PATH + "data/"
-const MOD_LIST_FILE_NAME: String = "mod_list.json" # name of file containing info on how to load all mods
-const MOD_INFO_FILE_NAME: String = "mod_info.json" # name of file for info on loading a single mod
+const MOD_LIST_FILE_NAME: String = "mod_list.json" # 记录所有 mod 加载信息的文件名。
+const MOD_INFO_FILE_NAME: String = "mod_info.json" # 单个 mod 加载信息的文件名。
 
-const SAVE_DIR_PATH: String = EXTERNAL_DIR_PATH + "saves/" # file path of the save directory
-const SAVE_FILE_NAME: String = "save.json" # filename of the current run's save
+const SAVE_DIR_PATH: String = EXTERNAL_DIR_PATH + "saves/" # 存档目录路径。
+const SAVE_FILE_NAME: String = "save.json" # 当前局存档文件名。
 
-var USER_SETTINGS_DIR_PATH: String = EXTERNAL_DIR_PATH # you may wish to change this to OS.get_user_data_dir()
+var USER_SETTINGS_DIR_PATH: String = EXTERNAL_DIR_PATH # 之后可按需要改为 OS.get_user_data_dir()。
 const USER_SETTINGS_FILE_NAME: String = "user_settings.json"
 
-var PROFILE_DIR_PATH: String = EXTERNAL_DIR_PATH # you may wish to change this to OS.get_user_data_dir()
+var PROFILE_DIR_PATH: String = EXTERNAL_DIR_PATH # 之后可按需要改为 OS.get_user_data_dir()。
 const PROFILE_FILE_NAME: String = "profile.json"
 
-const AUTOSAVING_ENABLED: bool = true # disabling this makes testing easier
+const AUTOSAVING_ENABLED: bool = true # 关闭后更方便做测试。
 
-var _cached_textures: Dictionary	= {}	# maps a partial image path to a loaded image
-var _cached_animations: Dictionary = {}	# maps unique animation ids to a spriteframe object
+var _cached_textures: Dictionary	= {}	# 局部图片路径到已加载图片的缓存。
+var _cached_animations: Dictionary = {}	# 唯一动画 ID 到 SpriteFrames 对象的缓存。
 
-## Any time a read only data file is loaded for the first time, its directory and file name is stored here.
-## Useful for migrating data via _migrate_read_only_data() and re-saving it
-## or debugging a problematic config/mod.
+## 只读数据文件首次加载时，会把目录和文件名记录在这里。
+## 这便于通过 _migrate_read_only_data() 迁移并重新保存数据，
+## 也便于调试有问题的配置或 mod。
 var _read_only_object_to_source_file_path: Dictionary[SerializableData, Array] = {
 	# SerializableData: ["partial_path", "filename"]
 }
@@ -46,14 +48,14 @@ const VALID_IMAGE_EXTENSIONS: Array[String] = [
 ]
 
 func _ready():
-	# change the base folder path based on the build type
+	# 根据运行形态切换基础目录。
 	DebugLogger.log_line("FileLoader: To enable external file loading in builds, download an export template and add the custom feature tag \"exported\" to the export. See https://docs.godotengine.org/en/stable/tutorials/export/feature_tags.html",Color.YELLOW, DebugLogger.Severities.WARNING)
 	if !OS.has_feature("exported"):
-		# debug build uses project directory
+		# 调试/编辑器运行时使用项目目录。
 		_EXTERNAL_FILE_PREFIX = "res://"
 		DebugLogger.log_line("Debug Base Directory: " + _EXTERNAL_FILE_PREFIX, Color.LIGHT_BLUE)
 	else:
-		# release build uses exe folder for user ease of access
+		# 发布版本使用 exe 同级目录，方便玩家找到文件。
 		_EXTERNAL_FILE_PREFIX = OS.get_executable_path().get_base_dir() + "/"
 		DebugLogger.log_line("Build Base Directory: " + _EXTERNAL_FILE_PREFIX, Color.LIGHT_BLUE)
 		
@@ -61,7 +63,7 @@ func _ready():
 		DebugLogger.log_line("FileLoader: Autosaving disabled", Color.RED)
 
 func _get_modified_filepath(partial_filepath: String) -> String:
-	# given a partial filepath, return the full one, which will change based on the build
+	# 输入局部路径，按当前运行形态返回完整路径。
 	return _EXTERNAL_FILE_PREFIX + partial_filepath
 
 func get_files_in_directory(partial_dir_path: String):
@@ -73,7 +75,7 @@ func get_files_in_directory(partial_dir_path: String):
 	return dir.get_files()
 
 func load_texture(image_partial_path, is_absolute: bool = false) -> ImageTexture:
-	# loads and caches a texture from external images
+	# 从外部图片加载并缓存纹理。
 	var full_path: String = image_partial_path
 	if not is_absolute:
 		full_path = _get_modified_filepath(image_partial_path)

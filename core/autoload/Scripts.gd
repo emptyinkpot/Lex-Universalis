@@ -1,17 +1,19 @@
-# Hardcoded script paths
+## Scripts 集中保存运行时脚本路径常量。
+## 卡牌 JSON、ActionGenerator 和规则系统通过这些常量创建 action、validator、listener。
+## 如果移动 core/runtime 或 core/domain 下的脚本，优先在这里同步路径。
 extends Node
 
-#region Action scripts
+#region Action 脚本
 
-# map generation actions
+# 地图生成 action
 const ACTION_GENERATE_ACT: String = "res://core/runtime/actions/world_generation_actions/ActionGenerateAct.gd"
 
-# map interaction actions
+# 地图交互 action
 const ACTION_VISIT_LOCATION: String = "res://core/runtime/actions/world_interaction_actions/ActionVisitLocation.gd"
 const ACTION_OPEN_CHEST: String = "res://core/runtime/actions/world_interaction_actions/ActionOpenChest.gd"
 const ACTION_START_COMBAT: String = "res://core/runtime/actions/world_interaction_actions/ActionStartCombat.gd"
 
-# general combat actions
+# 通用战斗 action
 
 const ACTION_RESET_BLOCK: String = "res://core/runtime/actions/ActionResetBlock.gd"
 const ACTION_BLOCK: String = "res://core/runtime/actions/ActionBlock.gd"
@@ -23,20 +25,20 @@ const ACTION_SUMMON_ENEMIES: String = "res://core/runtime/actions/ActionSummonEn
 const ACTION_END_TURN: String = "res://core/runtime/actions/ActionEndTurn.gd"
 const ACTION_RESHUFFLE: String = "res://core/runtime/actions/ActionReshuffle.gd"
 
-# status actions, created by StatusEffect scripts
+# 状态 action，由 StatusEffect 脚本创建。
 const ACTION_CORROSION: String = "res://core/runtime/actions/status_actions/ActionCorrosion.gd"
 
-# custom ui
+# 自定义 UI
 const ACTION_CUSTOM_UI: String = "res://core/runtime/actions/custom_ui_actions/ActionCustomUI.gd"
 
-# debug
+# 调试
 const ACTION_DEBUG_LOG = "res://core/runtime/actions/debug_actions/ActionDebugLog.gd"
 
-# card play
+# 出牌流程
 const ACTION_CARD_PLAY: String = "res://core/runtime/actions/meta_actions/ActionCardPlay.gd"
 const ACTION_CARD_PLAY_END: String = "res://core/runtime/actions/meta_actions/ActionCardPlayEnd.gd"
 
-# meta actions; actions that generate or affect other actions, or some other technical effect
+# 元 action：用于生成或影响其他 action，或承载技术性效果。
 const ACTION_ATTACK_GENERATOR: String = "res://core/runtime/actions/meta_actions/ActionAttackGenerator.gd"
 const ACTION_DRAW_GENERATOR: String = "res://core/runtime/actions/meta_actions/ActionDrawGenerator.gd"
 const ACTION_EMIT_CUSTOM_SIGNAL: String = "res://core/runtime/actions/meta_actions/ActionEmitCustomSignal.gd"
@@ -45,11 +47,11 @@ const ACTION_VARIABLE_CARDSET_MODIFIER: String = "res://core/runtime/actions/met
 const ACTION_VARIABLE_COMBAT_STATS_MODIFIER: String = "res://core/runtime/actions/meta_actions/ActionVariableCombatStatsModifier.gd"
 const ACTION_VALIDATOR: String = "res://core/runtime/actions/meta_actions/ActionValidator.gd"
 
-# generated actions; use their corresponding generator to make these
+# 生成型 action：应通过对应 generator 创建。
 const ACTION_ATTACK: String = "res://core/runtime/actions/generated_actions/ActionAttack.gd"
 const ACTION_DRAW: String = "res://core/runtime/actions/generated_actions/ActionDraw.gd"
 
-# progression actions
+# 成长/进度 action
 const ACTION_ADD_HEALTH: String = "res://core/runtime/actions/ActionAddHealth.gd"
 const ACTION_HEAL_PERCENT: String =  "res://core/runtime/actions/ActionHealPercent.gd"
 
@@ -61,26 +63,26 @@ const ACTION_UPDATE_REST_ACTIONS = "res://core/runtime/actions/player_actions/Ac
 const ACTION_ADD_CONSUMABLE: String = "res://core/runtime/actions/player_actions/ActionAddConsumable.gd"
 const ACTION_USE_CONSUMABLE: String = "res://core/runtime/actions/player_actions/ActionUseConsumable.gd"
 
-# reward actions
+# 奖励 action
 const ACTION_GRANT_REWARDS = "res://core/runtime/actions/rewards/ActionGrantRewards.gd"
 const ACTION_CLEAR_REWARDS = "res://core/runtime/actions/rewards/ActionClearRewards.gd"
 
-# shop
+# 商店
 const ACTION_SHOP_PURCHASE_ITEMS: String = "res://core/runtime/actions/shop_actions/ActionShopPurchaseItems.gd"
 const ACTION_SHOP_POPULATE_ITEMS: String = "res://core/runtime/actions/shop_actions/ActionShopPopulateItems.gd"
 
-# enemy actions
+# 敌人 action
 const ACTION_CYCLE_ENEMY_INTENT: String = "res://core/runtime/actions/enemy_actions/ActionCycleEnemyIntent.gd"
 
-# artifact actions
+# 遗物 action
 const ACTION_INCREASE_ARTIFACT_CHARGE: String = "res://core/runtime/actions/artifact_actions/ActionIncreaseArtifactCharge.gd"
 
-# pick card actions, used to select cards and typically apply cardset child actions
+# 选牌 action：用于选择卡牌，并通常执行 cardset 子 action。
 const ACTION_PICK_CARDS: String = "res://core/runtime/actions/pick_card_actions/ActionPickCards.gd"
 const ACTION_PICK_UPGRADE_CARDS: String = "res://core/runtime/actions/pick_card_actions/ActionPickUpgradeCards.gd"
 const ACTION_CREATE_CARDS: String = "res://core/runtime/actions/pick_card_actions/ActionCreateCards.gd"
 
-# cardsset actions
+# 卡组/卡牌集合 action
 const ACTION_IMPROVE_CARD_VALUES: String = "res://core/runtime/actions/cardset_actions/ActionImproveCardValues.gd"
 const ACTION_DISCARD_CARDS: String = "res://core/runtime/actions/cardset_actions/ActionDiscardCards.gd"
 const ACTION_EXHAUST_CARDS: String = "res://core/runtime/actions/cardset_actions/ActionExhaustCards.gd"
@@ -100,8 +102,8 @@ const ACTION_ATTACH_CARDS_ONTO_ENEMY = "res://core/runtime/actions/cardset_actio
 const ACTION_UPGRADE_CARDS: String = "res://core/runtime/actions/cardset_actions/ActionUpgradeCards.gd"
 #endregion
 
-#region Validators
-# card property validators
+#region Validator
+# 卡牌属性 validator
 const VALIDATOR_CARD_COLOR: String = "res://core/runtime/validators/card/ValidatorCardColor.gd"
 const VALIDATOR_CARD_TAG: String = "res://core/runtime/validators/card/ValidatorCardTag.gd"
 const VALIDATOR_CARD_DRAFTABLE = "res://core/runtime/validators/card/ValidatorCardDraftable.gd"
@@ -115,7 +117,7 @@ const VALIDATOR_CARD_TRANSFORMABLE_FROM_DECK: String = "res://core/runtime/valid
 const VALIDATOR_CARD_TYPE: String = "res://core/runtime/validators/card/ValidatorCardType.gd"
 const VALIDATOR_CARD_UPGRADEABLE: String = "res://core/runtime/validators/card/ValidatorCardUpgradeable.gd"
 
-# card play validators
+# 出牌 validator
 const VALIDATOR_CARD_PLAY_ENEMY_ATTACKING: String = "res://core/runtime/validators/card_plays/ValidatorCardPlayEnemyAttacking.gd"
 const VALIDATOR_CARD_PLAY_ENERGY_INPUT: String = "res://core/runtime/validators/card_plays/ValidatorCardPlayEnergyInput.gd"
 const VALIDATOR_CARD_PLAY_IS_DUPLICATED: String = "res://core/runtime/validators/card_plays/ValidatorCardPlayIsDuplicated.gd"

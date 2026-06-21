@@ -1,5 +1,8 @@
 extends Node
 
+## RunState 是当前局/暂停/玩家状态的薄服务层。
+## 目前主要转发到 Global，目的是让调用方不要直接依赖 Global 的内部实现。
+
 func start_run(character_object_id: String, run_seed: int, difficulty_level: int = 0, custom_run_modifier_object_ids: Array[String] = []) -> void:
 	Global.start_run(character_object_id, run_seed, difficulty_level, custom_run_modifier_object_ids)
 

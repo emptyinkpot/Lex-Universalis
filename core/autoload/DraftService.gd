@@ -1,5 +1,8 @@
 extends Node
 
+## DraftService 是抽卡/奖励候选生成的薄服务层。
+## 目前主要转发到 Random，后续若要调整抽卡权重或卡池来源，可优先从这里收口。
+
 func generate_unweighted_card_draft(rng: RandomNumberGenerator, number_of_cards: int) -> Array[CardData]:
 	return Random.generate_unweighted_card_draft(rng, number_of_cards)
 

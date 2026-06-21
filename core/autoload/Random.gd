@@ -1,8 +1,12 @@
-## Helper singleton. Provides deterministic randomization methods. See: PlayerData.get_player_rng()
-## for actually getting a RandomNumberGenerator to use for these methods.
+## Random 提供确定性随机工具。
+## 所有会影响局内结果的随机选择都应使用 PlayerData.get_player_rng() 提供的 rng，
+## 避免重放、存档恢复和同 seed 运行时出现不可控差异。
+##
+## 辅助单例：提供确定性随机方法。
+## 真正使用时应从 PlayerData.get_player_rng() 获取 RandomNumberGenerator。
 extends Node
 
-## General random method. Shuffles an array deterministically using a given rng.
+## 通用随机方法：使用指定 rng 对数组做确定性洗牌。
 func shuffle_array(rng: RandomNumberGenerator, array) -> Array:
 	for i in array.size():
 		var rand_idx = rng.randi_range(0,array.size()-1)
@@ -14,24 +18,23 @@ func shuffle_array(rng: RandomNumberGenerator, array) -> Array:
 			array[i] = temp
 	return array
 
-## Wrapper method to shuffle an array then slice it to N first elements
+## 洗牌后截取前 N 个元素的包装方法。
 func shuffle_slice_array(rng: RandomNumberGenerator, array: Array, index: int = len(array)) -> Array:
-	# shuffle the pack and pick the first N number of them
+	# 洗牌后取前 N 个元素。
 	var new_array = Random.shuffle_array(rng, array)
 	if len(new_array) > 0 and index >= 0:
-		# ensure slice can never exceed bounds of array
-		# negative slices will simply include entire array
+		# 确保截取宽度不会超过数组边界。
+		# 负数截取会直接包含整个数组。
 		var slice_width: int = clamp(index, 0, len(new_array))
 		new_array = new_array.slice(0, slice_width)
 	
 	return new_array
 
-## General random method. Randomly selects a variant object from a list of objects given a mapping of the objects to their
-## respective weights.
+## 通用随机方法：根据对象到权重的映射，随机选择一个对象。
 func get_weighted_selection(rng: RandomNumberGenerator, weights: Dictionary[Variant, int]) -> Variant:
 	if len(weights.keys()) > 0:
-		# generate weighted buckets using the weight of each object
-		# a weight of [1,2,1] would produce buckets of [1,3,4]
+		# 根据每个对象的权重生成累积权重桶。
+		# 例如权重 [1,2,1] 会生成桶 [1,3,4]。
 		var weight_total: int = 0
 		var weight_buckets: Dictionary = {}
 		var weight_keys: Array = weights.keys()
@@ -40,7 +43,7 @@ func get_weighted_selection(rng: RandomNumberGenerator, weights: Dictionary[Vari
 			weight_total += weight
 			weight_buckets[weighted_object] = weight_total
 		
-		# randomly select a bucket
+		# 随机命中一个权重桶。
 		var random_weight: int = rng.randi() % max(weight_total, 1)
 		var bottom_weight: int = 0
 		var first_object: Variant = weight_keys[0]
@@ -68,10 +71,10 @@ func test_weighted_selection(weights: Dictionary[Variant, int]) -> void:
 	
 	print(weight_results)
 
-### Drafting Cards
+### 抽卡候选生成
 
-## Randomly gets a number of cards from the player's card pool and returns a list of them.
-## This ignores weighting.
+## 从玩家卡池中随机取得指定数量的卡牌并返回。
+## 这里不计算权重。
 func generate_unweighted_card_draft(rng: RandomNumberGenerator, number_of_cards: int) -> Array[CardData]:
 	var returned_cards: Array[CardData] = []
 	

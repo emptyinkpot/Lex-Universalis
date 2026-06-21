@@ -1,24 +1,26 @@
-## Singleton managing central data across application providing several functions:
-## - Creates/stores PlayerData for the current run along with helper methods for retrieving common PlayerData queries.
-## - Stores read only data and prototype data lookup tables with getters methods for each.
-## - Maintains schema
-## - Manages test data generation via add_test_x() methods
-## - Stores cache of generated objects
+## Global 是当前项目最核心的数据单例。
+## 它负责生成 schema、加载 mod 数据、持有玩家运行状态、提供数据查询入口。
+##
+## 主要职责：
+## - 创建并保存当前局的 PlayerData，并提供常用查询方法。
+## - 保存只读数据和 prototype 数据查询表。
+## - 维护数据 schema。
+## - 通过 add_test_x() 方法生成测试数据。
+## - 缓存运行时生成对象。
 extends Node
 
 const CombatEndTurnScript = preload("res://client/scripts/features/combat/CombatEndTurn.gd")
 
-#region Schema and Data Management
+#region Schema 和数据管理
 
-## A lookup table used to generate other lookup tables via Global._generate_schema() and
-## FileLoader._generate_base_mod_data(), which are used for schema management across the framework.
-## CRITICAL: Global._generate_schema() MUST be run before any other data related methods, at the top
-## of Global._ready().
-## WARNING: Any time a new kind of data is added to the schema you should update this table and also run
-## FileLoader._generate_base_mod_data() in _ready().
+## 用于生成其他查询表的总表。
+## Global._generate_schema() 和 FileLoader._generate_base_mod_data() 会依赖这里，
+## 因此它是整个框架的数据 schema 真源。
+## 重要：Global._generate_schema() 必须在 _ready() 最开始执行。
+## 警告：新增数据类型时要更新这张表，并在 _ready() 中运行一次 FileLoader._generate_base_mod_data()。
 @onready var SCHEMA: Array[Array] = [
-	# ["SerializableDataScriptNameAsString", SerializableDataScript, "lookup_table_property_name", ["optional external folder paths to read from", ...]],
-	# read only data
+	# ["SerializableData 脚本名", SerializableData 脚本, "查询表属性名", ["可选外部读取目录", ...]],
+	# 只读数据
 	["RestActionData", RestActionData, "_id_to_rest_action_data", ["rest_actions/"]],
 	["StatusEffectData", StatusEffectData, "_id_to_status_data", ["status_effects/"]],
 	["ConsumableData", ConsumableData, "_id_to_consumable_data", ["consumables/"]],
@@ -36,7 +38,7 @@ const CombatEndTurnScript = preload("res://client/scripts/features/combat/Combat
 	["ArtifactPackData", ArtifactPackData, "_id_to_artifact_pack_data", ["artifact_packs/"]],
 	["CustomUIData", CustomUIData, "_id_to_custom_ui_data", ["custom_ui/"]],
 	["CustomSignalData", CustomSignalData, "_id_to_custom_signal_data", ["custom_signals/"]],
-	# prototype data
+	# prototype 数据
 	["EnemyData", EnemyData,"_id_to_enemy_data", ["enemies/"]],
 	["CardData", CardData, "_id_to_card_data", ["cards/"]],
 	["ArtifactData", ArtifactData, "_id_to_artifact_data", ["artifacts/"]],
