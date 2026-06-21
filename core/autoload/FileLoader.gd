@@ -75,7 +75,7 @@ func get_files_in_directory(partial_dir_path: String):
 	return dir.get_files()
 
 func load_texture(image_partial_path: String, is_absolute: bool = false) -> Texture2D:
-	# 加载图片纹理；res:// 内部资源走 Godot 导入系统，外部文件才按磁盘图片读取。
+	# 动态 JSON 图片优先走 Godot 导入资源；源码干净克隆缺少 .godot/imported 时，再读源 PNG。
 	var full_path: String = image_partial_path
 	if not is_absolute and not image_partial_path.begins_with("res://"):
 		full_path = _get_modified_filepath(image_partial_path)
@@ -84,12 +84,13 @@ func load_texture(image_partial_path: String, is_absolute: bool = false) -> Text
 		return self._cached_textures[full_path]
 	
 	if full_path.begins_with("res://"):
-		var imported_texture := ResourceLoader.load(full_path, "Texture2D")
+		var imported_texture: Resource = ResourceLoader.load(full_path, "Texture2D")
 		if imported_texture is Texture2D:
 			self._cached_textures[full_path] = imported_texture
 			return imported_texture
-		push_error("Image failed to load: ", full_path)
-		return null
+		if OS.has_feature("exported"):
+			push_error("Image failed to load from imported resource: ", full_path)
+			return null
 	
 	if FileAccess.file_exists(full_path):
 		var image := Image.load_from_file(full_path)
