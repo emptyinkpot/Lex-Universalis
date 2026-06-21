@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_thief",
 		"enemy_name": "盗贼",
-		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
 		"enemy_health": 30,
 		"enemy_health_max": 30,
 		"enemy_block": 0,

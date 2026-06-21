@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_mage",
 		"enemy_name": "法师",
-		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
 		"enemy_health": 35,
 		"enemy_health_max": 35,
 		"enemy_block": 0,

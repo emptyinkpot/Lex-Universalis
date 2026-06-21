@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_chief_justice",
 		"enemy_name": "审判长",
-		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
 		"enemy_health": 100,
 		"enemy_health_max": 100,
 		"enemy_block": 0,

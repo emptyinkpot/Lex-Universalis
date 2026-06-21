@@ -5,7 +5,7 @@
 	"properties": {
 		"card_name": "正义之盾",
 		"card_description": "每回合开始时获得[block]点格挡。",
-		"card_texture_path": "",
+		"card_texture_path": "assets/art/content/cards/orange/card_orange.png",
 		"card_keyword_object_ids": [],
 		"card_color_id": "color_lex",
 		"card_energy_cost": 1,

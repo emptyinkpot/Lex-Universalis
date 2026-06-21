@@ -5,7 +5,7 @@
 	"properties": {
 		"card_name": "威压",
 		"card_description": "给予敌人[status_charge_amount]层易伤。",
-		"card_texture_path": "",
+		"card_texture_path": "assets/art/content/cards/orange/card_orange.png",
 		"card_keyword_object_ids": [],
 		"card_color_id": "color_lex",
 		"card_energy_cost": 1,

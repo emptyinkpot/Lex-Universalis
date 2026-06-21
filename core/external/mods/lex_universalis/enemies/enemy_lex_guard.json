@@ -5,7 +5,7 @@
 	"properties": {
 		"enemy_object_id": "enemy_lex_guard",
 		"enemy_name": "守卫",
-		"enemy_texture_path": "external/sprites/enemies/enemy_blue_small.png",
+		"enemy_texture_path": "assets/art/content/enemies/enemy_blue_small.png",
 		"enemy_health": 55,
 		"enemy_health_max": 55,
 		"enemy_block": 0,
