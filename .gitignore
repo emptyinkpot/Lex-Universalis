@@ -1,5 +1,8 @@
 .saves/
 .screenshots/
+core/external/profile.json
+core/external/user_settings.json
+core/external/saves/
 
 # Godot 4+ specific ignores
 .godot/
@@ -9,6 +12,4 @@ export_presets.cfg
 
 # Mono-specific ignores
 .mono/
-/external/saves
-external/profile.json
 godot-old/

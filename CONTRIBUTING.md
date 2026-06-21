@@ -6,15 +6,14 @@
 - `build/`: 打包后的桌面输出
 - `docs/`: 设计、规则、世界观与迁移记录
 - `config/`: 项目配置与参考数据
-- `scripts/`: 辅助脚本
 
 ## 常用命令
 
-```bash
-.\validate-godot.bat
-.\start-godot.bat
-.\publish-desktop.bat
-.\start-codex-bridge.bat
+```powershell
+python .\lex.py validate
+python .\lex.py editor
+python .\lex.py run
+python .\lex.py build
 ```
 
 ## Reviewer / Sourcery 会重点看什么
@@ -22,11 +21,10 @@
 - scene / script / resource / signal / node path 是否保持一致
 - `godot/data/generated/` 的更新是否有明确来源与目标
 - Godot 桌面版是否仍然是唯一 canonical runtime
-- 导出、验证、bridge 脚本是否仍可执行且含义明确
+- `lex.py` 的启动、验证、导出入口是否仍可执行且含义明确
 
 ## 提交规则
 
-- 继续使用 `.gitmessage` 里的格式
 - 优先使用 `type(scope): subject`
 - 一个 commit / PR 尽量只做一个清晰主题
 
@@ -37,7 +35,7 @@
 1. 改动影响了哪些 scene / script / generated data / build 脚本
 2. 你的验证步骤是什么
 3. 是否有截图、录屏或等价证据
-4. 如果改了导出或 bridge 链路，如何最短回滚
+4. 如果改了导出或启动链路，如何最短回滚
 
 ## 跳过 Sourcery 的规则
 

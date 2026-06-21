@@ -3,20 +3,18 @@
 ## Read Order
 
 1. `README.md`
-2. `project.json`
-3. `godot/README.md`
-4. `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
-5. `docs/contracts/git-workflow.md`
-6. `docs/contracts/environment-branch-runbook.md`
+2. `docs/game-design/planning/Lex Universalis 项目企划书（Godot）_v1_2026_5_3.md`
+3. `godot/project.godot`
+4. `godot/scenes/Root.tscn`
+5. `godot/scripts/Root.gd`
 
 ## 常用命令
 
-```bash
-.\validate-godot.bat
-.\start-godot.bat
-.\publish-desktop.bat
-.\start-codex-bridge.bat
-.\scripts\git-env-sync.ps1 status
+```powershell
+python .\lex.py validate
+python .\lex.py editor
+python .\lex.py run
+python .\lex.py build
 ```
 
 ## 仓库专属审查重点
@@ -37,5 +35,5 @@
 
 - PR 描述必须写清影响了哪些 scene / script / generated data / desktop build 脚本。
 - 如果改了可见界面、剧情、卡牌、战斗流程或桌面运行行为，必须附截图、录屏或等价证据。
-- 如果改了导出、验证或 codex-bridge 脚本，必须写清你如何验证。
+- 如果改了导出、验证或启动入口，必须写清你如何验证。
 - 只有在明确需要跳过审查时才使用 `skip-sourcery`、`no-sourcery` 或 `sourcery-ignore`。
